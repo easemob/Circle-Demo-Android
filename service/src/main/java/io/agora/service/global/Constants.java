@@ -10,6 +10,7 @@ public class Constants {
     public static final String USERINFO_CHANGE = "userinfo_change";
     public static final String PRESENCES_CHANGED = "presences_changed";
     public static final String SERVER_CHANGED = "server_changed";
+    public static final String SERVER_ADDED = "server_added";
     public static final String SERVER_UPDATED = "server_updated";
     public static final String LEAVE_OR_DELETE_SERVER = "leave_or_delete_server";
     public static final String CHANNEL_CHANGED = "channel_changed";

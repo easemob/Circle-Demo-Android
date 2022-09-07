@@ -485,14 +485,14 @@ public class EaseChatMessageListLayout extends RelativeLayout implements IChatMe
             @Override
             public void onAddReaction(EMMessage message, EaseReactionEmojiconEntity reactionEntity) {
                 if (messageListItemClickListener != null) {
-                     messageListItemClickListener.onAddReaction( message,reactionEntity);
+                    messageListItemClickListener.onAddReaction(message, reactionEntity);
                 }
             }
 
             @Override
             public void onRemoveReaction(EMMessage message, EaseReactionEmojiconEntity reactionEntity) {
                 if (messageListItemClickListener != null) {
-                    messageListItemClickListener.onRemoveReaction( message,reactionEntity);
+                    messageListItemClickListener.onRemoveReaction(message, reactionEntity);
                 }
             }
         });

@@ -98,13 +98,19 @@ public class GroundFragment extends BaseInitFragment<FragmentGroundBinding> impl
         mViewModel.joinServerLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<CircleServer>() {
                 @Override
-                public void onSuccess(@Nullable CircleServer data) {
-                    if (data != null) {
-                        //存入缓存
-                        AppUserInfoManager.getInstance().getUserJoinedSevers().put(data.serverId, data);
+                public void onSuccess(@Nullable CircleServer circleServer) {
+                    if (circleServer != null) {
                         ToastUtils.showShort(getString(io.agora.service.R.string.circle_join_in_server_success));
                         //发送广播
-                        LiveEventBus.get(Constants.SERVER_CHANGED).post(data);
+                        LiveEventBus.get(Constants.SERVER_UPDATED).post(circleServer);
+
+                        //跳转到首页，显示社区详情
+                        Postcard postcard = ARouter.getInstance().build("/app/MainActivity");
+                        //直接跳转到首页,显示目标server详情
+                        postcard.withSerializable(Constants.SHOW_MODE, ShowMode.NORMAL);
+                        postcard.withInt(Constants.NAV_POSITION, 0);
+                        postcard.withParcelable(Constants.SERVER, circleServer);
+                        postcard.navigation();
                     }
                 }
 
