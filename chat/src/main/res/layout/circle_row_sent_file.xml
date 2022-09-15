@@ -60,7 +60,7 @@
                     android:maxLines="2"
                     android:paddingRight="8dp"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     tools:text="的链接发链接拉萨酱豆腐历史交锋垃圾啊多方了解按附件垃圾发是的龙卷风拉动房价" />
 
                 <RelativeLayout
@@ -75,7 +75,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_gravity="center_vertical"
                         android:textColor="#ffadadad"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
                         tools:text="9.8MB" />
 
                     <TextView
