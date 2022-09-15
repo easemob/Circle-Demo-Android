@@ -34,6 +34,7 @@ adb install circle-release.apk
 推荐Android Studio 版本：Android Studio Chipmunk | 2021.2.1 Patch 1 及以上
 
 Java版本：Java8及以上
+
 gradle版本：distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip
 
 打开方式：
