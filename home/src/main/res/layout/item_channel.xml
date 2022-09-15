@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="40dp"
+    android:background="@drawable/selector_black_gray_color"
    >
 
     <ImageView
         android:id="@+id/iv_channel_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="18dp"
+        android:layout_marginLeft="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -20,7 +21,7 @@
         android:id="@+id/tv_channel_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:ellipsize="end"
         android:gravity="left"
@@ -50,7 +51,7 @@
         android:layout_marginRight="5dp"
         android:background="@drawable/unread_count_bg"
         android:gravity="center"
-        android:minWidth="19dp"
+        android:minWidth="17dp"
         android:minHeight="14dp"
         android:textColor="@android:color/white"
         android:textSize="12sp"

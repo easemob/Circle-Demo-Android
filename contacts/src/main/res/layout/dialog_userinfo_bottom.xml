@@ -6,7 +6,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/black_1f1f1f">
+        android:background="@drawable/shape_black_top_half_radius4">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,11 +27,12 @@
 
             <com.hyphenate.easeui.widget.EaseImageView
                 android:id="@+id/iv_presence"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:scaleType="fitXY"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:scaleType="centerCrop"
                 app:ease_border_color="@color/black_141414"
-                app:ease_border_width="2dp"
+                app:ease_border_width="3dp"
+                app:ease_shape_type="round"
                 app:layout_constraintBottom_toBottomOf="@id/iv_user_avatar"
                 app:layout_constraintRight_toRightOf="@id/iv_user_avatar"
                 tools:src="@drawable/ease_presence_online" />
@@ -41,7 +42,7 @@
                 android:id="@+id/tv_nick_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
+                android:layout_marginLeft="10dp"
                 android:ellipsize="end"
                 android:maxLength="12"
                 android:singleLine="true"
@@ -98,7 +99,7 @@
                 android:id="@+id/tv_chat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="36dp"
+                android:layout_marginTop="32dp"
                 android:drawableTop="@drawable/circle_chat"
                 android:drawablePadding="14dp"
                 android:text="@string/dialog_to_chat"

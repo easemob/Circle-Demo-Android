@@ -324,10 +324,18 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
         String title;
         if (chatType == Constants.CHATTYPE_GROUP) {
             if (channel != null) {
-                title = "#" + channel.name;
+                title = channel.name;
+                String desc = channel.desc;
+                if (!TextUtils.isEmpty(desc)) {
+                    mBinding.tvDesc.setVisibility(View.VISIBLE);
+                    mBinding.tvDesc.setText(desc);
+                }
+                mBinding.ivChannelIcon.setVisibility(View.VISIBLE);
+                mBinding.ivChannelIcon.setImageResource(channel.type == 0 ? io.agora.home.R.drawable.circle_channel_public_icon : io.agora.home.R.drawable.circle_channel_private_icon);
             } else {
                 title = GroupHelper.getGroupName(conversationId);
             }
+
         } else if (chatType == Constants.CHATTYPE_CHATROOM) {
             EMChatRoom room = EMClient.getInstance().chatroomManager().getChatRoom(conversationId);
             if (room == null) {

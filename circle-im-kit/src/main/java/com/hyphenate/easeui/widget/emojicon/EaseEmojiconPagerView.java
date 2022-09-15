@@ -107,7 +107,7 @@ public class EaseEmojiconPagerView extends ViewPager {
      */
     public List<View> getGroupGridViews(EaseEmojiconGroupEntity groupEntity){
         List<EaseEmojicon> emojiconList = groupEntity.getEmojiconList();
-        int itemSize = emojiconColumns * emojiconRows -1;
+        int itemSize = emojiconColumns * emojiconRows ;
         int totalSize = emojiconList.size();
         Type emojiType = groupEntity.getType();
         if(emojiType == Type.BIG_EXPRESSION){
@@ -129,11 +129,11 @@ public class EaseEmojiconPagerView extends ViewPager {
             }else{
                 list.addAll(emojiconList.subList(i * itemSize, totalSize));
             }
-            if(emojiType != Type.BIG_EXPRESSION){
-                EaseEmojicon deleteIcon = new EaseEmojicon();
-                deleteIcon.setEmojiText(EaseSmileUtils.DELETE_KEY);
-                list.add(deleteIcon);
-            }
+//            if(emojiType != Type.BIG_EXPRESSION){
+//                EaseEmojicon deleteIcon = new EaseEmojicon();
+//                deleteIcon.setEmojiText(EaseSmileUtils.DELETE_KEY);
+//                list.add(deleteIcon);
+//            }
             final EmojiconGridAdapter gridAdapter = new EmojiconGridAdapter(context, 1, list, emojiType);
             gv.setAdapter(gridAdapter);
             gv.setOnItemClickListener(new OnItemClickListener() {
@@ -193,7 +193,6 @@ public class EaseEmojiconPagerView extends ViewPager {
     
     /**
      * get size of pages
-     * @param emojiconList
      * @return
      */
     private int getPageSize(EaseEmojiconGroupEntity groupEntity) {

@@ -91,6 +91,17 @@
             app:layout_constraintLeft_toLeftOf="@id/tv_thread_name"
             app:layout_constraintTop_toBottomOf="@id/tv_thread_name" />
 
+        <ImageView
+            android:id="@+id/iv_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/login_delete"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/et_input_name"
+            app:layout_constraintRight_toRightOf="@id/et_input_name"
+            app:layout_constraintTop_toTopOf="@id/et_input_name" />
+
         <View
             android:id="@+id/line"
             android:layout_width="match_parent"
@@ -107,9 +118,10 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
+            android:textSize="14sp"
             android:layout_marginRight="16dp"
             android:text="@string/ease_thread_create_mentions"
-            android:textColor="@color/color_light_gray_4d4d4d"
+            android:textColor="@color/color_light_gray_cccccc"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/line" />

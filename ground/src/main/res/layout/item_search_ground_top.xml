@@ -50,7 +50,7 @@
                 android:gravity="center"
                 android:background="@drawable/shape_white33fff_radius18"
                 android:textColor="#999999"
-                android:text="搜你感兴趣的"
+                android:text="@string/ground_serch_hint"
                 android:layout_marginStart="14dp"/>
 
             <ImageView

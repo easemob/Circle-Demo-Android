@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -95,7 +96,6 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (viewType == TYPE_EMPTY) {
             return new EmptyHolder(LayoutInflater.from(parent.getContext()).inflate(io.agora.service.R.layout.layout_empty, parent, false));
         }
-
         return new GroundViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ground, parent, false));
     }
 
@@ -140,8 +140,18 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             });
         } else if (viewType == TYPE_NORMAL) {
             GroundViewHolder holder = (GroundViewHolder) viewHolder;
-            CircleServer bean = mList.get(mShowTop ? position - 1 : position);
-
+            int realPosition = mShowTop ? position - 1 : position;
+            ViewGroup.LayoutParams itemViewLayoutParams = holder.itemView.getLayoutParams();
+            if(itemViewLayoutParams instanceof GridLayoutManager.LayoutParams) {
+                GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) itemViewLayoutParams;
+                if(realPosition%2==1) {
+                    layoutParams.setMargins(0,0,ConvertUtils.dp2px(6),0);
+                }else{
+                    layoutParams.setMargins(ConvertUtils.dp2px(6),0,0,0);
+                }
+                holder.itemView.setLayoutParams(layoutParams);
+            }
+            CircleServer bean = mList.get(realPosition);
             setText(holder.serverName, bean.name);
             setText(holder.tvDesc, bean.desc);
             Glide.with(holder.ivServer)

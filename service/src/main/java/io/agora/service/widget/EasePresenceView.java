@@ -139,6 +139,10 @@ public class EasePresenceView extends ConstraintLayout {
         }
     }
 
+    public void setPresenceTextVisiable(int visible) {
+        tvPresence.setVisibility(visible);
+    }
+
     public void setPresenceTextViewColor(@ColorInt int color) {
         tvPresence.setTextColor(color);
     }

@@ -37,6 +37,7 @@ public class ContactListAdapter extends EaseBaseRecyclerViewAdapter<CircleUser> 
     private String owner;
     private OnSelectListener listener;
     private List<String> memberList;
+    private boolean showStatusText=true;
 
     @Override
     public ViewHolder getViewHolder(ViewGroup parent, int viewType) {
@@ -69,6 +70,10 @@ public class ContactListAdapter extends EaseBaseRecyclerViewAdapter<CircleUser> 
 
     public void setDisplayMode(DisplayMode displayMode) {
         this.displayMode = displayMode;
+        notifyDataSetChanged();
+    }
+    public void setShowStatusText(boolean showStatusText) {
+        this.showStatusText = showStatusText;
         notifyDataSetChanged();
     }
 
@@ -149,6 +154,11 @@ public class ContactListAdapter extends EaseBaseRecyclerViewAdapter<CircleUser> 
                     }
                 }
             });
+            if(!showStatusText) {
+                presenceView.setPresenceTextVisiable(View.GONE);
+            }else{
+                presenceView.setPresenceTextVisiable(View.VISIBLE);
+            }
             if (displayMode == DisplayMode.SHOW_NONE) {
                 ivChat.setVisibility(View.GONE);
                 btnInvite.setVisibility(View.GONE);

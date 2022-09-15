@@ -82,6 +82,9 @@ public class InviteUserToChannelBottomFragment extends InviteUserToServerBottomF
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
+                    if(code==303) {
+                       message=getString(io.agora.service.R.string.circle_error_303);
+                    }
                     ToastUtils.showShort(message);
                 }
             });

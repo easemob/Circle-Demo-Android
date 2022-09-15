@@ -8,12 +8,14 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.haoge.easyandroid.easy.EasyMediaFile;
@@ -53,6 +55,14 @@ public class UserInfoSettingActivity extends BaseInitActivity<ActivityUserInfoSe
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
         mBinding.titleBar.setLeftLayoutVisibility(View.VISIBLE);
+
+        RelativeLayout.LayoutParams titleParams = (RelativeLayout.LayoutParams) mBinding.titleBar.getTitle().getLayoutParams();
+        titleParams.setMargins(ConvertUtils.dp2px(48), 0, 0, 0);
+        mBinding.titleBar.getTitle().setLayoutParams(titleParams);
+
+        RelativeLayout.LayoutParams iconParams = (RelativeLayout.LayoutParams) mBinding.titleBar.getLeftLayout().getLayoutParams();
+        iconParams.setMargins(ConvertUtils.dp2px(6), 0, 0, 0);
+        mBinding.titleBar.getLeftLayout().setLayoutParams(iconParams);
     }
 
     @Override
@@ -75,7 +85,6 @@ public class UserInfoSettingActivity extends BaseInitActivity<ActivityUserInfoSe
                     ToastUtils.showShort(getString(io.agora.service.R.string.circle_upLoad_failure));
                 }
             });
-
         });
         mViewModel.updateImageLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<CircleUser>() {
@@ -170,9 +179,9 @@ public class UserInfoSettingActivity extends BaseInitActivity<ActivityUserInfoSe
 
     @Override
     public void onClick(View v) {
-        if(v.getId()==R.id.cls_headview) {
+        if (v.getId() == R.id.cls_headview) {
             selectedPicture();
-        }else if(v.getId()==R.id.tv_nickname) {
+        } else if (v.getId() == R.id.tv_nickname) {
             showSetNickNameDialog();
         }
     }
@@ -266,6 +275,6 @@ public class UserInfoSettingActivity extends BaseInitActivity<ActivityUserInfoSe
                 return null;
             }
         });
-        
+
     }
 }

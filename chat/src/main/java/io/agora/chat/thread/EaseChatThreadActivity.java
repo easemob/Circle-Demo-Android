@@ -93,7 +93,7 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
                             onBackPressed();
                         }
                     })
-                    .setEmptyLayout(io.agora.service.R.layout.circle_no_data)
+                    .setEmptyLayout(R.layout.circle_thread_no_data)
                     .setOnChatInputChangeListener(new OnChatInputChangeListener() {
                         @Override
                         public void onTextChanged(CharSequence s, int start, int before, int count) {

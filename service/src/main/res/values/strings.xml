@@ -217,5 +217,6 @@
     <string name="circle_leave_server">%1$s离开了【%2$s】社区</string>
     <string name="circle_no_appkey">请在Manifest.xml文件中配置环信AppKey</string>
     <string name="dialog_add_nickname">添加昵称</string>
+    <string name="circle_error_303">不能邀请好友到默认频道</string>
 
 </resources>

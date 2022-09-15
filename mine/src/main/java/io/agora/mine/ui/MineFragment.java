@@ -1,12 +1,11 @@
 package io.agora.mine.ui;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -16,6 +15,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
+import io.agora.common.dialog.AlertDialog;
 import io.agora.mine.R;
 import io.agora.mine.databinding.FragmentMineBinding;
 import io.agora.mine.model.MineViewModel;
@@ -29,6 +29,7 @@ import io.agora.service.managers.AppUserInfoManager;
 public class MineFragment extends BaseInitFragment<FragmentMineBinding> implements Toolbar.OnMenuItemClickListener {
 
     private MineViewModel mViewModel;
+    private AlertDialog dialog;
 
     @Override
     protected int getResLayoutId() {
@@ -51,12 +52,13 @@ public class MineFragment extends BaseInitFragment<FragmentMineBinding> implemen
             @Override
             public void onChanged(Object o) {
                 CircleUser currentUser = AppUserInfoManager.getInstance().getCurrentUser();
-                if(currentUser!=null) {
+                if (currentUser != null) {
                     setUserData(currentUser);
                 }
             }
         });
     }
+
     private void setUserData(CircleUser currentUser) {
         Glide.with(MineFragment.this)
                 .load(currentUser.getAvatar())
@@ -93,22 +95,40 @@ public class MineFragment extends BaseInitFragment<FragmentMineBinding> implemen
     }
 
     private void showLogoutDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.circle_logout)
-                .setMessage(R.string.circle_logout_message)
-                .setPositiveButton(R.string.circle_logout_exit, new DialogInterface.OnClickListener() {
+//        AlertDialog dialog = new AlertDialog.Builder(mContext)
+//                .setTitle(R.string.circle_logout)
+//                .setMessage(R.string.circle_logout_message)
+//                .setPositiveButton(R.string.circle_logout_exit, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        logout();
+//                        dialog.dismiss();
+//                    }
+//                })
+//                .setNeutralButton(R.string.circle_logout_cancel, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.dismiss();
+//                    }
+//                })
+//                .show();
+
+        dialog = new AlertDialog.Builder(mContext)
+                .setContentView(R.layout.dialog_logout)
+                .setOnClickListener(R.id.tv_exit, new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
                         logout();
                         dialog.dismiss();
                     }
                 })
-                .setNeutralButton(R.string.circle_logout_cancel, new DialogInterface.OnClickListener() {
+                .setOnClickListener(R.id.tv_cancel, new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
                         dialog.dismiss();
                     }
                 })
+                .setCancelable(true)
                 .show();
     }
 

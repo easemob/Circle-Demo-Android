@@ -273,6 +273,8 @@ public class GlobalEventMonitor extends EaseChatPresenter {
             msgNotification.setAttribute(Constants.MESSAGE_TYPE_RECALL, true);
             msgNotification.setAttribute(Constants.MESSAGE_TYPE_RECALLER, recaller);
             msgNotification.setStatus(EMMessage.Status.SUCCESS);
+            msgNotification.setIsChannelMessage(msg.isChannelMessage());
+            msgNotification.setIsChatThreadMessage(msg.isChatThreadMessage());
             EMClient.getInstance().chatManager().saveMessage(msgNotification);
         }
 

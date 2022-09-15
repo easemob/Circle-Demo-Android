@@ -67,6 +67,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="8dp"
+                android:paddingTop="10dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center_vertical"
                 android:orientation="vertical">
@@ -76,17 +77,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:ellipsize="middle"
-                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:paddingRight="8dp"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     tools:text="的链接发链接拉萨酱豆腐历史交锋垃圾啊多方了解按附件垃圾发是的龙卷风拉动房价" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_marginTop="3dp"
+                    android:paddingBottom="8dp"
                     android:layout_weight="1">
 
                     <TextView
@@ -96,7 +97,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_gravity="center_vertical"
                         android:textColor="#ffadadad"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
                         tools:text="9.8MB" />
 
                     <TextView

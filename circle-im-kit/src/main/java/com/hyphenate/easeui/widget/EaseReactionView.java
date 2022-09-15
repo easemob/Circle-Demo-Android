@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMMessageReaction;
 import com.hyphenate.easeui.R;
@@ -17,6 +19,7 @@ import com.hyphenate.easeui.domain.EaseEmojicon;
 import com.hyphenate.easeui.interfaces.OnItemClickListener;
 import com.hyphenate.easeui.model.EaseMessageMenuData;
 import com.hyphenate.easeui.model.EaseReactionEmojiconEntity;
+import com.hyphenate.easeui.utils.EaseCommonUtils;
 import com.hyphenate.util.EMLog;
 
 import java.util.ArrayList;
@@ -214,6 +217,11 @@ public class EaseReactionView extends ViewGroup {
                 if (position == datas.size() - 1) {
                     //最后一个添加按钮不显示背景
                     itemView.setBackground(null);
+                    ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) ivEmo.getLayoutParams();
+                    layoutParams.setMargins(0,0,0,0);
+                    layoutParams.width= (int) EaseCommonUtils.dip2px(getContext(),20);
+                    layoutParams.height= (int) EaseCommonUtils.dip2px(getContext(),20);
+                    ivEmo.setLayoutParams(layoutParams);
                 }
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

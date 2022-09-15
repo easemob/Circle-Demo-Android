@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@drawable/selector_black_gray_color"
     android:layout_height="66dp">
 
     <io.agora.service.widget.EasePresenceView
@@ -42,7 +43,7 @@
         android:layout_marginRight="5dp"
         android:background="@drawable/unread_count_bg"
         android:gravity="center"
-        android:minWidth="19dp"
+        android:minWidth="17dp"
         android:minHeight="14dp"
         android:textColor="@android:color/white"
         android:textSize="12sp"

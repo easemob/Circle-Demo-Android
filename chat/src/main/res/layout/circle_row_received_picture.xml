@@ -30,8 +30,10 @@
 
             <com.hyphenate.easeui.widget.EaseImageView
                 android:id="@+id/image"
-                android:layout_width="180dp"
-                android:layout_height="125dp"
+                android:minWidth="180dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="125dp"
                 android:scaleType="centerCrop"
                 app:ease_radius="@dimen/ease_chat_image_corner_radius"
                 app:ease_shape_type="rectangle"

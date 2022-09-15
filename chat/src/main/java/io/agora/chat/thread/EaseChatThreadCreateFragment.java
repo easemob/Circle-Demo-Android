@@ -179,7 +179,7 @@ public class EaseChatThreadCreateFragment extends EaseBaseFragment implements Ch
         binding.threadParentMsg.addView(view);
 
         view.setOnMessageItemClickListener(chatItemClickListener);
-        view.setBottomDividerVisible(false);
+        view.setBottomDividerVisible(true);
 
         view.setMessage(EMClient.getInstance().chatManager().getMessage(messageId));
     }
@@ -218,8 +218,20 @@ public class EaseChatThreadCreateFragment extends EaseBaseFragment implements Ch
                     binding.etInputName.setText(s);
                     binding.etInputName.setSelection(tempSelection);//设置光标在最后
                 }
+                if (s.length() == 0) {
+                    binding.ivDelete.setVisibility(View.GONE);
+                } else {
+                    binding.ivDelete.setVisibility(View.VISIBLE);
+                }
             }
         });
+        binding.ivDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.etInputName.setText("");
+            }
+        });
+
 
     }
 

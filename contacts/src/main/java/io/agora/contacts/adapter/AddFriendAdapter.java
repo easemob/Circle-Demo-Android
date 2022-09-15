@@ -2,6 +2,7 @@ package io.agora.contacts.adapter;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -45,12 +46,13 @@ public class AddFriendAdapter extends BaseAdapter<CircleUser> {
             Glide.with(mContext).load(presenceIcon).into(ivPresence);
 
             if (user.getContact() == 0 || user.getContact() == 1) {//好友=可见联系人+黑名单
-                btnAddFriend.setEnabled(false);
                 btnAddFriend.setText(mContext.getString(R.string.circle_added));
-                btnAddFriend.setTextColor(ContextCompat.getColor(mContext, io.agora.service.R.color.color_blue_27ae60));
+                btnAddFriend.setEnabled(false);
+                btnAddFriend.setTextColor(ContextCompat.getColor(mContext, R.color.color_gray_40f2f2f2));
             } else {
-                btnAddFriend.setEnabled(true);
                 btnAddFriend.setText(mContext.getString(R.string.circle_add));
+                btnAddFriend.setEnabled(true);
+                btnAddFriend.setTextColor(Color.WHITE);
             }
 
             btnAddFriend.setOnClickListener(new View.OnClickListener() {

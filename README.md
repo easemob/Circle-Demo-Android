@@ -31,24 +31,28 @@ git clone git@github.com:easemob/Circle-Demo-Android.git
 adb install circle-release.apk
 ```
 3、打开工程项目
+
 推荐Android Studio 版本：Android Studio Chipmunk | 2021.2.1 Patch 1 及以上
 
 Java版本：Java8及以上
+
 gradle版本：distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip
 
 打开方式：
 打开Android Studio->File->New->Import Project->选择Circle-Demo-Android工程根目录
 
 4、设置appKey
+
 在工程"local.properties"文件中设置你的appKey。
 示例：
 ```bash
-'circle_appkey=easemob-demo#xxxx'
+circle_appkey=easemob-demo#xxxx
 ```
 开通配置环信即时通讯 IM 服务：
 https://docs-im.easemob.com/ccim/config
 
 5、运行项目
+
 直接点击Android Studio 运行按钮
 
 ## 反馈
