@@ -46,7 +46,7 @@ gradle版本：distributionUrl=https\://services.gradle.org/distributions/gradle
 在工程"local.properties"文件中设置你的appKey。
 示例：
 ```bash
-'circle_appkey=easemob-demo#xxxx'
+circle_appkey=easemob-demo#xxxx
 ```
 开通配置环信即时通讯 IM 服务：
 https://docs-im.easemob.com/ccim/config
