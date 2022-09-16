@@ -24,9 +24,10 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/circle_statusbar_height"
+            android:layout_height="48dp"
+            android:layout_marginTop="26dp"
             android:minHeight="?attr/actionBarSize"
+            android:paddingStart="16dp"
             android:paddingEnd="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +49,8 @@
             android:id="@+id/iv_user"
             android:layout_width="90dp"
             android:layout_height="90dp"
-            android:layout_marginLeft="@dimen/app_left_margin"
+            android:scaleType="centerCrop"
+            android:layout_marginLeft="16dp"
             android:src="@drawable/circle_default_avatar"
             app:ease_shape_type="round"
             app:layout_constraintBottom_toBottomOf="@id/iv_head_bg"
@@ -57,11 +59,12 @@
 
         <com.hyphenate.easeui.widget.EaseImageView
             android:id="@+id/iv_presence"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:src="@drawable/ease_presence_online"
             app:ease_border_color="@color/black"
-            app:ease_border_width="2dp"
+            app:ease_border_width="4dp"
+            app:ease_shape_type="round"
             app:layout_constraintBottom_toBottomOf="@id/iv_user"
             app:layout_constraintRight_toRightOf="@id/iv_user" />
 
@@ -69,11 +72,11 @@
             android:id="@+id/tv_nick_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginTop="10dp"
             android:textColor="@color/white"
             android:textSize="18sp"
-            app:layout_constraintLeft_toLeftOf="@id/iv_user"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_user"
             tools:text="pu" />
 
@@ -83,6 +86,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="14sp"
+            android:layout_marginTop="4dp"
             app:layout_constraintLeft_toLeftOf="@id/tv_nick_name"
             app:layout_constraintTop_toBottomOf="@id/tv_nick_name"
             tools:text="Double D" />
@@ -94,6 +98,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_head_bg" />
+            app:layout_constraintTop_toBottomOf="@id/tv_id" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

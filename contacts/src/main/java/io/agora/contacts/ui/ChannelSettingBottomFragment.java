@@ -451,7 +451,7 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
                 .setFocusable(true)
                 .setOutsideTouchable(true)
                 .create()
-                .showAsDropDown(locationView, ConvertUtils.dp2px(-60), 120);
+                .showAsDropDown(locationView, ConvertUtils.dp2px(-70), 120);
 
     }
 

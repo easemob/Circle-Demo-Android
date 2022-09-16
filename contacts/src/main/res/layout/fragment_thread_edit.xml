@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black_141414"
-        android:paddingTop="@dimen/circle_statusbar_height">
+        >
 
         <TextView
             android:id="@+id/tv_name"

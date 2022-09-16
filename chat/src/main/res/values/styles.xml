@@ -23,7 +23,7 @@
         <item name="android:layout_alignParentTop">true</item>
         <item name="android:layout_marginLeft">@dimen/ease_chat_avatar_margin</item>
         <item name="android:src">@drawable/circle_default_avatar</item>
-        <item name="android:scaleType">fitXY</item>
+        <item name="android:scaleType">centerCrop</item>
     </style>
 
 

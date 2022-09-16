@@ -461,7 +461,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     textView.setText(tag.name);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
                     textView.setTextColor(Color.WHITE);
-                    textView.setPadding(0, 0, ConvertUtils.dp2px(6), 0);
+                    textView.setPadding(0, 0, ConvertUtils.dp2px(8), 0);
                     mBinding.llTags.addView(textView);
                 }
             }

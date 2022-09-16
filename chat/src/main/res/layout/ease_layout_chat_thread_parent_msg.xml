@@ -58,9 +58,9 @@
             android:layout_marginEnd="16dp"
             android:gravity="end"
             android:textColor="@color/circle_gray_929497"
-            android:textSize="14sp"
+            android:textSize="10sp"
             app:layout_constraintLeft_toRightOf="@id/msg_mute"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/name"
             tools:text="09:51" />
 
         <ImageView
@@ -330,7 +330,7 @@
             android:id="@+id/tv_thread_mentions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="6dp"
             android:layout_marginBottom="10dp"
             android:ellipsize="end"
             android:maxLines="1"

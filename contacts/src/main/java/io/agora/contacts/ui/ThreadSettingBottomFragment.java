@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Group;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -48,6 +49,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
     private ThreadData threadData;
     private CustomPopWindow mCustomPopWindow;
     private TextView tvEditThread;
+    private Group clsGroup;
     private EMChatThread thread;
     private EMCircleUserRole selfRoleInServer = EMCircleUserRole.USER;
 
@@ -60,6 +62,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
         mBinding.etSearch.setVisibility(View.GONE);
         headView = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.layout_thread_setting_head, (ViewGroup) mBinding.getRoot(), false);
         tvEditThread = headView.findViewById(R.id.tv_edit_thread);
+        clsGroup = headView.findViewById(R.id.csl_group);
         ((EaseRecyclerView) mRecyclerView).addHeaderView(headView);
         mRecyclerView.setNestedScrollingEnabled(false);
         mBinding.sideBarContact.setVisibility(View.GONE);
@@ -155,9 +158,9 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
                     thread = data;
                     if (data != null) {
                         if (TextUtils.equals(AppUserInfoManager.getInstance().getCurrentUserName(), data.getOwner())) {
-                            tvEditThread.setVisibility(View.VISIBLE);
+                            clsGroup.setVisibility(View.VISIBLE);
                         } else {
-                            tvEditThread.setVisibility(View.GONE);
+                            clsGroup.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -198,6 +201,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
     protected void initData() {
         mRecyclerView.setAdapter(concatAdapter);
         ((ContactListAdapter) mListAdapter).setDisplayMode(ContactListAdapter.DisplayMode.SHOW_NONE);
+        ((ContactListAdapter) mListAdapter).setShowStatusText(false);
         mChannelViewModel.getThreadMembers(threadData.getThreadId());
         mChannelViewModel.getChannlThread(threadData.getThreadId());
     }
@@ -216,6 +220,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
         titlebar.setLeftLayoutVisibility(View.VISIBLE);
         titlebar.getRightImage().setVisibility(View.VISIBLE);
         titlebar.setRightImageResource(io.agora.service.R.drawable.circle_more_vertical);
+        titlebar.setLeftImageResource(io.agora.service.R.drawable.circle_x_delete);
         titlebar.setOnRightClickListener(new EaseTitleBar.OnRightClickListener() {
             @Override
             public void onRightClick(View view) {
@@ -237,7 +242,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
                 .setFocusable(true)
                 .setOutsideTouchable(true)
                 .create()
-                .showAsDropDown(locationView, ConvertUtils.dp2px(-60), 100);
+                .showAsDropDown(locationView, ConvertUtils.dp2px(-70), 120);
 
     }
 
@@ -263,14 +268,16 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
         };
         TextView tvDelete = contentView.findViewById(R.id.tv_delete_thread);
         TextView tvExit = contentView.findViewById(R.id.tv_exit_thread);
+        View line = contentView.findViewById(R.id.line);
         tvDelete.setOnClickListener(listener);
         tvExit.setOnClickListener(listener);
         if (thread != null) {
-            String owner = thread.getOwner();
             if (selfRoleInServer==EMCircleUserRole.OWNER) {
                 tvDelete.setVisibility(View.VISIBLE);
+                line.setVisibility(View.VISIBLE);
             } else {
                 tvDelete.setVisibility(View.GONE);
+                line.setVisibility(View.GONE);
             }
         }
     }

@@ -214,6 +214,8 @@ public class EaseHandleMessagePresenterImpl extends EaseHandleMessagePresenter {
             msgNotification.setAttribute(EaseConstant.MESSAGE_TYPE_RECALL, true);
             msgNotification.setAttribute(EaseConstant.MESSAGE_TYPE_RECALLER, EMClient.getInstance().getCurrentUser());
             msgNotification.setStatus(EMMessage.Status.SUCCESS);
+            msgNotification.setIsChannelMessage(message.isChannelMessage());
+            msgNotification.setIsChatThreadMessage(message.isChatThreadMessage());
             EMClient.getInstance().chatManager().recallMessage(message);
             EMClient.getInstance().chatManager().saveMessage(msgNotification);
             if(isActive()) {

@@ -84,7 +84,7 @@
             android:layout_height="24dp"
             app:ease_shape_type="round"
             android:layout_marginStart="2dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="11dp"
             android:src="@drawable/circle_default_avatar"
             app:layout_constraintBottom_toTopOf="@id/tv_msg_content"
             app:layout_constraintEnd_toStartOf="@id/tv_msg_username"
@@ -97,7 +97,7 @@
             android:id="@+id/tv_msg_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="8dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/white"
@@ -123,7 +123,7 @@
 
         <TextView
             android:id="@+id/tv_msg_content"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
@@ -137,7 +137,7 @@
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="@id/tv_msg_username"
             app:layout_constraintTop_toBottomOf="@id/iv_user_icon"
-            tools:text="Paula Credo." />
+            tools:text="Paula Credo.Paula Credo.Paula Credo.Paula Credo.Paula Credo." />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/group_msg"
