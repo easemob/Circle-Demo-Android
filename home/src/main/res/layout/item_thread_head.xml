@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cls_thread_head"
     android:layout_width="match_parent"
+    android:layout_marginLeft="18dp"
+    android:background="@drawable/selector_black_gray_color"
     android:layout_height="32dp">
 
     <ImageView
         android:id="@+id/iv_thread_head_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="18dp"
         android:src="@drawable/tree_ex"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

@@ -337,14 +337,14 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
     @Override
     public void onItemClick(View view, int position) {
 
-        List<CircleUser> datas = mListAdapter.getData();
-        CircleUser circleUser = datas.get(position - 1);
-        if (!TextUtils.equals(circleUser.getUsername(), AppUserInfoManager.getInstance().getCurrentUserName())) {
-            ARouter.getInstance().build("/chat/ChatActivity")
-                    .withString(EaseConstant.EXTRA_CONVERSATION_ID, circleUser.getUsername())
-                    .withInt(EaseConstant.EXTRA_CHAT_TYPE, Constants.CHATTYPE_SINGLE)
-                    .navigation();
-        }
+//        List<CircleUser> datas = mListAdapter.getData();
+//        CircleUser circleUser = datas.get(position - 1);
+//        if (!TextUtils.equals(circleUser.getUsername(), AppUserInfoManager.getInstance().getCurrentUserName())) {
+//            ARouter.getInstance().build("/chat/ChatActivity")
+//                    .withString(EaseConstant.EXTRA_CONVERSATION_ID, circleUser.getUsername())
+//                    .withInt(EaseConstant.EXTRA_CHAT_TYPE, Constants.CHATTYPE_SINGLE)
+//                    .navigation();
+//        }
     }
 
     @Override

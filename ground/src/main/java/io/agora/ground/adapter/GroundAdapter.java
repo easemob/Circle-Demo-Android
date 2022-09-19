@@ -140,18 +140,18 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             });
         } else if (viewType == TYPE_NORMAL) {
             GroundViewHolder holder = (GroundViewHolder) viewHolder;
-            GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) holder.itemView.getLayoutParams();
-//
             int realPosition = mShowTop ? position - 1 : position;
-            if(realPosition%2==1) {
-                layoutParams.setMargins(0,0,ConvertUtils.dp2px(6),0);
-            }else{
-                layoutParams.setMargins(ConvertUtils.dp2px(6),0,0,0);
+            ViewGroup.LayoutParams itemViewLayoutParams = holder.itemView.getLayoutParams();
+            if(itemViewLayoutParams instanceof GridLayoutManager.LayoutParams) {
+                GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) itemViewLayoutParams;
+                if(realPosition%2==1) {
+                    layoutParams.setMargins(0,0,ConvertUtils.dp2px(6),0);
+                }else{
+                    layoutParams.setMargins(ConvertUtils.dp2px(6),0,0,0);
+                }
+                holder.itemView.setLayoutParams(layoutParams);
             }
-            holder.itemView.setLayoutParams(layoutParams);
-
             CircleServer bean = mList.get(realPosition);
-
             setText(holder.serverName, bean.name);
             setText(holder.tvDesc, bean.desc);
             Glide.with(holder.ivServer)
