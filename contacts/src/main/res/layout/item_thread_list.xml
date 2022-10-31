@@ -26,6 +26,7 @@
         android:id="@+id/iv_user"
         android:layout_width="16dp"
         android:layout_height="16dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/circle_default_avatar"
         app:ease_shape_type="round"
         app:layout_constraintBottom_toBottomOf="parent"
