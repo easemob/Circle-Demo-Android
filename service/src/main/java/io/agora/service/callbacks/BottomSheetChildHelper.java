@@ -42,6 +42,12 @@ public interface BottomSheetChildHelper {
         bottomSheetFragment.show(supportFragmentManager, instance.getClass().getSimpleName());
     }
 
+    default  void show(FragmentManager supportFragmentManager,int topOffset) {
+        Fragment instance= (Fragment) this;
+        MyContainerBottomSheetFragment bottomSheetFragment = new MyContainerBottomSheetFragment(instance,topOffset);
+        bottomSheetFragment.show(supportFragmentManager, instance.getClass().getSimpleName());
+    }
+
 
 
     class MyContainerBottomSheetFragment extends ContainerBottomSheetFragment{
@@ -50,7 +56,11 @@ public interface BottomSheetChildHelper {
 
          public MyContainerBottomSheetFragment(Fragment fragment) {
             this.fragment=fragment;
-        }
+         }
+         public MyContainerBottomSheetFragment(Fragment fragment,int topOffset) {
+            this.fragment=fragment;
+            setTopOffset(topOffset);
+         }
 
         @NonNull
         @Override

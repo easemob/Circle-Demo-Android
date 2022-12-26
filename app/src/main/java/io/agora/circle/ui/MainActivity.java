@@ -16,6 +16,7 @@ import androidx.lifecycle.Observer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
+import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
@@ -146,7 +147,7 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("server", server);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager());
+                fragment.show(getSupportFragmentManager(), ConvertUtils.dp2px(300));
             }
         });
         LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).observe(this, new Observer<CircleServer>() {
