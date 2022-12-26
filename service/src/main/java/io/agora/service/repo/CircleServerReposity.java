@@ -18,6 +18,7 @@ import com.blankj.utilcode.util.ThreadUtils;
 import com.google.gson.Gson;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMCircleChannelCategory;
 import com.hyphenate.chat.EMCircleServer;
 import com.hyphenate.chat.EMCircleServerAttribute;
 import com.hyphenate.chat.EMCircleTag;
@@ -636,5 +637,38 @@ public class CircleServerReposity extends ServiceReposity {
             }
         }.asLiveData();
 
+    }
+
+    public LiveData<Resource<List<EMCircleChannelCategory>>> getServerCategories(String serverId) {
+        return new NetworkOnlyResource<List<EMCircleChannelCategory>>() {
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<List<EMCircleChannelCategory>>> callBack) {
+                int limit = 20;
+                List<EMCircleChannelCategory> categories = new ArrayList<>();
+                doFetchServerCategories(serverId, limit, categories, null, callBack);
+            }
+        }.asLiveData();
+    }
+
+    private void doFetchServerCategories(String serverID, int limit, List<EMCircleChannelCategory> categories, String cursor, ResultCallBack<LiveData<List<EMCircleChannelCategory>>> callBack) {
+        getCircleManager().fetchCategoryInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleChannelCategory>>() {
+            @Override
+            public void onSuccess(EMCursorResult<EMCircleChannelCategory> value) {
+
+                if (!CollectionUtils.isEmpty(value.getData())) {
+                    categories.addAll(value.getData());
+                }
+                if (!TextUtils.isEmpty(value.getCursor())) {
+                    doFetchServerCategories(serverID, limit, categories, value.getCursor(), callBack);
+                } else {
+                    callBack.onSuccess(createLiveData(categories));
+                }
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+                callBack.onError(error, errorMsg);
+            }
+        });
     }
 }

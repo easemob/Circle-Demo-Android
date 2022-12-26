@@ -12,6 +12,7 @@ import androidx.lifecycle.Transformations;
 
 import com.alibaba.android.arouter.utils.TextUtils;
 import com.hyphenate.EMError;
+import com.hyphenate.chat.EMCircleChannelCategory;
 import com.hyphenate.chat.EMCircleUserRole;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class ServerViewModel extends ServiceViewModel {
     public SingleSourceLiveData<Resource<String>> inviteToServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> removeUserFromServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CustomInfo>> checkSelfIsInServerLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<List<EMCircleChannelCategory>>> getServerCategoriesLiveData=new SingleSourceLiveData<>();
 
     public ServerViewModel(@NonNull Application application) {
         super(application);
@@ -172,5 +174,9 @@ public class ServerViewModel extends ServiceViewModel {
 
     public void checkSelfIsInServer(CustomInfo info) {
         checkSelfIsInServerLiveData.setSource(serverReposity.checkSelfIsInServer(info));
+    }
+
+    public void getServerCategories(String serverId){
+        getServerCategoriesLiveData.setSource(serverReposity.getServerCategories(serverId));
     }
 }

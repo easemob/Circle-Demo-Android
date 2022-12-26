@@ -233,7 +233,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         void onClick(View itemView, int positon);
     }
 
-    private ItemClickListener clickListener;
+    protected ItemClickListener clickListener;
 
     public void setOnItemClickListener(ItemClickListener listener) {
         this.clickListener = listener;

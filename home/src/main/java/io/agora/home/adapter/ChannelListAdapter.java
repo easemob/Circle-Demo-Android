@@ -4,6 +4,7 @@ package io.agora.home.adapter;
 import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -29,15 +30,53 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         Node node = datas.get(position);
         switch (level) {
             case 0:
-                processChannelItem(holder, node, position);
+                if(!node.getName().equals("Default Channel Category")) {
+                    processCategoryItem(holder, node, position);
+                }
                 break;
             case 1:
-                processThreadHeadView(holder, node, position);
+                processChannelItem(holder, node, position);
                 break;
             case 2:
+                processThreadHeadView(holder, node, position);
+                break;
+            case 3:
                 processThreadItem(holder, node, position);
                 break;
         }
+    }
+
+    private void processCategoryItem(ViewHolder holder, Node node, int position) {
+        LinearLayout llChannelType = holder.getView(R.id.ll_channel_type);
+//        if(node.getName().equals("Default Channel Category")) {
+//            llChannelType.setVisibility(View.GONE);
+//            return;
+//        }else{
+//            llChannelType.setVisibility(View.VISIBLE);
+//        }
+
+        TextView tvCategoryName = holder.getView(R.id.tv_category_name);
+        ImageView ivArrow=holder.getView(R.id.iv_category_list);
+        ImageView ivAddChannel=holder.getView(R.id.iv_add_channel);
+        if (node != null) {
+            tvCategoryName.setText(node.getName());
+        } else {
+            tvCategoryName.setText("");
+        }
+        //设置图标
+        if(!node.isExpand()) {
+            ivArrow.setImageResource(io.agora.service.R.drawable.circle_arrow_right_gray);
+        }else{
+            ivArrow.setImageResource(io.agora.service.R.drawable.circle_arrow_up);
+        }
+        ivAddChannel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(clickListener!=null) {
+                    clickListener.onClick(v,position);
+                }
+            }
+        });
     }
 
     private void processThreadItem(ViewHolder holder, Node node, int position) {

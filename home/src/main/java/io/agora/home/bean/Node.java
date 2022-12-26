@@ -161,7 +161,7 @@ public class Node {
     /**
      * 设置展开
      *
-     * @param isexpand
+     * @param isExpand
      */
     public void setExpand(boolean isExpand) {
         this.isExpand = isExpand;

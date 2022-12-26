@@ -26,6 +26,7 @@ public class CircleChannel implements Serializable, Parcelable {
     @PrimaryKey
     @NonNull
     public String channelId;
+    public String categoryId;
     public String serverId;
     public String name;
     public String desc;
@@ -36,8 +37,9 @@ public class CircleChannel implements Serializable, Parcelable {
     public List<CircleUser> channelUsers;
     public List<String> modetators;//目前暂时与server的一致
 
-    public CircleChannel(@NonNull String channelId, String serverId, String name, String desc, String custom, int inviteMode, boolean isDefault, int type, List<CircleUser> channelUsers, List<String> modetators) {
+    public CircleChannel(@NonNull String channelId,String categoryId, String serverId, String name, String desc, String custom, int inviteMode, boolean isDefault, int type, List<CircleUser> channelUsers, List<String> modetators) {
         this.channelId = channelId;
+        this.categoryId=categoryId;
         this.serverId = serverId;
         this.name = name;
         this.desc = desc;
@@ -54,15 +56,22 @@ public class CircleChannel implements Serializable, Parcelable {
         this.serverId = serverlId;
         this.channelId = channelId;
     }
+    @Ignore
+    public CircleChannel(String serverlId,String categoryId, String channelId) {
+        this.serverId = serverlId;
+        this.categoryId=categoryId;
+        this.channelId = channelId;
+    }
 
     @Ignore
     public CircleChannel(EMCircleChannel emCircleChannel) {
         this.serverId = emCircleChannel.getServerlId();
+        this.categoryId=emCircleChannel.getCategoryId();
         this.channelId = emCircleChannel.getChannelId();
         this.name = emCircleChannel.getName();
         this.desc = emCircleChannel.getDesc();
         this.custom = emCircleChannel.getExt();
-        this.inviteMode = emCircleChannel.getInviteMode().getCode();
+        this.inviteMode = 0;
         this.isDefault = emCircleChannel.isDefault();
         this.type = emCircleChannel.getType().getCode();
     }
@@ -70,6 +79,7 @@ public class CircleChannel implements Serializable, Parcelable {
     @Ignore
     protected CircleChannel(Parcel in) {
         channelId = in.readString();
+        categoryId=in.readString();
         serverId = in.readString();
         name = in.readString();
         desc = in.readString();
@@ -113,6 +123,7 @@ public class CircleChannel implements Serializable, Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(channelId);
+        dest.writeString(categoryId);
         dest.writeString(serverId);
         dest.writeString(name);
         dest.writeString(desc);

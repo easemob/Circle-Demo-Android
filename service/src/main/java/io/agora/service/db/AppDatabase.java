@@ -14,7 +14,7 @@ import io.agora.service.db.entity.CircleUser;
 
 
 @Database(entities = {CircleServer.class, CircleChannel.class,CircleUser.class},
-        version = 1)
+        version = 2)
 @TypeConverters(FormatConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 

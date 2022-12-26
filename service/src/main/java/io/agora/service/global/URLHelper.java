@@ -12,6 +12,7 @@ public class URLHelper {
     public final static String UPLOAD_IMAGE_URL = getBaseUrl()+"/chatfiles";
 
     public static String getBaseUrl() {
-        return EMHttpClient.getInstance().chatConfig().a(true, false);
+//        return EMHttpClient.getInstance().chatConfig().a(true, false);
+        return EMHttpClient.getInstance().chatConfig().getBaseUrl(true, false);
     }
 }

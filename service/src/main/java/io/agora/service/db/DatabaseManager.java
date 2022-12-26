@@ -3,9 +3,12 @@ package io.agora.service.db;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.room.Room;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.hyphenate.util.EMLog;
 
@@ -61,6 +64,7 @@ public class DatabaseManager {
         EMLog.i(TAG, "db name = "+dbName);
         mDatabase = Room.databaseBuilder(mContext, AppDatabase.class, dbName)
                         .allowMainThreadQueries()
+                        .addMigrations(migration1_2)
                         .fallbackToDestructiveMigration()
                         .build();
         mIsDatabaseCreated.postValue(true);
@@ -104,4 +108,11 @@ public class DatabaseManager {
         return null;
     }
 
+    private Migration migration1_2=new Migration(1,2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            //插入categoryId列
+            database.execSQL("ALTER TABLE circle_channel ADD COLUMN categoryId TEXT DEFAULT NULL");
+        }
+    };
 }

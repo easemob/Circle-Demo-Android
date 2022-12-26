@@ -61,7 +61,7 @@ public class EMContactManagerRepository extends ServiceReposity {
                     callBack.onError(ErrorCode.FRIEND_ERROR);
                     return;
                 }
-                getContactManager().aysncAddContact(username, reason, new EMCallBack() {
+                getContactManager().asyncAddContact(username, reason, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         callBack.onSuccess(new MutableLiveData<>(true));
@@ -87,7 +87,7 @@ public class EMContactManagerRepository extends ServiceReposity {
         return new NetworkOnlyResource<Boolean>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
-                getContactManager().aysncDeleteContact(username, new EMCallBack() {
+                getContactManager().asyncDeleteContact(username, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         getUserDao().deleteUser(username);

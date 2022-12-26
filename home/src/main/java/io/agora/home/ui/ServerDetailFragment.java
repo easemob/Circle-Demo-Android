@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMCircleChannel;
+import com.hyphenate.chat.EMCircleChannelCategory;
 import com.hyphenate.chat.EMCircleServerEvent;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
@@ -80,6 +81,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleChannel>> channels = new ConcurrentHashMap();//key:serverId , value:(key:channelId , value:channel)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, EMChatThread>> threads = new ConcurrentHashMap();//key:channelId , value:(key:threadId , value:thread)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleServer.Tag>> tags = new ConcurrentHashMap();//key:serverId , value:(key:tagId , value:tag)
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, EMCircleChannelCategory>> categories = new ConcurrentHashMap();//key:serverId , value:(key:categoryId , value:category)
     private List<Node> sortedNodes = new ArrayList<>();//装在多级列表真正的数据
     private CircleServer currrentServer;
     private ShowMode showMode = ShowMode.NORMAL;
@@ -103,10 +105,16 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 int level = adapter.getDatas().get(positon).getLevel();
                 switch (level) {
                     case 0:
-                        return R.layout.item_channel;
+                        if(!adapter.getDatas().get(positon).getName().equals("Default Channel Category")) {
+                            return R.layout.item_category;
+                        }else{
+                            return R.layout.item_category_0_height;
+                        }
                     case 1:
-                        return R.layout.item_thread_head;
+                        return R.layout.item_channel;
                     case 2:
+                        return R.layout.item_thread_head;
+                    case 3:
                         return R.layout.item_thread;
                 }
                 return R.layout.item_channel;
@@ -139,6 +147,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         this.showMode = showMode;
         showViewByMode(showMode);
         setServerData(server);
+        setCategoryData(server.serverId);
         setChannelData(server.serverId);
     }
 
@@ -151,6 +160,15 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             mBinding.btnJoinIn.setVisibility(View.VISIBLE);
             mBinding.ivInvite.setVisibility(View.GONE);
             mBinding.ivMore.setVisibility(View.GONE);
+        }
+    }
+
+    private void setCategoryData(String serverId) {
+        //包含了说明已经请求过了，避免重复请求,对刷新有实时性要求的可在这里放开
+        if (!categories.containsKey(serverId)) {
+            mServerViewModel.getServerCategories(serverId);
+        } else {
+            refreshList();
         }
     }
 
@@ -193,6 +211,21 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         super.initConfig();
         mServerViewModel = new ViewModelProvider(this).get(ServerDetailViewModel.class);
         mChannelViewModel = new ViewModelProvider(this).get(ChannelViewModel.class);
+        mServerViewModel.getServerCategoriesLiveData.observe(getViewLifecycleOwner(),response->{
+            parseResource(response, new OnResourceParseCallback<List<EMCircleChannelCategory>>() {
+                @Override
+                public void onSuccess(@Nullable List<EMCircleChannelCategory> categories) {
+                    getCategoryDataSuccess(categories);
+                    refreshList();
+                }
+
+                @Override
+                public void onError(int code, String message) {
+                    super.onError(code, message);
+                    refreshList();
+                }
+            });
+        });
         mServerViewModel.getChannelsLiveData.observe(getViewLifecycleOwner(), response -> {
             if (mBinding.srlRefresh.isRefreshing()) {
                 mBinding.srlRefresh.finishRefresh();
@@ -376,6 +409,15 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         initListener();
     }
 
+    private void getCategoryDataSuccess(List<EMCircleChannelCategory> categories) {
+        if (!CollectionUtils.isEmpty(categories)) {
+            for (EMCircleChannelCategory category : categories) {
+                ConcurrentHashMap<String, EMCircleChannelCategory> categoryContainer = getCategoryContainer(category.getServerId());
+                categoryContainer.put(category.getCategoryId(), category);
+            }
+        }
+    }
+
     /**
      * 刷新跟角色相关的view及数据等
      *
@@ -392,13 +434,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
     private void initViewByRole(int roleId) {
-        if (roleId == EMCircleUserRole.USER.getRoleId()) {//普通成员
-            mBinding.ivAddChannel.setVisibility(View.GONE);
-        } else if (roleId == EMCircleUserRole.MODERATOR.getRoleId()) {//管理员
-            mBinding.ivAddChannel.setVisibility(View.GONE);
-        } else {//拥有者owner
-            mBinding.ivAddChannel.setVisibility(View.VISIBLE);
-        }
+//        if (roleId == EMCircleUserRole.USER.getRoleId()) {//普通成员
+//            mBinding.ivAddChannel.setVisibility(View.GONE);
+//        } else if (roleId == EMCircleUserRole.MODERATOR.getRoleId()) {//管理员
+//            mBinding.ivAddChannel.setVisibility(View.GONE);
+//        } else {//拥有者owner
+//            mBinding.ivAddChannel.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void initDataByRole(final int roleId) {
@@ -587,35 +629,74 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
      */
     private List<Node> getServerNodes(String serverId) {
         List<Node> allNodes = new ArrayList<>();
+
         ConcurrentHashMap<String, CircleChannel> channelsContainer = getChannelsContainer(serverId);
         Collection<CircleChannel> serverChannels = channelsContainer.values();
+        //所有channel数据分组
+        ConcurrentHashMap<String,List<CircleChannel>> tempCategoryContainer=new ConcurrentHashMap();//key:categoryId
         for (CircleChannel channel : serverChannels) {
-            //构造频道item数据
-            Node node = new Node(channel.channelId, null, channel.name);
-            if (channel.type == EMChannelStylePublic.getCode()) {
-                node.setIcon(R.drawable.circle_channel_public_icon);
-            } else {
-                node.setIcon(R.drawable.circle_channel_private_icon);
+            List<CircleChannel> circleChannels = tempCategoryContainer.get(channel.categoryId);
+            if(circleChannels==null) {
+                circleChannels=new ArrayList<>();
+                tempCategoryContainer.put(channel.categoryId,circleChannels);
             }
-            node.setDefault(channel.isDefault);
-            allNodes.add(node);
+            circleChannels.add(channel);
+        }
 
-            Collection<EMChatThread> channelThreads = getThreadsContainer(channel.channelId).values();
-            Iterator<EMChatThread> iterator = channelThreads.iterator();
-            if (iterator.hasNext()) {
-                EMChatThread chatThread = iterator.next();
-                //构造子区标题栏数据
-                //id=固定Id+pid,保证唯一性即可
-                allNodes.add(getThreadHeadNode(chatThread));
-                allNodes.add(getThreadItemNode(chatThread));
+        ConcurrentHashMap<String, EMCircleChannelCategory> categoryContainer = getCategoryContainer(serverId);
+        Iterator<String> categoryIterator = tempCategoryContainer.keySet().iterator();
+        //遍历每个server下的分组
+        while (categoryIterator.hasNext()){
+            String categoryId = categoryIterator.next();
+            EMCircleChannelCategory channelCategory = categoryContainer.get(categoryId);
+            if(channelCategory==null) {
+                continue;
             }
-            while (iterator.hasNext()) {
-                EMChatThread chatThread = iterator.next();
-                allNodes.add(getThreadItemNode(chatThread));
+            Node categoryItemNode = getCategoryItemNode(channelCategory);
+            if(categoryItemNode.getName().equals("Default Channel Category")) {
+                categoryItemNode.setDefault(true);
+            }
+            allNodes.add(categoryItemNode);
+            //遍历每个分组下的所有channel
+            List<CircleChannel> categoryChannels = tempCategoryContainer.get(categoryId);
+            for (CircleChannel channel : categoryChannels) {
+                //构造频道item数据
+                Node node=getChannelItemNode(channel);
+                if (channel.type == EMChannelStylePublic.getCode()) {
+                    node.setIcon(R.drawable.circle_channel_public_icon);
+                } else {
+                    node.setIcon(R.drawable.circle_channel_private_icon);
+                }
+//                node.setDefault(channel.isDefault);
+                allNodes.add(node);
+
+                Collection<EMChatThread> channelThreads = getThreadsContainer(channel.channelId).values();
+                Iterator<EMChatThread> iterator = channelThreads.iterator();
+                if (iterator.hasNext()) {
+                    EMChatThread chatThread = iterator.next();
+                    //构造子区标题栏数据
+                    //id=固定Id+pid,保证唯一性即可
+                    allNodes.add(getThreadHeadNode(chatThread));
+                    allNodes.add(getThreadItemNode(chatThread));
+                }
+                while (iterator.hasNext()) {
+                    EMChatThread chatThread = iterator.next();
+                    allNodes.add(getThreadItemNode(chatThread));
+                }
             }
         }
         sortNodes(allNodes);
         return allNodes;
+    }
+
+    private Node getChannelItemNode(CircleChannel channel) {
+        Node node = new Node(channel.channelId, channel.categoryId, channel.name);
+        return node;
+    }
+
+    private Node getCategoryItemNode(EMCircleChannelCategory category) {
+        Node node = new Node(category.getCategoryId(), null, category.getName());
+        return node;
     }
 
     private Node getThreadItemNode(EMChatThread chatThread) {
@@ -629,7 +710,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
     private void sortNodes(List<Node> allNodes) {
-        //通用频道放到最前边
+        //通用分组放最前边
         Node defaultChannelNode = null;
         for (Node node : allNodes) {
             if (node.isDefault()) {
@@ -639,8 +720,8 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         }
         if (defaultChannelNode != null) {
             allNodes.remove(defaultChannelNode);
+            allNodes.add(0, defaultChannelNode);
         }
-        allNodes.add(0, defaultChannelNode);
     }
 
     private void getThreadDataSuccess(List<EMChatThread> chatThreads) {
@@ -672,6 +753,15 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         return serverChannels;
     }
 
+    private synchronized ConcurrentHashMap<String, EMCircleChannelCategory> getCategoryContainer(String serverId) {
+        ConcurrentHashMap<String, EMCircleChannelCategory> serverCategories = categories.get(serverId);
+        if (serverCategories == null) {
+            serverCategories = new ConcurrentHashMap<>();
+            categories.put(serverId, serverCategories);
+        }
+        return serverCategories;
+    }
+
     private synchronized ConcurrentHashMap<String, EMChatThread> getThreadsContainer(String channelId) {
         ConcurrentHashMap<String, EMChatThread> channelThreads = threads.get(channelId);
         if (channelThreads == null) {
@@ -694,8 +784,6 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     private void initListener() {
         mBinding.ivInvite.setOnClickListener(this);
         mBinding.ivMore.setOnClickListener(this);
-        mBinding.llChannelType.setOnClickListener(this);
-        mBinding.ivAddChannel.setOnClickListener(this);
         mBinding.btnJoinIn.setOnClickListener(this);
         adapter.setOnItemClickListener(this);
         mBinding.srlRefresh.setOnRefreshListener(this);
@@ -712,25 +800,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         } else if (v.getId() == R.id.iv_more) {
             //弹框
             LiveEventBus.get(Constants.SHOW_SERVER_SETTING_FRAGMENT, CircleServer.class).post(currrentServer);
-        } else if (v.getId() == R.id.ll_channel_type) {
-            //变更箭头方向，收齐展开recycleview
-            int channelVisibility = mBinding.rvChannel.getVisibility();
-            if (channelVisibility == View.VISIBLE) {
-                mBinding.ivChannnelList.setImageResource(io.agora.service.R.drawable.circle_arrow_right_gray);
-                mBinding.rvChannel.setVisibility(View.GONE);
-            } else {
-                mBinding.ivChannnelList.setImageResource(io.agora.service.R.drawable.circle_arrow_up);
-                mBinding.rvChannel.setVisibility(View.VISIBLE);
-            }
-
-        } else if (v.getId() == R.id.iv_add_channel) {
-            if (showMode == ShowMode.NORMAL) {
-                //去创建频道
-                LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).post(currrentServer);
-            } else {
-                ToastUtils.showShort(getString(io.agora.service.R.string.circle_preview_mode));
-            }
-        } else if (v.getId() == R.id.btn_join_in) {
+        }else if (v.getId() == R.id.btn_join_in) {
             //加入server
             mServerViewModel.joinServer(currrentServer.serverId);
         }
@@ -741,7 +811,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         List<Node> datas = adapter.getDatas();
         Node node = datas.get(positon);
         switch (node.getLevel()) {
-            case 0:
+            case 1:
                 //首先判断是否在这个频道里，没有就弹框
                 if (showMode == ShowMode.NORMAL) {
                     CustomInfo info = new CustomInfo();
@@ -753,14 +823,25 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     jumpToChannel(currrentServer.serverId, node.getId());
                 }
                 break;
-            case 1:
+            case 0:
+                if(itemView.getId()==R.id.iv_add_channel) {
+                    //点击的是"+"号，创建频道
+                    if (showMode == ShowMode.NORMAL) {
+                        //去创建频道
+                        LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).post(currrentServer);
+                    } else {
+                        ToastUtils.showShort(getString(io.agora.service.R.string.circle_preview_mode));
+                    }
+                    break;
+                }
+            case 2:
                 if (!node.isLeaf()) {
                     node.setExpand(!node.isExpand());
                     List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
                     adapter.refresh(visiableNodes);
                 }
                 break;
-            case 2:
+            case 3:
                 EMChatThread chatThread = getThreadsContainer(node.getParent().getpId()).get(node.getId());
                 if (chatThread != null) {
                     ARouter.getInstance().build("/app/ChatThreadActivity")
