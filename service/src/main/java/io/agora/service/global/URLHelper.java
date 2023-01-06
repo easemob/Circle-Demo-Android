@@ -15,4 +15,8 @@ public class URLHelper {
 //        return EMHttpClient.getInstance().chatConfig().a(true, false);
         return EMHttpClient.getInstance().chatConfig().getBaseUrl(true, false);
     }
+    public static String getRtcURL(String channelName,String agoraUid,String username){
+//        return "http://a1.easemob.com/inside/token/rtc/channel/"+channelName+"/agorauid/"+agoraUid+"?userAccount="+username;
+        return "http://a1.easemob.com/inside/token/rtc/channel/"+channelName;
+    }
 }

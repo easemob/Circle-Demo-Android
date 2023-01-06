@@ -10,6 +10,51 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Circle">
         <activity
+            android:name=".ui.channel.ChannelMembersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.MoveChannelActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.ChannelSettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.ChannelOverviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.EditChannelActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.category.EditCategoryNameActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.category.EditCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.server.ServerSettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.server.ServerOverviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.server.EditServerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.category.CreateCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.CreateChannelActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.server.ServerMembersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.server.ServerNotificationSettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.channel.ChannelNotificationSettingActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.AddFriendActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false"

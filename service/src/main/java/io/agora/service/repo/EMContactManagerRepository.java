@@ -6,7 +6,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 
 import com.blankj.utilcode.util.ThreadUtils;
 import com.hyphenate.EMCallBack;
@@ -218,12 +217,15 @@ public class EMContactManagerRepository extends ServiceReposity {
 
             @Override
             protected LiveData<List<CircleUser>> loadFromDb() {
-                return Transformations.map(getUserDao().loadUsers(), result -> {
-                    if (result != null) {
-                        sortData(result);
-                    }
-                    return result;
-                });
+//                return Transformations.map(getUserDao().loadUsers(), result -> {
+//                    if (result != null) {
+//                        sortData(result);
+//                    }
+//                    return result;
+//                });
+                List<CircleUser> circleUsers= getUserDao().loadContacts();
+                sortData(circleUsers);
+                return createLiveData(circleUsers);
             }
 
             @Override

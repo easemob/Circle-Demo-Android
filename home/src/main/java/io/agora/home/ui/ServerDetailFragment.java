@@ -6,12 +6,14 @@ import static com.hyphenate.easeui.constants.EaseConstant.CONVERSATION_ID;
 import static com.hyphenate.easeui.constants.EaseConstant.PARENT_ID;
 import static com.hyphenate.easeui.constants.EaseConstant.PARENT_MSG_ID;
 import static com.hyphenate.easeui.constants.EaseConstant.SERVER_ID;
+import static io.agora.service.global.Constants.DEFAULT_CATEGORY_NAME;
 import static io.agora.service.utils.CircleUtils.sendInviteCustomMessage;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -30,7 +32,6 @@ import com.bumptech.glide.Glide;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMCircleChannel;
-import com.hyphenate.chat.EMCircleChannelCategory;
 import com.hyphenate.chat.EMCircleServerEvent;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
@@ -65,14 +66,16 @@ import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
+import io.agora.service.event.CategoryEvent;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.model.ChannelViewModel;
 import io.agora.service.repo.ServiceReposity;
 
-public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailBinding> implements View.OnClickListener, BaseAdapter.ItemClickListener, OnRefreshListener {
+public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailBinding> implements View.OnClickListener, BaseAdapter.ItemClickListener, OnRefreshListener, BaseAdapter.ItemLongClickListener {
 
     private ServerDetailViewModel mServerViewModel;
     private ChannelViewModel mChannelViewModel;
@@ -81,7 +84,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleChannel>> channels = new ConcurrentHashMap();//key:serverId , value:(key:channelId , value:channel)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, EMChatThread>> threads = new ConcurrentHashMap();//key:channelId , value:(key:threadId , value:thread)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleServer.Tag>> tags = new ConcurrentHashMap();//key:serverId , value:(key:tagId , value:tag)
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, EMCircleChannelCategory>> categories = new ConcurrentHashMap();//key:serverId , value:(key:categoryId , value:category)
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleCategory>> categories = new ConcurrentHashMap();//key:serverId , value:(key:categoryId , value:category)
     private List<Node> sortedNodes = new ArrayList<>();//装在多级列表真正的数据
     private CircleServer currrentServer;
     private ShowMode showMode = ShowMode.NORMAL;
@@ -105,10 +108,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 int level = adapter.getDatas().get(positon).getLevel();
                 switch (level) {
                     case 0:
-                        if(!adapter.getDatas().get(positon).getName().equals("Default Channel Category")) {
+                        if (!adapter.getDatas().get(positon).getName().equals(DEFAULT_CATEGORY_NAME)) {
                             return R.layout.item_category;
-                        }else{
-                            return R.layout.item_category_0_height;
+                        } else {
+                            return R.layout.item_category_1px_height;
                         }
                     case 1:
                         return R.layout.item_channel;
@@ -211,10 +214,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         super.initConfig();
         mServerViewModel = new ViewModelProvider(this).get(ServerDetailViewModel.class);
         mChannelViewModel = new ViewModelProvider(this).get(ChannelViewModel.class);
-        mServerViewModel.getServerCategoriesLiveData.observe(getViewLifecycleOwner(),response->{
-            parseResource(response, new OnResourceParseCallback<List<EMCircleChannelCategory>>() {
+        mServerViewModel.getServerCategoriesLiveData.observe(getViewLifecycleOwner(), response -> {
+            parseResource(response, new OnResourceParseCallback<List<CircleCategory>>() {
                 @Override
-                public void onSuccess(@Nullable List<EMCircleChannelCategory> categories) {
+                public void onSuccess(@Nullable List<CircleCategory> categories) {
                     getCategoryDataSuccess(categories);
                     refreshList();
                 }
@@ -403,17 +406,27 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             onRefresh(null);
         });
 
+        LiveEventBus.get(Constants.CATEGORY_DELETE, CategoryEvent.class).observe(getViewLifecycleOwner(), categoryEvent -> {
+            if(categoryEvent!=null) {
+                ConcurrentHashMap<String, CircleCategory> categoryContainer = getCategoryContainer(categoryEvent.serverId);
+                categoryContainer.remove(categoryEvent.categoryId);
+                if(android.text.TextUtils.equals(currrentServer.serverId,categoryEvent.serverId)) {
+                    refreshList();
+                }
+            }
+        });
+
         AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
             refreshByRoleChanged(serverRoleMap);
         });
         initListener();
     }
 
-    private void getCategoryDataSuccess(List<EMCircleChannelCategory> categories) {
+    private void getCategoryDataSuccess(List<CircleCategory> categories) {
         if (!CollectionUtils.isEmpty(categories)) {
-            for (EMCircleChannelCategory category : categories) {
-                ConcurrentHashMap<String, EMCircleChannelCategory> categoryContainer = getCategoryContainer(category.getServerId());
-                categoryContainer.put(category.getCategoryId(), category);
+            for (CircleCategory category : categories) {
+                ConcurrentHashMap<String, CircleCategory> categoryContainer = getCategoryContainer(category.serverId);
+                categoryContainer.put(category.categoryId, category);
             }
         }
     }
@@ -477,7 +490,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 tagsContainer.clear();
 
                 for (CircleServer.Tag tag : data) {
-                    tagsContainer.put(tag.id, tag);
+                    tagsContainer.put(tag.server_tag_id, tag);
                 }
                 //更新当前server
                 if (android.text.TextUtils.equals(currrentServer.serverId, firstTag.serverId)) {
@@ -500,7 +513,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     textView.setCompoundDrawablesWithIntrinsicBounds(drawableLeft,
                             null, null, null);
                     textView.setCompoundDrawablePadding(4);
-                    textView.setText(tag.name);
+                    textView.setText(tag.tag_name);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
                     textView.setTextColor(Color.WHITE);
                     textView.setPadding(0, 0, ConvertUtils.dp2px(8), 0);
@@ -633,35 +646,38 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         ConcurrentHashMap<String, CircleChannel> channelsContainer = getChannelsContainer(serverId);
         Collection<CircleChannel> serverChannels = channelsContainer.values();
         //所有channel数据分组
-        ConcurrentHashMap<String,List<CircleChannel>> tempCategoryContainer=new ConcurrentHashMap();//key:categoryId
+        ConcurrentHashMap<String, List<CircleChannel>> tempCategoryContainer = new ConcurrentHashMap();//key:categoryId
         for (CircleChannel channel : serverChannels) {
             List<CircleChannel> circleChannels = tempCategoryContainer.get(channel.categoryId);
-            if(circleChannels==null) {
-                circleChannels=new ArrayList<>();
-                tempCategoryContainer.put(channel.categoryId,circleChannels);
+            if (circleChannels == null) {
+                circleChannels = new ArrayList<>();
+                tempCategoryContainer.put(channel.categoryId, circleChannels);
             }
             circleChannels.add(channel);
         }
 
-        ConcurrentHashMap<String, EMCircleChannelCategory> categoryContainer = getCategoryContainer(serverId);
-        Iterator<String> categoryIterator = tempCategoryContainer.keySet().iterator();
+        ConcurrentHashMap<String, CircleCategory> categoryContainer = getCategoryContainer(serverId);
+        Iterator<String> categoryIterator = categoryContainer.keySet().iterator();
         //遍历每个server下的分组
-        while (categoryIterator.hasNext()){
+        while (categoryIterator.hasNext()) {
             String categoryId = categoryIterator.next();
-            EMCircleChannelCategory channelCategory = categoryContainer.get(categoryId);
-            if(channelCategory==null) {
+            CircleCategory circleCategory = categoryContainer.get(categoryId);
+            if (circleCategory == null) {
                 continue;
             }
-            Node categoryItemNode = getCategoryItemNode(channelCategory);
-            if(categoryItemNode.getName().equals("Default Channel Category")) {
+            Node categoryItemNode = getCategoryItemNode(circleCategory);
+            if (categoryItemNode.getName().equals("Default Channel Category")) {
                 categoryItemNode.setDefault(true);
             }
             allNodes.add(categoryItemNode);
             //遍历每个分组下的所有channel
             List<CircleChannel> categoryChannels = tempCategoryContainer.get(categoryId);
+            if(categoryChannels==null) {
+                continue;
+            }
             for (CircleChannel channel : categoryChannels) {
                 //构造频道item数据
-                Node node=getChannelItemNode(channel);
+                Node node = getChannelItemNode(channel);
                 if (channel.type == EMChannelStylePublic.getCode()) {
                     node.setIcon(R.drawable.circle_channel_public_icon);
                 } else {
@@ -694,8 +710,8 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         return node;
     }
 
-    private Node getCategoryItemNode(EMCircleChannelCategory category) {
-        Node node = new Node(category.getCategoryId(), null, category.getName());
+    private Node getCategoryItemNode(CircleCategory category) {
+        Node node = new Node(category.categoryId, null, category.categoryName);
         return node;
     }
 
@@ -753,8 +769,8 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         return serverChannels;
     }
 
-    private synchronized ConcurrentHashMap<String, EMCircleChannelCategory> getCategoryContainer(String serverId) {
-        ConcurrentHashMap<String, EMCircleChannelCategory> serverCategories = categories.get(serverId);
+    private synchronized ConcurrentHashMap<String, CircleCategory> getCategoryContainer(String serverId) {
+        ConcurrentHashMap<String, CircleCategory> serverCategories = categories.get(serverId);
         if (serverCategories == null) {
             serverCategories = new ConcurrentHashMap<>();
             categories.put(serverId, serverCategories);
@@ -786,6 +802,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         mBinding.ivMore.setOnClickListener(this);
         mBinding.btnJoinIn.setOnClickListener(this);
         adapter.setOnItemClickListener(this);
+        adapter.setOnItemLongClickListener(this);
         mBinding.srlRefresh.setOnRefreshListener(this);
     }
 
@@ -800,7 +817,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         } else if (v.getId() == R.id.iv_more) {
             //弹框
             LiveEventBus.get(Constants.SHOW_SERVER_SETTING_FRAGMENT, CircleServer.class).post(currrentServer);
-        }else if (v.getId() == R.id.btn_join_in) {
+        } else if (v.getId() == R.id.btn_join_in) {
             //加入server
             mServerViewModel.joinServer(currrentServer.serverId);
         }
@@ -812,19 +829,31 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         Node node = datas.get(positon);
         switch (node.getLevel()) {
             case 1:
-                //首先判断是否在这个频道里，没有就弹框
-                if (showMode == ShowMode.NORMAL) {
-                    CustomInfo info = new CustomInfo();
-                    info.setServerId(currrentServer.serverId);
-                    info.setChannelId(node.getId());
-                    mChannelViewModel.checkSelfIsInChannel(info);
-                } else {
-                    //预览模式直接跳转到会话页面
-                    jumpToChannel(currrentServer.serverId, node.getId());
+                //先判断是语聊频道还是文字频道
+                CircleChannel circleChannel = getChannelsContainer(currrentServer.serverId).get(node.getId());
+                if(circleChannel==null) {
+                    break;
                 }
+                if(circleChannel.channelMode==0) {
+                    //文字频道
+                    //首先判断是否在这个频道里，没有就弹框
+                    if (showMode == ShowMode.NORMAL) {
+                        CustomInfo info = new CustomInfo();
+                        info.setServerId(currrentServer.serverId);
+                        info.setChannelId(node.getId());
+                        mChannelViewModel.checkSelfIsInChannel(info);
+                    } else {
+                        //预览模式直接跳转到会话页面
+                        jumpToChannel(currrentServer.serverId, node.getId());
+                    }
+                }else if(circleChannel.channelMode==1) {
+                    //语聊频道 底部弹框
+                    LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).post(circleChannel);
+                }
+
                 break;
             case 0:
-                if(itemView.getId()==R.id.iv_add_channel) {
+                if (itemView.getId() == R.id.iv_add_channel) {
                     //点击的是"+"号，创建频道
                     if (showMode == ShowMode.NORMAL) {
                         //去创建频道
@@ -877,5 +906,58 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             channels.remove(currrentServer.serverId);
             mServerViewModel.getChannelData(currrentServer.serverId);
         }
+    }
+
+    @Override
+    public boolean onClick(int positon) {
+        List<Node> datas = adapter.getDatas();
+        Node node = datas.get(positon);
+        switch (node.getLevel()) {
+            case 0:
+                //长按分组项
+                ConcurrentHashMap<String, CircleCategory> categoryContainer = getCategoryContainer(currrentServer.serverId);
+                CircleCategory category = categoryContainer.get(node.getId());
+                showCategoryBottomDialog(category);
+                break;
+            case 1:
+                //长按频道
+
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
+        return false;
+    }
+
+    private void showCategoryBottomDialog(CircleCategory category) {
+        AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                .setContentView(R.layout.dialog_category_setting)
+                .setFromBottomAnimation()
+                .setGravity(Gravity.BOTTOM)
+                .setLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .show();
+        alertDialog.setOnClickListener(R.id.ll_fold, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.setOnClickListener(R.id.tv_edit_category, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(category!=null) {
+                    jumptoEditCategory(category);
+                    alertDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    private void jumptoEditCategory(CircleCategory circleCategory) {
+        ARouter.getInstance().build("/contacts/EditCategoryActivity")
+                .withSerializable(Constants.CATEGORY, circleCategory)
+                .navigation();
     }
 }

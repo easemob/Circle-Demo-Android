@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/iv_float_voice_channel"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginRight="24dp"
+    android:layout_marginBottom="94dp"
+    android:src="@drawable/circle_in_voice_channel_mic_on_speaking"
+    android:visibility="gone" />

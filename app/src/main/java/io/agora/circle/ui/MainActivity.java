@@ -1,5 +1,6 @@
 package io.agora.circle.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,18 +12,22 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.blankj.utilcode.util.ConvertUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.hyphenate.easeui.utils.ShowMode;
 import com.jeremyliao.liveeventbus.LiveEventBus;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,21 +39,30 @@ import java.util.TimerTask;
 import io.agora.circle.R;
 import io.agora.circle.adapter.MainViewPagerAdapter;
 import io.agora.circle.databinding.ActivityMainBinding;
+import io.agora.circle.model.MainViewModel;
 import io.agora.common.base.BaseFragment;
 import io.agora.contacts.ui.ContactsFragment;
-import io.agora.contacts.ui.CreateChannelBottomFragment;
 import io.agora.contacts.ui.InviteUserToServerBottomFragment;
-import io.agora.contacts.ui.ServerSettingBottomFragment;
+import io.agora.contacts.ui.channel.CreateChannelActivity;
+import io.agora.contacts.ui.channel.VoiceChannelDetailBottomFrament;
+import io.agora.contacts.ui.server.ServerSettingBottomFragment;
 import io.agora.ground.ui.GroundFragment;
 import io.agora.home.ui.HomeFragment;
 import io.agora.mine.ui.MineFragment;
 import io.agora.service.base.BaseInitActivity;
+import io.agora.service.bean.GetRTCTokenBean;
+import io.agora.service.callbacks.CircleRTCListener;
+import io.agora.service.callbacks.CircleRTCTokenCallback;
+import io.agora.service.callbacks.OnResourceParseCallback;
+import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.global.GlobalEventMonitor;
+import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 
 @Route(path = "/app/MainActivity")
-public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
+public class MainActivity extends BaseInitActivity<ActivityMainBinding> implements CircleRTCListener {
     private List<BaseFragment> fragments = new ArrayList<>();
     private BaseFragment homeFragment, groundFragment, contactsFragment, mineFragment;
     private BaseFragment mCurrentFragment;
@@ -56,6 +70,9 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
     private int[] msgIds = {R.id.tv_main_contacts_msg};
     private TextView mTvMainContactsMsg;
     private int count = 1;
+    private RxPermissions rxPermissions;
+    private MainViewModel viewModel;
+    private CircleRTCTokenCallback circleRTCTokenCallback;
 
     @Override
     protected int getResLayoutId() {
@@ -98,8 +115,36 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
     @Override
     protected void initConfig() {
         super.initConfig();
+        initPermission();
         initFragments();
         initListener();
+
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        viewModel.getRTCTokenLiveData.observeForever(response -> {
+            parseResource(response, new OnResourceParseCallback<GetRTCTokenBean>() {
+                @Override
+                public void onSuccess(@Nullable GetRTCTokenBean getRTCTokenBean) {
+                    if(circleRTCTokenCallback!=null) {
+                        if (getRTCTokenBean != null) {
+                            circleRTCTokenCallback.setToken(getRTCTokenBean.getAccessToken(), Integer.parseInt(getRTCTokenBean.getAgoraUid()));
+                        }
+                    }
+                }
+            });
+        });
+        CircleRTCManager.getInstance().init(getBaseContext())
+                .registerCircleRTCListener(this);
+    }
+
+    private void initPermission() {
+        rxPermissions = new RxPermissions(this);
+        rxPermissions
+                .request(Manifest.permission.RECORD_AUDIO)
+                .subscribe(granted -> {
+                    if (granted) {
+                        // All requested permissions are granted
+                    }
+                });
     }
 
     private void initListener() {
@@ -147,17 +192,23 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("server", server);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager(), ConvertUtils.dp2px(300));
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(1));
             }
         });
         LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).observe(this, new Observer<CircleServer>() {
             @Override
             public void onChanged(CircleServer server) {
-                CreateChannelBottomFragment fragment = new CreateChannelBottomFragment();
+                CreateChannelActivity.actionStart(MainActivity.this,server);
+            }
+        });
+        LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).observe(this, new Observer<CircleChannel>() {
+            @Override
+            public void onChanged(CircleChannel channel) {
+                VoiceChannelDetailBottomFrament fragment = new VoiceChannelDetailBottomFrament();
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(Constants.SERVER, server);
+                bundle.putSerializable(Constants.CHANNEL, channel);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager());
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(410));
             }
         });
         LiveEventBus.get(Constants.SHOW_RED_DOT, Boolean.class).observe(this, isShow -> {
@@ -250,5 +301,11 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onGenerateRTCToken(String channelName, CircleRTCTokenCallback callback) {
+        this.circleRTCTokenCallback = callback;
+        viewModel.getRTCToken(channelName, "0", AppUserInfoManager.getInstance().getCurrentUserName());
     }
 }

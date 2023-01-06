@@ -21,6 +21,7 @@ import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMCircleChannelCategory;
 import com.hyphenate.chat.EMCircleServer;
 import com.hyphenate.chat.EMCircleServerAttribute;
+import com.hyphenate.chat.EMCircleServerSearchType;
 import com.hyphenate.chat.EMCircleTag;
 import com.hyphenate.chat.EMCircleUser;
 import com.hyphenate.chat.EMCircleUserRole;
@@ -37,7 +38,9 @@ import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.RecommendServiceBean;
 import io.agora.service.callbacks.ResultCallBack;
 import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.dao.CircleCategoryDao;
 import io.agora.service.db.dao.CircleServerDao;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
 import io.agora.service.global.Constants;
@@ -49,24 +52,38 @@ import io.agora.service.net.Resource;
 
 public class CircleServerReposity extends ServiceReposity {
 
-    public LiveData<Resource<List<CircleServer>>> getServerListByKey(String key) {
+    public LiveData<Resource<List<CircleServer>>> getServerListByKey(EMCircleServerSearchType searchType, String key) {
         return new NetworkOnlyResource<List<CircleServer>>() {
-
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<List<CircleServer>>> callBack) {
-                EMClient.getInstance().chatCircleManager().fetchServersWithKeyword(key, new EMValueCallBack<List<EMCircleServer>>() {
-                    @Override
-                    public void onSuccess(List<EMCircleServer> value) {
-                        callBack.onSuccess(new MutableLiveData(CircleServer.converToCirlceServerList(value)));
-                    }
-
-                    @Override
-                    public void onError(int error, String errorMsg) {
-                        callBack.onError(error, errorMsg);
-                    }
-                });
+                int limit = 20;
+                String cursor = null;
+                ArrayList<CircleServer> servers = new ArrayList<>();
+                doGetServerListByKey(searchType,key,limit, cursor, servers, callBack);
             }
         }.asLiveData();
+    }
+
+    private void doGetServerListByKey(EMCircleServerSearchType searchType, String key, int limit, String cursor, ArrayList<CircleServer> servers, ResultCallBack<LiveData<List<CircleServer>>> callBack) {
+        EMClient.getInstance().chatCircleManager().fetchServers(searchType,key,limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleServer>>() {
+            @Override
+            public void onSuccess(EMCursorResult<EMCircleServer> value) {
+                List<CircleServer> circleServers = CircleServer.converToCirlceServerList(value.getData());
+                if (circleServers != null) {
+                    servers.addAll(circleServers);
+                }
+                if (!TextUtils.isEmpty(value.getCursor())) {
+                    doGetServerListByKey(searchType,key,limit, value.getCursor(), servers, callBack);
+                } else {
+                    callBack.onSuccess(new MutableLiveData<>(servers));
+                }
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+                callBack.onError(error, errorMsg);
+            }
+        });
     }
 
     public LiveData<Resource<List<CircleServer>>> getServerJoinedList() {
@@ -156,7 +173,8 @@ public class CircleServerReposity extends ServiceReposity {
                                                 null,
                                                 null,
                                                 true,
-                                                false);
+                                                false,
+                                                0);//推荐列表返回的都是公开的
                                         servers.add(circleServer);
                                     }
                                     callBack.onSuccess(createLiveData(servers));
@@ -333,6 +351,44 @@ public class CircleServerReposity extends ServiceReposity {
         }.asLiveData();
     }
 
+    public LiveData<Resource<CircleServer>> updateServer(String serverID, EMCircleServerAttribute attribute) {
+        return new NetworkOnlyResource<CircleServer>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<CircleServer>> callBack) {
+
+                getCircleManager().updateServer(serverID, attribute, new EMValueCallBack<EMCircleServer>() {
+
+                    @Override
+                    public void onSuccess(EMCircleServer value) {
+                        CircleServer circleServer = getServerDao().getServerById(value.getServerId());
+                        CircleServer server = new CircleServer(value);
+                        if (circleServer != null) {
+                            server.isJoined = circleServer.isJoined;
+                            server.isRecommand = circleServer.isRecommand;
+                            server.channels = circleServer.channels;
+                            server.modetators = circleServer.modetators;
+                        }
+                        callBack.onSuccess(createLiveData(server));
+                        //发出通知
+                        LiveEventBus.get(Constants.SERVER_UPDATED).post(server);
+                    }
+
+                    @Override
+                    public void onError(int error, String errorMsg) {
+                        callBack.onError(error, errorMsg);
+                    }
+                });
+            }
+
+            @Override
+            protected void saveCallResult(CircleServer item) {
+                super.saveCallResult(item);
+                getServerDao().insert(item);
+            }
+        }.asLiveData();
+    }
+
     public LiveData<Resource<List<CircleServer.Tag>>> addTagToServer(CircleServer circleServer, String tag) {
         return new NetworkOnlyResource<List<CircleServer.Tag>>() {
             @Override
@@ -376,7 +432,7 @@ public class CircleServerReposity extends ServiceReposity {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<CircleServer>> callBack) {
                 List tags = new ArrayList();
-                tags.add(tag.id);
+                tags.add(tag.server_tag_id);
                 getCircleManager().removeTagsFromServer(circleServer.serverId, tags, new EMCallBack() {
                     @Override
                     public void onSuccess() {
@@ -639,24 +695,49 @@ public class CircleServerReposity extends ServiceReposity {
 
     }
 
-    public LiveData<Resource<List<EMCircleChannelCategory>>> getServerCategories(String serverId) {
-        return new NetworkOnlyResource<List<EMCircleChannelCategory>>() {
+    public LiveData<Resource<List<CircleCategory>>> getServerCategories(String serverId) {
+
+        return new NetworkBoundResource<List<CircleCategory>,List<CircleCategory>>(){
             @Override
-            protected void createCall(@NonNull ResultCallBack<LiveData<List<EMCircleChannelCategory>>> callBack) {
+            protected boolean shouldFetch(List<CircleCategory> data) {
+                return true;
+            }
+
+            @Override
+            protected LiveData<List<CircleCategory>> loadFromDb() {
+                return getCategoryDao().getCategoriesByChannelServerIdLiveData(serverId);
+            }
+
+            @Override
+            protected void createCall(ResultCallBack<LiveData<List<CircleCategory>>> callBack) {
                 int limit = 20;
-                List<EMCircleChannelCategory> categories = new ArrayList<>();
+                List<CircleCategory> categories = new ArrayList<>();
                 doFetchServerCategories(serverId, limit, categories, null, callBack);
+
+            }
+
+            @Override
+            protected void saveCallResult(List<CircleCategory> circleCategories) {
+
+                if (circleCategories != null && !circleCategories.isEmpty()) {
+                    CircleCategoryDao categoryDao = DatabaseManager.getInstance().getCagegoryDao();
+                    for (CircleCategory circleCategory : circleCategories) {
+                        categoryDao.insert(circleCategory);
+                    }
+                }
             }
         }.asLiveData();
     }
 
-    private void doFetchServerCategories(String serverID, int limit, List<EMCircleChannelCategory> categories, String cursor, ResultCallBack<LiveData<List<EMCircleChannelCategory>>> callBack) {
+    private void doFetchServerCategories(String serverID, int limit, List<CircleCategory> categories, String cursor, ResultCallBack<LiveData<List<CircleCategory>>> callBack) {
         getCircleManager().fetchCategoryInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleChannelCategory>>() {
             @Override
             public void onSuccess(EMCursorResult<EMCircleChannelCategory> value) {
-
-                if (!CollectionUtils.isEmpty(value.getData())) {
-                    categories.addAll(value.getData());
+                List<EMCircleChannelCategory> datas = value.getData();
+                if (!CollectionUtils.isEmpty(datas)) {
+                    for (EMCircleChannelCategory data : datas) {
+                        categories.add(new CircleCategory(data));
+                    }
                 }
                 if (!TextUtils.isEmpty(value.getCursor())) {
                     doFetchServerCategories(serverID, limit, categories, value.getCursor(), callBack);

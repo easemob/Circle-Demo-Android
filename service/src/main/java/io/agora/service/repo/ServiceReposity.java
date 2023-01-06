@@ -4,6 +4,7 @@ package io.agora.service.repo;
 import static com.hyphenate.EMError.GENERAL_ERROR;
 
 import android.content.Context;
+import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -37,10 +38,12 @@ import java.util.List;
 import java.util.Random;
 
 import io.agora.service.R;
+import io.agora.service.bean.GetRTCTokenBean;
 import io.agora.service.bean.UploadFileResultBean;
 import io.agora.service.bean.UserAccountBean;
 import io.agora.service.callbacks.ResultCallBack;
 import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.dao.CircleCategoryDao;
 import io.agora.service.db.dao.CircleChannelDao;
 import io.agora.service.db.dao.CircleServerDao;
 import io.agora.service.db.dao.CircleUserDao;
@@ -394,6 +397,38 @@ public class ServiceReposity {
         }.asLiveData();
     }
 
+    public LiveData<Resource<GetRTCTokenBean>> getRTCToken(String channelName,String agoraUid,String userName) {
+        return new NetworkOnlyResource<GetRTCTokenBean>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<GetRTCTokenBean>> callBack) {
+                ThreadUtils.getCachedPool().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Pair<Integer, String> response = EMHttpClient.getInstance().sendRequestWithToken(URLHelper.getRtcURL(channelName,agoraUid,userName), null, EMHttpClient.GET);
+                            if (response != null) {
+                                int resCode = response.first;
+                                String responseInfo = response.second;
+                                GetRTCTokenBean getRTCTokenBean = new Gson().fromJson(responseInfo, GetRTCTokenBean.class);
+                                if (resCode == 200 && getRTCTokenBean != null ) {
+                                    callBack.onSuccess(createLiveData(getRTCTokenBean));
+                                } else {
+                                    callBack.onError(resCode, responseInfo);
+                                }
+                            } else {
+                                callBack.onError(GENERAL_ERROR, "response is null ");
+                            }
+                        } catch (HyphenateException e) {
+                            e.printStackTrace();
+                            callBack.onError(GENERAL_ERROR, e.getMessage());
+                        }
+                    }
+                });
+            }
+        }.asLiveData();
+    }
+
     public <T> LiveData<T> createLiveData(T item) {
         return new MutableLiveData<>(item);
     }
@@ -408,6 +443,10 @@ public class ServiceReposity {
 
     protected CircleServerDao getServerDao() {
         return DatabaseManager.getInstance().getServerDao();
+    }
+
+    protected CircleCategoryDao getCategoryDao() {
+        return DatabaseManager.getInstance().getCagegoryDao();
     }
 
     protected CircleChannelDao getChannelDao() {

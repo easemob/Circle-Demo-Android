@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,7 +20,6 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.bumptech.glide.Glide;
 import com.hyphenate.easeui.utils.ShowMode;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.agora.common.dialog.AlertDialog;
 import io.agora.ground.R;
 import io.agora.ground.adapter.GroundAdapter;
 import io.agora.ground.callbacks.OnItemClickListener;
@@ -39,7 +36,6 @@ import io.agora.ground.databinding.FragmentGroundBinding;
 import io.agora.ground.model.GroundViewModel;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.callbacks.OnResourceParseCallback;
-import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
@@ -228,33 +224,10 @@ public class GroundFragment extends BaseInitFragment<FragmentGroundBinding> impl
     }
 
     private void showDialog(CircleServer circleServer) {
-        DialogJoinServerBinding joinServerBinding = DialogJoinServerBinding.inflate(getLayoutInflater());
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setContentView(joinServerBinding.getRoot())
-                .setLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                .show();
-        Glide.with(this).load(circleServer.icon).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(joinServerBinding.ivServer);
-        joinServerBinding.tvServerName.setText(circleServer.name);
-        joinServerBinding.tvDesc.setText(circleServer.desc);
-        joinServerBinding.btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //跳转到首页预览模式
-//                Postcard postcard = ARouter.getInstance().build("/app/MainActivity");
-//                //直接跳转到首页,显示目标server详情
-//                postcard.withSerializable(Constants.SHOW_MODE, ShowMode.SERVER_PREVIEW);
-//                postcard.withInt(Constants.NAV_POSITION, 0);
-//                postcard.withParcelable(Constants.SERVER, circleServer);
-//                postcard.navigation();
-                dialog.dismiss();
-            }
-        });
-        joinServerBinding.btnJoinImmediately.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.joinServer(circleServer.serverId);
-                dialog.dismiss();
-            }
-        });
+        JoinServerBottomFragment fragment = new JoinServerBottomFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Constants.SERVER, circleServer);
+        fragment.setArguments(bundle);
+        fragment.show(getParentFragmentManager());
     }
 }

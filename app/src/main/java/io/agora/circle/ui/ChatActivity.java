@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.blankj.utilcode.util.ConvertUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.example.zhouwei.library.CustomPopWindow;
 import com.hyphenate.chat.EMChatRoom;
@@ -36,7 +37,7 @@ import io.agora.chat.viewmodel.ChatViewModel;
 import io.agora.circle.R;
 import io.agora.circle.databinding.ActivityChatBinding;
 import io.agora.common.dialog.AlertDialog;
-import io.agora.contacts.ui.ChannelSettingBottomFragment;
+import io.agora.contacts.ui.channel.ChannelSettingBottomFragment;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.bean.ThreadData;
 import io.agora.service.callbacks.OnResourceParseCallback;
@@ -234,7 +235,7 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(CHANNEL, channel);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager());
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight()-ConvertUtils.dp2px(1));
             }
         });
         LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(this, event -> {

@@ -12,6 +12,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.hyphenate.chat.EMCircleServer;
+import com.hyphenate.chat.EMCircleServerType;
 import com.hyphenate.chat.EMCircleTag;
 import com.hyphenate.chat.adapter.EMACircleServer;
 
@@ -42,6 +43,7 @@ public class CircleServer implements Parcelable, Serializable {
     public List<String> modetators;
     public boolean isRecommand;
     public boolean isJoined;
+    public int type;
 
     @Ignore
     protected CircleServer(Parcel in) {
@@ -57,6 +59,7 @@ public class CircleServer implements Parcelable, Serializable {
         modetators = in.createStringArrayList();
         isRecommand = in.readByte() != 0;
         isJoined = in.readByte() != 0;
+        type = in.readInt();
     }
 
     public static final Creator<CircleServer> CREATOR = new Creator<CircleServer>() {
@@ -90,6 +93,7 @@ public class CircleServer implements Parcelable, Serializable {
         dest.writeStringList(modetators);
         dest.writeByte((byte) (isRecommand ? 1 : 0));
         dest.writeByte((byte) (isJoined ? 1 : 0));
+        dest.writeInt(type);
     }
 
 
@@ -98,20 +102,20 @@ public class CircleServer implements Parcelable, Serializable {
     public static class Tag implements Serializable, Parcelable {
         @PrimaryKey
         @NonNull
-        public String id;
-        public String name;
+        public String server_tag_id;
+        public String tag_name;
         public String serverId;
 
         public Tag(String id, String name, String serverId) {
-            this.id = id;
-            this.name = name;
+            this.server_tag_id = id;
+            this.tag_name = name;
             this.serverId = serverId;
         }
 
         @Ignore
         public Tag(EMCircleTag tag) {
-            this.id = tag.getId();
-            this.name = tag.getName();
+            this.server_tag_id = tag.getId();
+            this.tag_name = tag.getName();
         }
 
         @Ignore
@@ -127,8 +131,8 @@ public class CircleServer implements Parcelable, Serializable {
 
         @Ignore
         protected Tag(Parcel in) {
-            id = in.readString();
-            name = in.readString();
+            server_tag_id = in.readString();
+            tag_name = in.readString();
             serverId = in.readString();
         }
 
@@ -151,8 +155,8 @@ public class CircleServer implements Parcelable, Serializable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(id);
-            dest.writeString(name);
+            dest.writeString(server_tag_id);
+            dest.writeString(tag_name);
             dest.writeString(serverId);
         }
     }
@@ -161,7 +165,7 @@ public class CircleServer implements Parcelable, Serializable {
     public CircleServer() {
     }
 
-    public CircleServer(@NonNull String serverId, String defaultChannelID, String name, String icon, String desc, String custom, String owner, List<Tag> tags, List<CircleChannel> channels, List<String> modetators, boolean isRecommand, boolean isJoined) {
+    public CircleServer(@NonNull String serverId, String defaultChannelID, String name, String icon, String desc, String custom, String owner, List<Tag> tags, List<CircleChannel> channels, List<String> modetators, boolean isRecommand, boolean isJoined,int type) {
         this.serverId = serverId;
         this.defaultChannelID = defaultChannelID;
         this.name = name;
@@ -174,6 +178,7 @@ public class CircleServer implements Parcelable, Serializable {
         this.modetators = modetators;
         this.isRecommand = isRecommand;
         this.isJoined = isJoined;
+        this.type=type;
     }
 
     @Ignore
@@ -185,6 +190,7 @@ public class CircleServer implements Parcelable, Serializable {
         this.desc = emCircleServer.getDesc();
         this.custom = emCircleServer.getExt();
         this.owner = emCircleServer.getOwner();
+        this.type=emCircleServer.getType().getCode();
         List<EMCircleTag> tags = emCircleServer.getTags();
         List<Tag> tagList = new ArrayList<>();
         if (tags != null) {
@@ -211,10 +217,15 @@ public class CircleServer implements Parcelable, Serializable {
             emCircleServer.setDesc(circleServer.desc);
             emCircleServer.setExt(circleServer.custom);
             emCircleServer.setOwner(circleServer.owner);
+            if(circleServer.type==0) {
+                emCircleServer.setType(EMCircleServerType.EM_CIRCLE_SERVER_TYPE_PUBLIC);
+            }else if(circleServer.type==1) {
+                emCircleServer.setType(EMCircleServerType.EM_CIRCLE_SERVER_TYPE_PRIVATE);
+            }
             tagList.clear();
             for (int i = 0; i < circleServer.tags.size(); i++) {
                 Tag tag = circleServer.tags.get(i);
-                tagList.add(tag.name);
+                tagList.add(tag.tag_name);
             }
             emCircleServer.setTags(tagList);
             output.add(emCircleServer);

@@ -12,12 +12,13 @@ import androidx.lifecycle.Transformations;
 
 import com.alibaba.android.arouter.utils.TextUtils;
 import com.hyphenate.EMError;
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleServerAttribute;
 import com.hyphenate.chat.EMCircleUserRole;
 
 import java.util.List;
 
 import io.agora.service.bean.CustomInfo;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
 import io.agora.service.net.Resource;
@@ -47,7 +48,8 @@ public class ServerViewModel extends ServiceViewModel {
     public SingleSourceLiveData<Resource<String>> inviteToServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> removeUserFromServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CustomInfo>> checkSelfIsInServerLiveData = new SingleSourceLiveData<>();
-    public SingleSourceLiveData<Resource<List<EMCircleChannelCategory>>> getServerCategoriesLiveData=new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<List<CircleCategory>>> getServerCategoriesLiveData=new SingleSourceLiveData<>();
+
 
     public ServerViewModel(@NonNull Application application) {
         super(application);
@@ -97,6 +99,9 @@ public class ServerViewModel extends ServiceViewModel {
                 }
             });
         }
+    }
+    public void updateServer(String serverId, EMCircleServerAttribute attribute) {
+        updateServerLiveData.setSource(serverReposity.updateServer(serverId,attribute));
     }
 
     public void getJoinedServerList() {

@@ -17,6 +17,8 @@ public class Constants {
     public static final String CHANNEL_LEAVE = "channel_leave";
     public static final String CHANNEL_DELETE = "channel_delete";
     public static final String NOTIFY_CHANGE = "notify_change";
+    public static final String CATEGORY_DELETE = "category_delete";
+    public static final String CATEGORY_UPDATE = "category_update";
 
 
     public static final String SHOW_SERVER_INVITE_FRAGMENT = "show_server_invite_fragment";
@@ -24,6 +26,7 @@ public class Constants {
     public static final String SHOW_CHANNEL_SETTING_FRAGMENT = "show_channel_setting_fragment";
     public static final String SHOW_CREATE_CHANNEL_FRAGMENT = "show_create_channel_fragment";
     public static final String SHOW_THREAD_SETTING_FRAGMENT = "show_thread_setting_fragment";
+    public static final String SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT = "show_voice_channel_detail_bottom_fragment";
     public static final long PRESENCE_SUBSCRIBE_EXPIRY = 7 * 24 * 60 * 60;
 
     public static final String SYSTEM_MESSAGE_FROM = "from";
@@ -73,6 +76,7 @@ public class Constants {
 
     public static final String SERVER_ID = "server_id";
     public static final String CHANNEL = "channel";
+    public static final String CATEGORY = "category";
     public static final String CHANNELS = "channels";
     public static final String SERVER = "server";
     public static final String SERVERS = "servers";
@@ -150,4 +154,6 @@ public class Constants {
     public static final String SHOW_MODE = "show_mode";
     public static final String NAV_POSITION = "navigation_position";
     public static final String SHOW_RED_DOT ="show_red_dot" ;
+
+    public static final String DEFAULT_CATEGORY_NAME ="Default Channel Category" ;
 }

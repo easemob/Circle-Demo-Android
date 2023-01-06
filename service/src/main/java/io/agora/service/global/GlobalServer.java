@@ -66,8 +66,8 @@ public class GlobalServer {
             return false;
         }
         // 测试环境
-        options.setRestServer("a1-test.easemob.com");
-        options.setIMServer("msync-im-aws-bj.easemob.com");
+        options.setRestServer("aws-im-bj-web-245870899.cn-north-1.elb.amazonaws.com.cn");
+        options.setIMServer("aws-im-bj-msync-dc5e2e76b0d58215.elb.cn-north-1.amazonaws.com.cn");
         options.setImPort(6717);
 
 //        options.setAppKey(BuildConfig.circle_appkey);

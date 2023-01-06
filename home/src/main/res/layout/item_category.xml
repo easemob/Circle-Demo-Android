@@ -24,7 +24,7 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="10dp"
     android:layout_weight="1"
-    tools:text="@string/home_text_channel"
+    tools:text="@string/circle_text_channel"
     android:textColor="@color/color_white_75ffffff"
     android:textSize="12sp" />
 

@@ -1,22 +1,19 @@
-package io.agora.contacts.ui;
+package io.agora.contacts.ui.channel;
 
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.android.arouter.launcher.ARouter;
-import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.example.zhouwei.library.CustomPopWindow;
@@ -24,7 +21,6 @@ import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMPresence;
 import com.hyphenate.easeui.constants.EaseConstant;
 import com.hyphenate.easeui.widget.EaseRecyclerView;
-import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.HashMap;
@@ -35,8 +31,8 @@ import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.R;
 import io.agora.contacts.adapter.ContactListAdapter;
 import io.agora.contacts.databinding.DialogUserinfoBottomBinding;
+import io.agora.contacts.ui.ContactListFragment;
 import io.agora.service.bean.channel.ChannelEventNotifyBean;
-import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleUser;
@@ -46,16 +42,12 @@ import io.agora.service.model.ChannelViewModel;
 import io.agora.service.model.ServerViewModel;
 import io.agora.service.utils.EasePresenceUtil;
 
-public class ChannelSettingBottomFragment extends ContactListFragment implements BottomSheetChildHelper, View.OnClickListener {
-    private ConstraintLayout headView;
+public class ChannelMembersFragment extends ContactListFragment implements View.OnClickListener {
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
     private ChannelViewModel mChannelViewModel;
     private ServerViewModel mServerViewModel;
     private CircleChannel channel;
     private CustomPopWindow mCustomPopWindow;
-    private TextView tvInvite;
-    private TextView tvThreadList;
-    private TextView tvEditChannel;
     private AlertDialog dialog;
     private CircleUser selectedUser;
     private long muteDuration = 24 * 60 * 60 * 1000;//毫秒
@@ -69,20 +61,6 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
         if (channel == null) {
             channel = (CircleChannel) arguments.getSerializable(Constants.CHANNEL);
         }
-        headView = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.layout_channel_setting_head, mRecyclerView, false);
-        if (headView != null) {
-            tvInvite = headView.findViewById(R.id.tv_invite);
-            tvThreadList = headView.findViewById(R.id.tv_thread_list);
-            tvEditChannel = headView.findViewById(R.id.tv_edit_channel);
-        }
-        if (headView.getParent() == null) {
-            ((EaseRecyclerView) mRecyclerView).addHeaderView(headView);
-            mRecyclerView.setNestedScrollingEnabled(false);
-        }
-    }
-
-    private void initHeadViewVisiablity(EMCircleUserRole role) {
-        tvEditChannel.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -92,25 +70,6 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
 
         mChannelViewModel = new ViewModelProvider(this).get(ChannelViewModel.class);
         mServerViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
-        mChannelViewModel.deleteChannelResultLiveData.observe(this, response -> {
-            parseResource(response, new OnResourceParseCallback<CircleChannel>() {
-                @Override
-                public void onSuccess(@Nullable CircleChannel circleChannel) {
-                    ToastUtils.showShort(getString(R.string.delete_channel_success));
-                    hide();
-                    //发出通知
-                    LiveEventBus.get(Constants.CHANNEL_DELETE).post(circleChannel);
-                }
-
-                @Override
-                public void onError(int code, String message) {
-                    super.onError(code, message);
-                    if (!TextUtils.isEmpty(message)) {
-                        ToastUtils.showShort(message);
-                    }
-                }
-            });
-        });
         mChannelViewModel.channelMembersLiveData.observe(this, response -> {
             finishRefresh();
             parseResource(response, new OnResourceParseCallback<List<CircleUser>>() {
@@ -120,24 +79,6 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
                     if (data != null) {
                         mData.addAll(data);
                         setData(mData);
-                    }
-                }
-            });
-        });
-        mChannelViewModel.leaveChannelResultLiveData.observe(this, response -> {
-            parseResource(response, new OnResourceParseCallback<CircleChannel>() {
-
-                @Override
-                public void onSuccess(@Nullable CircleChannel circleChannel) {
-                    ToastUtils.showShort(getString(R.string.leave_channel_success));
-                    hide();
-                }
-
-                @Override
-                public void onError(int code, String message) {
-                    super.onError(code, message);
-                    if (!TextUtils.isEmpty(message)) {
-                        ToastUtils.showShort(message);
                     }
                 }
             });
@@ -271,7 +212,6 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
     private void onFetchSelfRoleSuccess(EMCircleUserRole role) {
         selfRole = role;
         refreshDialogView();
-        initHeadViewVisiablity(role);
         if (role != EMCircleUserRole.USER) {
             mChannelViewModel.fetchChannelMuteUsers(channel.serverId, channel.channelId);
         }
@@ -395,9 +335,6 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
     @Override
     protected void initListener() {
         super.initListener();
-        tvInvite.setOnClickListener(this);
-        tvThreadList.setOnClickListener(this);
-        tvEditChannel.setOnClickListener(this);
     }
 
     @Override
@@ -415,72 +352,9 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
 
     protected void checkView(String content) {
         super.checkView(content);
-        mBinding.sideBarContact.setVisibility(View.GONE);
         if (!TextUtils.isEmpty(content)) {
             ((EaseRecyclerView) mRecyclerView).removeHeaderViews();
         }
-    }
-
-    @Override
-    public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
-        titlebar.setTitle(getString(R.string.circle_channel_setting));
-        titlebar.setLeftLayoutVisibility(View.VISIBLE);
-        if (channel != null && channel.isDefault) {
-            titlebar.setRightLayoutVisibility(View.GONE);
-        } else {
-            titlebar.setRightImageResource(io.agora.service.R.drawable.circle_more_vertical);
-            titlebar.setOnRightClickListener(new EaseTitleBar.OnRightClickListener() {
-                @Override
-                public void onRightClick(View view) {
-                    showPopWindow(titlebar.getRightText());
-                }
-            });
-        }
-    }
-
-    private void showPopWindow(TextView locationView) {
-
-        View contentView = LayoutInflater.from(mContext).inflate(R.layout.channel_setting_menu, (ViewGroup) locationView.getParent(), false);
-        //处理popWindow 显示内容
-        handleLogic(contentView);
-
-        //显示PopupWindow
-        mCustomPopWindow = new CustomPopWindow.PopupWindowBuilder(mContext)
-                .setView(contentView)
-                .size(ConvertUtils.dp2px(104), ViewGroup.LayoutParams.WRAP_CONTENT)
-                .setFocusable(true)
-                .setOutsideTouchable(true)
-                .create()
-                .showAsDropDown(locationView, ConvertUtils.dp2px(-70), 120);
-
-    }
-
-    /**
-     * 处理弹出显示内容、点击事件等逻辑
-     *
-     * @param contentView
-     */
-    private void handleLogic(View contentView) {
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCustomPopWindow != null) {
-                    mCustomPopWindow.dissmiss();
-                }
-                int id = v.getId();
-                if (id == R.id.tv_delete_channel) {
-                    mChannelViewModel.deleteChannel(channel);
-                } else if (id == R.id.tv_exit_channel) {
-                    mChannelViewModel.leaveChannel(channel);
-                }
-            }
-        };
-        TextView tvDelete = contentView.findViewById(R.id.tv_delete_channel);
-        TextView tvExit = contentView.findViewById(R.id.tv_exit_channel);
-        tvDelete.setOnClickListener(listener);
-        tvExit.setOnClickListener(listener);
-        tvDelete.setVisibility(selfRole == EMCircleUserRole.OWNER ? View.VISIBLE : View.GONE);
-        tvExit.setVisibility(selfRole == EMCircleUserRole.OWNER ? View.GONE : View.VISIBLE);
     }
 
     private void showUserInfoBottomDialog(CircleUser user) {
@@ -512,26 +386,7 @@ public class ChannelSettingBottomFragment extends ContactListFragment implements
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.tv_invite) {
-            //跳转去邀请好友页面
-            InviteUserToChannelBottomFragment fragment = new InviteUserToChannelBottomFragment();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.CHANNEL, channel);
-            fragment.setArguments(bundle);
-            startFragment(fragment, fragment.getClass().getSimpleName());
-        } else if (v.getId() == R.id.tv_thread_list) {
-            //跳转去子区列表页面
-            ThreadListActivity.actionStart(mContext, channel);
-
-        } else if (v.getId() == R.id.tv_edit_channel) {
-            //跳转去编辑频道页面
-            ChannelEditBottomFragment fragment = new ChannelEditBottomFragment();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.CHANNEL, channel);
-            fragment.setArguments(bundle);
-            startFragment(fragment, fragment.getClass().getSimpleName());
-
-        } else if (v.getId() == R.id.tv_chat) {
+        if  (v.getId() == R.id.tv_chat) {
             //发起私聊
             if (selectedUser != null) {
                 ARouter.getInstance().build("/chat/ChatActivity")

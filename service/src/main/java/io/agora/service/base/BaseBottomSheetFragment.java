@@ -64,6 +64,11 @@ public class BaseBottomSheetFragment extends BottomSheetDialogFragment {
         mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
+    public void setLayoutHeight(int height){
+        ViewGroup.LayoutParams layoutParams = requireView().getLayoutParams();
+        layoutParams.height = height;
+    }
+
     protected <T extends View> T findViewById(@IdRes int id) {
         return requireView().findViewById(id);
     }

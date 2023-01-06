@@ -145,7 +145,7 @@
     <string name="contacts_search_friends">搜索好友</string>
     <string name="circle_save">保存</string>
 
-    <string name="home_server_name">社区名</string>
+    <string name="home_server_name">社区名称</string>
     <string name="home_server_name_hint">必填项</string>
     <string name="home_server_desc">社区简介</string>
     <string name="home_server_desc_hint">120字以内</string>
@@ -211,12 +211,43 @@
     <string name="loading">加载中……</string>
     <string name="circle_tags_to_max">最多可以添加%1$s个标签</string>
     <string name="circle_delete_server">%1$s删除了 %2$s 社区</string>
-    <string name="circle_leave_channel">%1$s离开了【%2$s】频道</string>
+    <string name="circle_leave_channel_notification">%1$s离开了【%2$s】频道</string>
     <string name="circle_join_channel">%1$s加入了【%2$s】频道</string>
-    <string name="circle_join_server">%1$s加入了【%2$s】社区</string>
+    <string name="circle_join_server_notification">%1$s加入了【%2$s】社区</string>
     <string name="circle_leave_server">%1$s离开了【%2$s】社区</string>
     <string name="circle_no_appkey">请在Manifest.xml文件中配置环信AppKey</string>
     <string name="dialog_add_nickname">添加昵称</string>
     <string name="circle_error_303">不能邀请好友到默认频道</string>
+
+    <string name="circle_text_channel">文字频道</string>
+    <string name="circle_voice_channel">语聊房频道</string>
+    <string name="circle_channel_name">频道名称</string>
+    <string name="input_channel_name">输入频道名称</string>
+    <string name="circle_whether_public">是否公开频道</string>
+    <string name="create_category_success">创建分组成功</string>
+    <string name="circle_edit_cover">编辑封面</string>
+    <string name="circle_setting">设置</string>
+    <string name="circle_server_overview_title">社区概览</string>
+    <string name="circle_category_name">频道分组名</string>
+    <string name="circle_edit_category">编辑分组</string>
+    <string name="circle_delete_success">删除成功</string>
+    <string name="circle_edit_category_name">编辑分组名称</string>
+    <string name="circle_category_name_is_null">分组名称不能为空</string>
+    <string name="circle_detelte_category">删除分组</string>
+    <string name="circle_move_channel_to">移动频道至</string>
+    <string name="circle_channel_members">查看频道成员</string>
+    <string name="circle_edit_channel">编辑频道</string>
+    <string name="circlr_move_channel">频道分组</string>
+    <string name="circle_default_category">默认分组</string>
+    <string name="circle_channel_overview_title">频道概揽</string>
+    <string name="circle_whether_private_channel">是否为公开频道</string>
+    <string name="circle_change_channel_category">更改频道分组</string>
+    <string name="circle_leave_channel">离开频道</string>
+    <string name="circle_server_name">社区名称</string>
+    <string name="circle_search">搜索</string>
+    <string name="circle_server_tag">社区标签</string>
+    <string name="circle_join_server">加入社区</string>
+    <string name="circle_join_voice_channel">加入语聊房频道</string>
+    <string name="circle_channel_member_max">人数上限</string>
 
 </resources>

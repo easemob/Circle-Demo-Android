@@ -15,6 +15,7 @@ import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMCircleChannel;
 import com.hyphenate.chat.EMCircleChannelAttribute;
+import com.hyphenate.chat.EMCircleChannelMode;
 import com.hyphenate.chat.EMCircleChannelStyle;
 import com.hyphenate.chat.EMCircleUser;
 import com.hyphenate.chat.EMCursorResult;
@@ -266,6 +267,33 @@ public class CircleChannelReposity extends ServiceReposity {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<CircleChannel>> callBack) {
                 getCircleManager().createChannel(serverId, attribute, stype, new EMValueCallBack<EMCircleChannel>() {
+
+                    @Override
+                    public void onSuccess(EMCircleChannel value) {
+                        callBack.onSuccess(createLiveData(new CircleChannel(value)));
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        callBack.onError(code, error);
+                    }
+                });
+            }
+
+            @Override
+            protected void saveCallResult(CircleChannel item) {
+                super.saveCallResult(item);
+                getChannelDao().insert(item);
+            }
+        }.asLiveData();
+    }
+
+    public LiveData<Resource<CircleChannel>> createChannel(EMCircleChannelMode mode, String serverId, String categoryId, EMCircleChannelAttribute attribute, EMCircleChannelStyle stype) {
+        return new NetworkOnlyResource<CircleChannel>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<CircleChannel>> callBack) {
+                getCircleManager().createChannel(mode, serverId, categoryId, attribute, new EMValueCallBack<EMCircleChannel>() {
 
                     @Override
                     public void onSuccess(EMCircleChannel value) {
@@ -661,4 +689,69 @@ public class CircleChannelReposity extends ServiceReposity {
             }
         }.asLiveData();
     }
+
+    public LiveData<Resource<String>> joinChannel(CircleChannel channel, String userId) {
+        return new NetworkOnlyResource<String>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<String>> callBack) {
+                getCircleManager().joinChannel(channel.serverId, channel.channelId, new EMValueCallBack<EMCircleChannel>() {
+                    @Override
+                    public void onSuccess(EMCircleChannel value) {
+                        callBack.onSuccess(createLiveData(userId));
+                    }
+
+                    @Override
+                    public void onError(int error, String errorMsg) {
+                        callBack.onError(error, errorMsg);
+                    }
+                });
+            }
+        }.asLiveData();
+
+    }
+
+    public LiveData<Resource<List<CircleUser>>> getVoiceChannelMembers(String serverId, String channelId) {
+        return new NetworkOnlyResource<List<CircleUser>>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<List<CircleUser>>> callBack) {
+                int limit = 20;
+                List<CircleUser> users = new ArrayList<>();
+                doFetchVoiceChannelMembers(serverId, channelId, limit, users, null, callBack);
+            }
+        }.asLiveData();
+    }
+
+    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users,  String cursor, ResultCallBack<LiveData<List<CircleUser>>> callBack) {
+        getCircleManager().fetchChannelMembers(serverID, channelID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleUser>>() {
+            @Override
+            public void onSuccess(EMCursorResult<EMCircleUser> value) {
+
+                if (!CollectionUtils.isEmpty(value.getData())) {
+                    for (EMCircleUser emCircleUser : value.getData()) {
+                        CircleUser circleUser = getUserDao().loadUserByUserId(emCircleUser.getUserId());
+                        if (circleUser == null) {
+                            circleUser = new CircleUser(emCircleUser.getUserId());
+                            circleUser.setContact(3);//没有从数据中找到说明不是好友
+                        }
+                        circleUser.roleID = emCircleUser.getRole().getRoleId();
+                        users.add(circleUser);
+                    }
+                }
+                if (!TextUtils.isEmpty(value.getCursor())) {
+                    doFetchChannelMembers(serverID, channelID, limit, users, value.getCursor(), callBack);
+                } else {
+                    callBack.onSuccess(createLiveData(users));
+                }
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+                callBack.onError(error, errorMsg);
+            }
+        });
+
+    }
+
 }

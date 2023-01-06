@@ -53,5 +53,10 @@
     <color name="color_black_404a4e">#404a4e</color>
     <color name="color_purple_6c6ff8">#6c6ff8</color>
     <color name="circle_black_60">#60000000</color>
+    <color name="black_929497">#929497</color>
+    <color name="black_333333">#333333</color>
+    <color name="black_292929">#292929</color>
+    <color name="color_gray_747577">#747577</color>
+    <color name="color_black_181818">#181818</color>
 
 </resources>

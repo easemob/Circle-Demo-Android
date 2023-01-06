@@ -403,7 +403,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         public void onMemberJoinedServer(String serverId, String member) {
             CircleServer server = getServerDao().getServerById(serverId);
             if (server != null) {
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_server, member, server.name));
+                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_server_notification, member, server.name));
             }
             LiveEventBus.get(Constants.SERVER_MEMBER_JOINED_NOTIFY).post(new ServerMemberNotifyBean(serverId, member));
         }
@@ -530,7 +530,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                     }
                     getChannelDao().updateChannel(channel);
                 }
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_leave_channel, member, channel.name));
+                ToastUtils.showShort(applicationContext.getString(R.string.circle_leave_channel_notification, member, channel.name));
             }
             LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, member));
         }

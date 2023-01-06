@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/app_left_padding"
+        android:paddingTop="46dp"
+        android:paddingRight="@dimen/app_right_padding"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/tv_invite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/circle_invite_friends"
+            android:drawablePadding="15dp"
+            android:text="@string/contacts_invite_friend"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/tv_thread_list"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_thread_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/circle_thread"
+            android:drawablePadding="15dp"
+            android:text="@string/circle_thread"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintLeft_toRightOf="@id/tv_invite"
+            app:layout_constraintRight_toLeftOf="@id/tv_notification_setting"
+            app:layout_constraintTop_toTopOf="@id/tv_invite" />
+
+        <TextView
+            android:id="@+id/tv_notification_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/circle_notification_setting"
+            android:drawablePadding="15dp"
+            android:text="@string/circle_notification_setting"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintLeft_toRightOf="@id/tv_thread_list"
+            app:layout_constraintRight_toLeftOf="@id/tv_edit_channel"
+            app:layout_constraintTop_toTopOf="@id/tv_invite" />
+
+        <TextView
+            android:id="@+id/tv_edit_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/circle_setting"
+            android:drawablePadding="15dp"
+            android:text="@string/circle_set_channel"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintLeft_toRightOf="@id/tv_notification_setting"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_invite" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/csl_mark_read"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="35dp"
+            android:background="@color/black_292929"
+            app:layout_constraintTop_toBottomOf="@id/tv_invite">
+
+            <ImageView
+                android:id="@+id/iv_mark_read"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="13dp"
+                android:src="@drawable/circle_checked"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_mark_read"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@string/circle_mark_read"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_mark_read"
+                app:layout_constraintLeft_toRightOf="@id/iv_mark_read"
+                app:layout_constraintTop_toTopOf="@id/iv_mark_read" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="13dp"
+                android:src="@drawable/circle_arrow_gray_right"
+                app:layout_constraintBottom_toBottomOf="@id/tv_mark_read"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_mark_read" />
+
+            <View
+                android:layout_width="268dp"
+                android:layout_height="1dp"
+                android:background="@color/black_333333"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/csl_move_channel"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/black_292929"
+            app:layout_constraintTop_toBottomOf="@id/csl_mark_read">
+
+            <ImageView
+                android:id="@+id/iv_move_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="13dp"
+                android:src="@drawable/circle_move_channel"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_move_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@string/circle_move_channel_to"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_move_channel"
+                app:layout_constraintLeft_toRightOf="@id/iv_move_channel"
+                app:layout_constraintTop_toTopOf="@id/iv_move_channel" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="13dp"
+                android:src="@drawable/circle_arrow_gray_right"
+                app:layout_constraintBottom_toBottomOf="@id/tv_move_channel"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_move_channel" />
+
+            <View
+                android:layout_width="268dp"
+                android:layout_height="1dp"
+                android:background="@color/black_333333"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/csl_channel_members"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/black_292929"
+            app:layout_constraintTop_toBottomOf="@id/csl_move_channel">
+
+            <ImageView
+                android:id="@+id/iv_channel_members"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="13dp"
+                android:src="@drawable/circle_members"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_channel_members"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@string/circle_channel_members"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_channel_members"
+                app:layout_constraintLeft_toRightOf="@id/iv_channel_members"
+                app:layout_constraintTop_toTopOf="@id/iv_channel_members" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="13dp"
+                android:src="@drawable/circle_arrow_gray_right"
+                app:layout_constraintBottom_toBottomOf="@id/tv_channel_members"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_channel_members" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/csl_leave_channel"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/black_292929"
+            app:layout_constraintTop_toBottomOf="@id/csl_channel_members">
+
+            <ImageView
+                android:id="@+id/iv_leave_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="13dp"
+                android:src="@drawable/circle_exit"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_leave_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@string/circle_leave_channel"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_leave_channel"
+                app:layout_constraintLeft_toRightOf="@id/iv_leave_channel"
+                app:layout_constraintTop_toTopOf="@id/iv_leave_channel" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="13dp"
+                android:src="@drawable/circle_arrow_gray_right"
+                app:layout_constraintBottom_toBottomOf="@id/tv_leave_channel"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_leave_channel" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

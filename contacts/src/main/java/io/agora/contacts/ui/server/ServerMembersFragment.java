@@ -1,30 +1,24 @@
-package io.agora.contacts.ui;
+package io.agora.contacts.ui.server;
 
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.android.arouter.launcher.ARouter;
-import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
-import com.example.zhouwei.library.CustomPopWindow;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMPresence;
 import com.hyphenate.easeui.constants.EaseConstant;
-import com.hyphenate.easeui.widget.EaseRecyclerView;
-import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.List;
@@ -33,8 +27,8 @@ import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.R;
 import io.agora.contacts.adapter.ContactListAdapter;
 import io.agora.contacts.databinding.DialogUserinfoBottomBinding;
+import io.agora.contacts.ui.ContactListFragment;
 import io.agora.service.bean.server.ServerMemberNotifyBean;
-import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
@@ -43,14 +37,9 @@ import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.model.ServerViewModel;
 import io.agora.service.utils.EasePresenceUtil;
 
-public class ServerSettingBottomFragment extends ContactListFragment implements BottomSheetChildHelper, View.OnClickListener {
-    private ConstraintLayout headView;
+public class ServerMembersFragment extends ContactListFragment implements  View.OnClickListener {
     private ServerViewModel mServerViewModel;
     private CircleServer server;
-    private CustomPopWindow mCustomPopWindow;
-    private TextView tvInvite;
-    private TextView tvCreateChannel;
-    private TextView tvEditServer;
     private CircleUser currentUser;
     private AlertDialog dialog;
     private CircleUser selectedUser;
@@ -63,27 +52,7 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
         mContactsListViewModel.getContactObservable().removeObservers(getViewLifecycleOwner());
 
         mServerViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
-        mServerViewModel.deleteServerResultLiveData.observe(this, response -> {
-            parseResource(response, new OnResourceParseCallback<Boolean>() {
-                @Override
-                public void onSuccess(@Nullable Boolean data) {
-                    if (data) {
-                        ToastUtils.showShort(getString(R.string.delete_server_success));
-                        hide();
-                    } else {
-                        ToastUtils.showShort(getString(R.string.delete_server_failure));
-                    }
-                }
 
-                @Override
-                public void onError(int code, String message) {
-                    super.onError(code, message);
-                    if (!TextUtils.isEmpty(message)) {
-                        ToastUtils.showShort(message);
-                    }
-                }
-            });
-        });
         mServerViewModel.serverMembersLiveData.observe(this, response -> {
             finishRefresh();
             parseResource(response, new OnResourceParseCallback<List<CircleUser>>() {
@@ -105,28 +74,7 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
                 }
             });
         });
-        mServerViewModel.leaveServerResultLiveData.observe(this, response -> {
-            parseResource(response, new OnResourceParseCallback<Boolean>() {
 
-                @Override
-                public void onSuccess(@Nullable Boolean data) {
-                    if (data) {
-                        ToastUtils.showShort(getString(R.string.leave_server_success));
-                        hide();
-                    } else {
-                        ToastUtils.showShort(getString(R.string.leave_server_failure));
-                    }
-                }
-
-                @Override
-                public void onError(int code, String message) {
-                    super.onError(code, message);
-                    if(!TextUtils.isEmpty(message)) {
-                        ToastUtils.showShort(message);
-                    }
-                }
-            });
-        });
 
         mServerViewModel.removeUserFromServerLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<String>() {
@@ -222,32 +170,17 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
                         selfRole = EMCircleUserRole.OWNER;
                     }
                 }
-                initHeadViewVisiablity(selfRole);
             }
         });
-        tvInvite.setOnClickListener(this);
-        tvCreateChannel.setOnClickListener(this);
-        tvEditServer.setOnClickListener(this);
     }
 
-    private void initHeadViewVisiablity(EMCircleUserRole role) {
-        tvCreateChannel.setVisibility(role == EMCircleUserRole.OWNER ? View.VISIBLE : View.GONE);
-        tvEditServer.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
-    }
 
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
         Bundle arguments = getArguments();
         server = (CircleServer) arguments.get(Constants.SERVER);
-
-        mBinding.etSearch.setVisibility(View.GONE);
-        headView = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.layout_server_setting_head, (ViewGroup) mBinding.getRoot(), false);
-        tvInvite = headView.findViewById(R.id.tv_invite);
-        tvCreateChannel = headView.findViewById(R.id.tv_create_channel);
-        tvEditServer = headView.findViewById(R.id.tv_edit_server);
-        ((EaseRecyclerView) mRecyclerView).addHeaderView(headView);
-        mRecyclerView.setNestedScrollingEnabled(false);
+        mBinding.etSearch.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -265,73 +198,6 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
     protected void checkView(String content) {
         super.checkView(content);
         mBinding.sideBarContact.setVisibility(View.GONE);
-        if (!TextUtils.isEmpty(content)) {
-            ((EaseRecyclerView) mRecyclerView).removeHeaderViews();
-        }
-    }
-
-    @Override
-    public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
-        titlebar.setTitle(getString(R.string.circle_server_setting));
-        titlebar.setLeftLayoutVisibility(View.VISIBLE);
-        titlebar.getRightImage().setVisibility(View.VISIBLE);
-        titlebar.setRightImageResource(io.agora.service.R.drawable.circle_more_vertical);
-        titlebar.setOnRightClickListener(new EaseTitleBar.OnRightClickListener() {
-            @Override
-            public void onRightClick(View view) {
-                showPopWindow(titlebar.getRightText());
-            }
-        });
-        titlebar.setLeftImageResource(io.agora.service.R.drawable.circle_x_delete);
-    }
-
-    private void showPopWindow(TextView locationView) {
-
-        View contentView = LayoutInflater.from(mContext).inflate(R.layout.server_setting_menu, (ViewGroup) locationView.getParent(), false);
-        //处理popWindow 显示内容
-        handleLogic(contentView);
-
-        //显示PopupWindow
-        mCustomPopWindow = new CustomPopWindow.PopupWindowBuilder(mContext)
-                .setView(contentView)
-                .size(ConvertUtils.dp2px(104), ViewGroup.LayoutParams.WRAP_CONTENT)
-                .setFocusable(true)
-                .setOutsideTouchable(true)
-                .create()
-                .showAsDropDown(locationView, ConvertUtils.dp2px(-70), 120);
-
-    }
-
-    /**
-     * 处理弹出显示内容、点击事件等逻辑
-     *
-     * @param contentView
-     */
-    private void handleLogic(View contentView) {
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCustomPopWindow != null) {
-                    mCustomPopWindow.dissmiss();
-                }
-                int id = v.getId();
-                if (id == R.id.tv_delete_server) {
-                    mServerViewModel.deleteServer(server.serverId);
-                } else if (id == R.id.tv_exit_server) {
-                    mServerViewModel.leaveServer(server.serverId);
-                }
-            }
-        };
-        TextView tvDelete = contentView.findViewById(R.id.tv_delete_server);
-        TextView tvExit = contentView.findViewById(R.id.tv_exit_server);
-        View line = contentView.findViewById(R.id.line);
-        tvDelete.setOnClickListener(listener);
-        tvExit.setOnClickListener(listener);
-        if (currentUser != null) {
-            tvDelete.setVisibility(currentUser.roleID == EMCircleUserRole.OWNER.getRoleId() ? View.VISIBLE : View.GONE);
-            tvExit.setVisibility(currentUser.roleID == EMCircleUserRole.OWNER.getRoleId() ? View.GONE : View.VISIBLE);
-            line.setVisibility(currentUser.roleID == EMCircleUserRole.OWNER.getRoleId() ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override
@@ -455,29 +321,7 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.tv_invite) {
-            //去邀请好友页面
-            InviteUserToServerBottomFragment inviteUserBottomFragment = new InviteUserToServerBottomFragment();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.SERVER, server);
-            inviteUserBottomFragment.setArguments(bundle);
-            startFragment(inviteUserBottomFragment, inviteUserBottomFragment.getClass().getSimpleName());
-        } else if (v.getId() == R.id.tv_create_channel) {
-            //去创建频道页面
-            CreateChannelBottomFragment createChannelBottomFragment = new CreateChannelBottomFragment();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.SERVER, server);
-            createChannelBottomFragment.setArguments(bundle);
-            startFragment(createChannelBottomFragment, createChannelBottomFragment.getClass().getSimpleName());
-
-        } else if (v.getId() == R.id.tv_edit_server) {
-            //去编辑社区页面
-            ServerEditBottomFragment serverEditBottomFragment = new ServerEditBottomFragment();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.SERVER, server);
-            serverEditBottomFragment.setArguments(bundle);
-            startFragment(serverEditBottomFragment, serverEditBottomFragment.getClass().getSimpleName());
-        } else if (v.getId() == R.id.tv_chat) {
+         if (v.getId() == R.id.tv_chat) {
             //发起私聊
             if (selectedUser != null) {
                 ARouter.getInstance().build("/chat/ChatActivity")
@@ -504,5 +348,4 @@ public class ServerSettingBottomFragment extends ContactListFragment implements 
             }
         }
     }
-
 }

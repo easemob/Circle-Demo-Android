@@ -9,6 +9,7 @@ import androidx.databinding.ObservableField;
 
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMCircleChannelAttribute;
+import com.hyphenate.chat.EMCircleChannelMode;
 import com.hyphenate.chat.EMCircleChannelStyle;
 
 import java.util.List;
@@ -29,8 +30,10 @@ public class ChannelViewModel extends ServiceViewModel {
 
     private CircleChannelReposity channelReposity = new CircleChannelReposity();
     public SingleSourceLiveData<Resource<List<CircleUser>>> channelMembersLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<List<CircleUser>>> voiceChannelMembersLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CircleChannel>> createChannelResultLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CircleChannel>> deleteChannelResultLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<String>> joinChannelResultLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CircleChannel>> leaveChannelResultLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<Boolean>> muteUserLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> removeUserLiveData = new SingleSourceLiveData<>();
@@ -55,12 +58,24 @@ public class ChannelViewModel extends ServiceViewModel {
         channelMembersLiveData.setSource(channelReposity.getChannelMembers(serverId, channelId));
     }
 
+    //语聊房成员变动很大，不需要存表，所以单独起一个请求方法
+    public void getVoiceChannelMembers(String serverId, String channelId) {
+        voiceChannelMembersLiveData.setSource(channelReposity.getVoiceChannelMembers(serverId, channelId));
+    }
+
     public void createChannel(String serverId, EMCircleChannelAttribute attribute, EMCircleChannelStyle style) {
         createChannelResultLiveData.setSource(channelReposity.createChannel(serverId, attribute, style));
     }
 
+    public void createChannel(EMCircleChannelMode mode,String serverId,String categoryId, EMCircleChannelAttribute attribute, EMCircleChannelStyle style) {
+        createChannelResultLiveData.setSource(channelReposity.createChannel(mode,serverId, categoryId,attribute, style));
+    }
+
     public void deleteChannel(CircleChannel channel) {
         deleteChannelResultLiveData.setSource(channelReposity.deleteChannel(channel));
+    }
+    public void joinChannel(CircleChannel channel,String userId) {
+        joinChannelResultLiveData.setSource(channelReposity.joinChannel(channel,userId));
     }
 
     public void leaveChannel(CircleChannel channel) {

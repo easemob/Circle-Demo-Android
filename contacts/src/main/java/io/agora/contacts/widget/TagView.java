@@ -68,7 +68,7 @@ public class TagView extends ViewGroup {
 
     public void setTagData(CircleServer.Tag tag) {
         this.tag = tag;
-        tvContent.setText(tag.name);
+        tvContent.setText(tag.tag_name);
         requestLayout();
     }
 

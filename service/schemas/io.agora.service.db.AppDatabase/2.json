@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "9fe2131722186150972112881d626482",
+    "identityHash": "2ef05c7d20ab1172c394a265b4d7134f",
     "entities": [
       {
         "tableName": "circle_server",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`serverId` TEXT NOT NULL, `defaultChannelID` TEXT, `name` TEXT, `icon` TEXT, `desc` TEXT, `custom` TEXT, `owner` TEXT, `tags` TEXT, `channels` TEXT, `modetators` TEXT, `isRecommand` INTEGER NOT NULL, `isJoined` INTEGER NOT NULL, PRIMARY KEY(`serverId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`serverId` TEXT NOT NULL, `defaultChannelID` TEXT, `name` TEXT, `icon` TEXT, `desc` TEXT, `custom` TEXT, `owner` TEXT, `tags` TEXT, `channels` TEXT, `modetators` TEXT, `isRecommand` INTEGER NOT NULL, `isJoined` INTEGER NOT NULL, `type` INTEGER NOT NULL, PRIMARY KEY(`serverId`))",
         "fields": [
           {
             "fieldPath": "serverId",
@@ -79,6 +79,12 @@
             "columnName": "isJoined",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -92,7 +98,7 @@
       },
       {
         "tableName": "circle_channel",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`channelId` TEXT NOT NULL, `categoryId` TEXT, `serverId` TEXT, `name` TEXT, `desc` TEXT, `custom` TEXT, `inviteMode` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL, `type` INTEGER NOT NULL, `channelUsers` TEXT, `modetators` TEXT, PRIMARY KEY(`channelId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`channelId` TEXT NOT NULL, `categoryId` TEXT, `serverId` TEXT, `name` TEXT, `desc` TEXT, `custom` TEXT, `inviteMode` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL, `type` INTEGER NOT NULL, `channelMode` INTEGER NOT NULL, `seatCount` INTEGER NOT NULL, `rtcName` TEXT, `channelUsers` TEXT, `modetators` TEXT, PRIMARY KEY(`channelId`))",
         "fields": [
           {
             "fieldPath": "channelId",
@@ -147,6 +153,24 @@
             "columnName": "type",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "channelMode",
+            "columnName": "channelMode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seatCount",
+            "columnName": "seatCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rtcName",
+            "columnName": "rtcName",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "channelUsers",
@@ -289,12 +313,70 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "circle_mute",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`channelId` TEXT NOT NULL, `isMuted` INTEGER NOT NULL, PRIMARY KEY(`channelId`))",
+        "fields": [
+          {
+            "fieldPath": "channelId",
+            "columnName": "channelId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isMuted",
+            "columnName": "isMuted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "channelId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "circle_category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`categoryId` TEXT NOT NULL, `serverId` TEXT, `categoryName` TEXT, PRIMARY KEY(`categoryId`))",
+        "fields": [
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverId",
+            "columnName": "serverId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "categoryName",
+            "columnName": "categoryName",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "categoryId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9fe2131722186150972112881d626482')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ef05c7d20ab1172c394a265b4d7134f')"
     ]
   }
 }

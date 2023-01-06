@@ -4,6 +4,6 @@
     android:id="@+id/ll_channel_type"
     android:background="@color/black_141414"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
+    android:layout_height="1px"
   >
 </View>
