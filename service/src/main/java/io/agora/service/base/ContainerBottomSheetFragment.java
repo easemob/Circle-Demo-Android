@@ -92,6 +92,7 @@ public abstract class ContainerBottomSheetFragment extends BaseBottomSheetFragme
             baseBinding.titlebar.setLeftImageResource(R.drawable.back_arrow_bold);
             baseBinding.titlebar.setLeftLayoutVisibility(View.GONE);
             currentChild.onContainerTitleBarInitialize(baseBinding.titlebar);
+            currentChild.showllFold(baseBinding.llFold);
         }
     }
 
@@ -112,6 +113,12 @@ public abstract class ContainerBottomSheetFragment extends BaseBottomSheetFragme
     @Override
     protected void initListener() {
         super.initListener();
+        baseBinding.llFold.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hide();
+            }
+        });
     }
 
     public void back() {

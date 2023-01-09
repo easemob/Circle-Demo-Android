@@ -7,7 +7,6 @@ import android.widget.RadioGroup;
 import io.agora.contacts.R;
 import io.agora.contacts.databinding.ActivityServerNotificationSettingBinding;
 import io.agora.service.base.BaseInitActivity;
-import io.agora.service.global.OptionsHelper;
 
 public class ServerNotificationSettingActivity extends BaseInitActivity<ActivityServerNotificationSettingBinding> {
 
@@ -28,9 +27,12 @@ public class ServerNotificationSettingActivity extends BaseInitActivity<Activity
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.rb_all_msg) {
-                    OptionsHelper.getInstance().setAllowNotifyAllMessages(true);
+
+
                 } else if (checkedId == R.id.rb_no_notify) {
-                    OptionsHelper.getInstance().setAllowNotifyAllMessages(false);
+                    //对该社区下所有的channel设置为禁言
+
+
                 }
             }
         });
@@ -46,6 +48,6 @@ public class ServerNotificationSettingActivity extends BaseInitActivity<Activity
     @Override
     protected void initData() {
         super.initData();
-        mBinding.rgNotification.check(OptionsHelper.getInstance().IsAllowNotifyAllMessages() ? R.id.rb_all_msg : R.id.rb_no_notify);
+
     }
 }

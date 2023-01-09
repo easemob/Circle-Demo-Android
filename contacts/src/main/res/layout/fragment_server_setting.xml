@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
@@ -32,6 +33,7 @@
             android:text="@string/circle_notification_setting"
             android:textColor="@color/white"
             android:textSize="14sp"
+            android:visibility="gone"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintLeft_toRightOf="@id/tv_invite"
             app:layout_constraintRight_toLeftOf="@id/tv_edit_server"
@@ -53,226 +55,231 @@
             app:layout_constraintTop_toTopOf="@id/tv_invite" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/csl_mark_read"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="35dp"
-            android:background="@color/black_292929"
+            android:background="@drawable/shape_gray_292929_radius8"
             app:layout_constraintTop_toBottomOf="@id/tv_invite">
 
-            <ImageView
-                android:id="@+id/iv_mark_read"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:src="@drawable/circle_checked"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/csl_mark_read"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/tv_mark_read"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/circle_mark_read"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@id/iv_mark_read"
-                app:layout_constraintLeft_toRightOf="@id/iv_mark_read"
-                app:layout_constraintTop_toTopOf="@id/iv_mark_read" />
+                <ImageView
+                    android:id="@+id/iv_mark_read"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:src="@drawable/circle_checked"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="13dp"
-                android:src="@drawable/circle_arrow_gray_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_mark_read"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_mark_read" />
+                <TextView
+                    android:id="@+id/tv_mark_read"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/circle_mark_read"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_mark_read"
+                    app:layout_constraintLeft_toRightOf="@id/iv_mark_read"
+                    app:layout_constraintTop_toTopOf="@id/iv_mark_read" />
 
-            <View
-                android:layout_width="268dp"
-                android:layout_height="1dp"
-                android:background="@color/black_333333"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="13dp"
+                    android:src="@drawable/circle_arrow_gray_right"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_mark_read"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_mark_read" />
 
+                <View
+                    android:layout_width="268dp"
+                    android:layout_height="1dp"
+                    android:background="@color/black_333333"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/csl_create_channel"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/csl_mark_read">
+
+                <ImageView
+                    android:id="@+id/iv_create_channel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:src="@drawable/circle_channel_create"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_create_channel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/circle_create_channel"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_create_channel"
+                    app:layout_constraintLeft_toRightOf="@id/iv_create_channel"
+                    app:layout_constraintTop_toTopOf="@id/iv_create_channel" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="13dp"
+                    android:src="@drawable/circle_arrow_gray_right"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_create_channel"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_create_channel" />
+
+                <View
+                    android:layout_width="268dp"
+                    android:layout_height="1dp"
+                    android:background="@color/black_333333"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/csl_create_category"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/csl_create_channel">
+
+                <ImageView
+                    android:id="@+id/iv_create_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:src="@drawable/circle_category_create"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_create_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/circle_create_category"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_create_category"
+                    app:layout_constraintLeft_toRightOf="@id/iv_create_category"
+                    app:layout_constraintTop_toTopOf="@id/iv_create_category" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="13dp"
+                    android:src="@drawable/circle_arrow_gray_right"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_create_category"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_create_category" />
+
+                <View
+                    android:layout_width="268dp"
+                    android:layout_height="1dp"
+                    android:background="@color/black_333333"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/csl_server_members"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                app:layout_constraintTop_toBottomOf="@id/csl_create_category">
+
+                <ImageView
+                    android:id="@+id/iv_server_members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:src="@drawable/circle_members"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_server_members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/circle_server_members"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_server_members"
+                    app:layout_constraintLeft_toRightOf="@id/iv_server_members"
+                    app:layout_constraintTop_toTopOf="@id/iv_server_members" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="13dp"
+                    android:src="@drawable/circle_arrow_gray_right"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_server_members"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_server_members" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/csl_exit_server"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                app:layout_constraintTop_toBottomOf="@id/csl_server_members">
+
+                <ImageView
+                    android:id="@+id/iv_exit_server"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:src="@drawable/circle_members"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_exit_server"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/circlr_exit_server"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_exit_server"
+                    app:layout_constraintLeft_toRightOf="@id/iv_exit_server"
+                    app:layout_constraintTop_toTopOf="@id/iv_exit_server" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="13dp"
+                    android:src="@drawable/circle_arrow_gray_right"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_exit_server"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_exit_server" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/csl_create_channel"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/black_292929"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/csl_mark_read">
-
-            <ImageView
-                android:id="@+id/iv_create_channel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:src="@drawable/circle_channel_create"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_create_channel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/circle_create_channel"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@id/iv_create_channel"
-                app:layout_constraintLeft_toRightOf="@id/iv_create_channel"
-                app:layout_constraintTop_toTopOf="@id/iv_create_channel" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="13dp"
-                android:src="@drawable/circle_arrow_gray_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_create_channel"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_create_channel" />
-
-            <View
-                android:layout_width="268dp"
-                android:layout_height="1dp"
-                android:background="@color/black_333333"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/csl_create_category"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/black_292929"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/csl_create_channel">
-
-            <ImageView
-                android:id="@+id/iv_create_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:src="@drawable/circle_category_create"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_create_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/circle_create_category"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@id/iv_create_category"
-                app:layout_constraintLeft_toRightOf="@id/iv_create_category"
-                app:layout_constraintTop_toTopOf="@id/iv_create_category" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="13dp"
-                android:src="@drawable/circle_arrow_gray_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_create_category"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_create_category" />
-
-            <View
-                android:layout_width="268dp"
-                android:layout_height="1dp"
-                android:background="@color/black_333333"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/csl_server_members"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/black_292929"
-            app:layout_constraintTop_toBottomOf="@id/csl_create_category">
-
-            <ImageView
-                android:id="@+id/iv_server_members"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:src="@drawable/circle_members"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_server_members"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/circle_server_members"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@id/iv_server_members"
-                app:layout_constraintLeft_toRightOf="@id/iv_server_members"
-                app:layout_constraintTop_toTopOf="@id/iv_server_members" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="13dp"
-                android:src="@drawable/circle_arrow_gray_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_server_members"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_server_members" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/csl_exit_server"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/black_292929"
-            app:layout_constraintTop_toBottomOf="@id/csl_server_members">
-
-            <ImageView
-                android:id="@+id/iv_exit_server"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:src="@drawable/circle_members"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_exit_server"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/circlr_exit_server"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@id/iv_exit_server"
-                app:layout_constraintLeft_toRightOf="@id/iv_exit_server"
-                app:layout_constraintTop_toTopOf="@id/iv_exit_server" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="13dp"
-                android:src="@drawable/circle_arrow_gray_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_exit_server"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_exit_server" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

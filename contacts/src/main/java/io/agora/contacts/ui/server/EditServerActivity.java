@@ -26,11 +26,14 @@ import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.model.ServerViewModel;
+import io.agora.service.repo.ServiceReposity;
 import io.agora.service.utils.UriFormatUtils;
 
 public class EditServerActivity extends BaseInitActivity<ActivityEditServerBinding> implements View.OnClickListener {
-    private static final int REQUEST_CODE_LOCAL = 1;
-    private String imagePath;
+    private static final int REQUEST_CODE_SERVER_BG = 1;
+    private static final int REQUEST_CODE_SERVER_ICON = 2;
+    private String bgImagePath;
+    private String iconImagePath;
     private CircleServer server;
     private RxPermissions rxPermissions;
     private ServerViewModel mViewModel;
@@ -99,6 +102,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         mBinding.cslServerSetting.setOnClickListener(this);
         mBinding.cslServerDissolve.setOnClickListener(this);
         mBinding.ivBack.setOnClickListener(this);
+        mBinding.ivServerIcon.setOnClickListener(this);
     }
 
     @Override
@@ -107,7 +111,8 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         rxPermissions = new RxPermissions(this);
         server = (CircleServer) getIntent().getSerializableExtra(Constants.SERVER);
         if (server != null) {
-            Glide.with(this).load(server.icon).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(mBinding.ivServer);
+            Glide.with(this).load(server.background).placeholder(ServiceReposity.getRandomServerIcon(server.serverId)).into(mBinding.ivServerBg);
+            Glide.with(this).load(server.icon).placeholder(ServiceReposity.getRandomServerIcon(server.serverId)).into(mBinding.ivServerIcon);
         }
     }
 
@@ -115,8 +120,10 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_CODE_LOCAL) { // send local image
-                onActivityResultForLocalPhotos(data);
+            if (requestCode == REQUEST_CODE_SERVER_BG) { // send local image
+                onActivityResultForLocalBgPhotos(data);
+            }else if(requestCode == REQUEST_CODE_SERVER_ICON){
+                onActivityResultForLocalIconPhotos(data);
             }
         }
     }
@@ -126,17 +133,37 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
      *
      * @param data
      */
-    private void onActivityResultForLocalPhotos(@Nullable Intent data) {
+    private void onActivityResultForLocalBgPhotos(@Nullable Intent data) {
         if (data != null) {
             try {
                 Uri selectedImage = data.getData(); //获取系统返回的照片的Uri
-                imagePath = UriFormatUtils.getPathByUri4kitkat(mContext, selectedImage);
-                Glide.with(this).load(imagePath).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(mBinding.ivServer);
+                bgImagePath = UriFormatUtils.getPathByUri4kitkat(mContext, selectedImage);
+                Glide.with(this).load(bgImagePath).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(mBinding.ivServerBg);
                 if (server != null) {
-                    mViewModel.updateServer(server, imagePath, server.name, server.desc);
+                    mViewModel.updateServerBg(server, bgImagePath);
                 }
             } catch (Exception e) {
-                imagePath = null;
+                bgImagePath = null;
+                e.printStackTrace();
+            }
+        }
+    }
+    /**
+     * 选择本地图片处理结果
+     *
+     * @param data
+     */
+    private void onActivityResultForLocalIconPhotos(@Nullable Intent data) {
+        if (data != null) {
+            try {
+                Uri selectedImage = data.getData(); //获取系统返回的照片的Uri
+                iconImagePath = UriFormatUtils.getPathByUri4kitkat(mContext, selectedImage);
+                Glide.with(this).load(iconImagePath).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(mBinding.ivServerIcon);
+                if (server != null) {
+                    mViewModel.updateServer(server, iconImagePath, server.name, server.desc);
+                }
+            } catch (Exception e) {
+                iconImagePath = null;
                 e.printStackTrace();
             }
         }
@@ -160,11 +187,24 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
                         if (granted) {
                             // All requested permissions are granted
                             //去相册选择
-                            EaseCompat.openImage(this, REQUEST_CODE_LOCAL);
+                            EaseCompat.openImage(this, REQUEST_CODE_SERVER_BG);
                         }
                     });
         }else if(v.getId()==R.id.iv_back) {
             finish();
+        }else if(v.getId()==R.id.iv_server_icon) {
+            //去相册选择
+            //申请权限
+            rxPermissions
+                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .subscribe(granted -> {
+                        if (granted) {
+                            // All requested permissions are granted
+                            //去相册选择
+                            EaseCompat.openImage(this, REQUEST_CODE_SERVER_ICON);
+                        }
+                    });
         }
     }
 }

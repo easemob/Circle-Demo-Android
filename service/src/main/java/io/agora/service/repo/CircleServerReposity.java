@@ -166,6 +166,7 @@ public class CircleServerReposity extends ServiceReposity {
                                                 server.getDefault_channel_id(),
                                                 server.getName(),
                                                 server.getIcon_url(),
+                                                server.getBackground_url(),
                                                 server.getDescription(),
                                                 server.getCustom(),
                                                 server.getOwner(),
@@ -319,6 +320,44 @@ public class CircleServerReposity extends ServiceReposity {
                 attribute.setIcon(icon);
                 attribute.setDesc(desc);
                 attribute.setName(name);
+                getCircleManager().updateServer(serverID, attribute, new EMValueCallBack<EMCircleServer>() {
+
+                    @Override
+                    public void onSuccess(EMCircleServer value) {
+                        CircleServer circleServer = getServerDao().getServerById(value.getServerId());
+                        CircleServer server = new CircleServer(value);
+                        if (circleServer != null) {
+                            server.isJoined = circleServer.isJoined;
+                            server.isRecommand = circleServer.isRecommand;
+                            server.channels = circleServer.channels;
+                            server.modetators = circleServer.modetators;
+                        }
+                        callBack.onSuccess(createLiveData(server));
+                        //发出通知
+                        LiveEventBus.get(Constants.SERVER_UPDATED).post(server);
+                    }
+
+                    @Override
+                    public void onError(int error, String errorMsg) {
+                        callBack.onError(error, errorMsg);
+                    }
+                });
+            }
+
+            @Override
+            protected void saveCallResult(CircleServer item) {
+                super.saveCallResult(item);
+                getServerDao().insert(item);
+            }
+        }.asLiveData();
+    }
+    public LiveData<Resource<CircleServer>> updateServerBg(String serverID, String serverBgPath) {
+        return new NetworkOnlyResource<CircleServer>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<CircleServer>> callBack) {
+                EMCircleServerAttribute attribute = new EMCircleServerAttribute();
+                attribute.setBackground(serverBgPath);
                 getCircleManager().updateServer(serverID, attribute, new EMValueCallBack<EMCircleServer>() {
 
                     @Override

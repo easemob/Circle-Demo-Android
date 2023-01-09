@@ -1,5 +1,7 @@
 package io.agora.service.callbacks;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -13,6 +15,7 @@ import io.agora.service.base.ContainerBottomSheetFragment;
 public interface BottomSheetChildHelper {
 
     default void onContainerTitleBarInitialize(EaseTitleBar titlebar){}
+    default void showllFold(View llfold){}
 
     Fragment getParentFragment();
 

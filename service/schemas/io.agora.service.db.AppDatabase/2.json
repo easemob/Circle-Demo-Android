@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "2ef05c7d20ab1172c394a265b4d7134f",
+    "identityHash": "486af3e2270c4c6edebfc2c61f6db614",
     "entities": [
       {
         "tableName": "circle_server",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`serverId` TEXT NOT NULL, `defaultChannelID` TEXT, `name` TEXT, `icon` TEXT, `desc` TEXT, `custom` TEXT, `owner` TEXT, `tags` TEXT, `channels` TEXT, `modetators` TEXT, `isRecommand` INTEGER NOT NULL, `isJoined` INTEGER NOT NULL, `type` INTEGER NOT NULL, PRIMARY KEY(`serverId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`serverId` TEXT NOT NULL, `defaultChannelID` TEXT, `name` TEXT, `icon` TEXT, `background` TEXT, `desc` TEXT, `custom` TEXT, `owner` TEXT, `tags` TEXT, `channels` TEXT, `modetators` TEXT, `isRecommand` INTEGER NOT NULL, `isJoined` INTEGER NOT NULL, `type` INTEGER NOT NULL, PRIMARY KEY(`serverId`))",
         "fields": [
           {
             "fieldPath": "serverId",
@@ -29,6 +29,12 @@
           {
             "fieldPath": "icon",
             "columnName": "icon",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "background",
+            "columnName": "background",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -376,7 +382,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ef05c7d20ab1172c394a265b4d7134f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '486af3e2270c4c6edebfc2c61f6db614')"
     ]
   }
 }

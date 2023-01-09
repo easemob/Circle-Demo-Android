@@ -34,6 +34,7 @@ public class CircleServer implements Parcelable, Serializable {
     public String defaultChannelID;
     public String name;
     public String icon;
+    public String background;
     public String desc;
     public String custom;
     public String owner;
@@ -51,6 +52,7 @@ public class CircleServer implements Parcelable, Serializable {
         defaultChannelID = in.readString();
         name = in.readString();
         icon = in.readString();
+        background = in.readString();
         desc = in.readString();
         custom = in.readString();
         owner = in.readString();
@@ -85,6 +87,7 @@ public class CircleServer implements Parcelable, Serializable {
         dest.writeString(defaultChannelID);
         dest.writeString(name);
         dest.writeString(icon);
+        dest.writeString(background);
         dest.writeString(desc);
         dest.writeString(custom);
         dest.writeString(owner);
@@ -165,11 +168,12 @@ public class CircleServer implements Parcelable, Serializable {
     public CircleServer() {
     }
 
-    public CircleServer(@NonNull String serverId, String defaultChannelID, String name, String icon, String desc, String custom, String owner, List<Tag> tags, List<CircleChannel> channels, List<String> modetators, boolean isRecommand, boolean isJoined,int type) {
+    public CircleServer(@NonNull String serverId, String defaultChannelID, String name, String icon,String background, String desc, String custom, String owner, List<Tag> tags, List<CircleChannel> channels, List<String> modetators, boolean isRecommand, boolean isJoined,int type) {
         this.serverId = serverId;
         this.defaultChannelID = defaultChannelID;
         this.name = name;
         this.icon = icon;
+        this.background = background;
         this.desc = desc;
         this.custom = custom;
         this.owner = owner;
@@ -187,6 +191,7 @@ public class CircleServer implements Parcelable, Serializable {
         this.name = emCircleServer.getName();
         this.defaultChannelID = emCircleServer.getDefaultChannelID();
         this.icon = emCircleServer.getIcon();
+        this.background = emCircleServer.getBackground();
         this.desc = emCircleServer.getDesc();
         this.custom = emCircleServer.getExt();
         this.owner = emCircleServer.getOwner();
@@ -214,6 +219,7 @@ public class CircleServer implements Parcelable, Serializable {
             emCircleServer.setServerId(circleServer.serverId);
             emCircleServer.setName(circleServer.name);
             emCircleServer.setIcon(circleServer.icon);
+            emCircleServer.setBackground(circleServer.background);
             emCircleServer.setDesc(circleServer.desc);
             emCircleServer.setExt(circleServer.custom);
             emCircleServer.setOwner(circleServer.owner);

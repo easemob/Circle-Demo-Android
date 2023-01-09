@@ -40,7 +40,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <io.agora.service.widget.RadiuImageView
-            android:id="@+id/iv_server"
+            android:id="@+id/iv_server_bg"
             android:layout_width="match_parent"
             android:layout_height="144dp"
             android:layout_marginLeft="16dp"
@@ -51,6 +51,39 @@
             app:layout_constraintTop_toBottomOf="@id/cls_titlebar"
             app:radius="12dp"
             tools:src="@drawable/cover03" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="32dp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_server_bg"
+            app:layout_constraintLeft_toLeftOf="@id/iv_server_bg"
+            app:layout_constraintTop_toTopOf="@id/iv_server_bg">
+
+            <com.hyphenate.easeui.widget.EaseImageView
+                android:id="@+id/iv_server_icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:foregroundTint="@color/color_40black_000000"
+                app:ease_border_color="@color/color_black_333333"
+                app:ease_border_width="6dp"
+                app:ease_shape_type="round"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@drawable/cover01" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/circle_server_icon_camera"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/btn_edit_cover"
@@ -66,8 +99,8 @@
             android:text="@string/circle_edit_cover"
             android:textColor="@color/white"
             android:textSize="14sp"
-            app:layout_constraintRight_toRightOf="@id/iv_server"
-            app:layout_constraintTop_toTopOf="@id/iv_server" />
+            app:layout_constraintRight_toRightOf="@id/iv_server_bg"
+            app:layout_constraintTop_toTopOf="@id/iv_server_bg" />
 
         <TextView
             android:id="@+id/tv_hint"
@@ -78,8 +111,8 @@
             android:text="@string/circle_edit_server_cover_hint"
             android:textColor="@color/color_gray_747577"
             android:textSize="12sp"
-            app:layout_constraintRight_toRightOf="@id/iv_server"
-            app:layout_constraintTop_toBottomOf="@id/iv_server" />
+            app:layout_constraintRight_toRightOf="@id/iv_server_bg"
+            app:layout_constraintTop_toBottomOf="@id/iv_server_bg" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/csl_server_overview"

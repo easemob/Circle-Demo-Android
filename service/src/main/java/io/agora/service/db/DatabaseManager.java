@@ -138,6 +138,8 @@ public class DatabaseManager {
             database.execSQL("ALTER TABLE circle_channel ADD COLUMN rtcName TEXT DEFAULT NULL");
             //插入type列
             database.execSQL("ALTER TABLE circle_server ADD COLUMN type INTEGER DEFAULT 0");
+            //插入background列
+            database.execSQL("ALTER TABLE circle_server ADD COLUMN background TEXT DEFAULT NULL");
         }
     };
 }

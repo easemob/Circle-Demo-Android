@@ -43,6 +43,7 @@ public class RecommendServiceBean {
         private Long created;
         private String server_id;
         private String icon_url;
+        private String background_url;
         private Integer tag_count;
         private String default_channel_id;
 
@@ -110,6 +111,15 @@ public class RecommendServiceBean {
             this.icon_url = icon_url;
         }
 
+        public String getBackground_url() {
+
+            return background_url;
+        }
+
+        public void setBackground_url(String background_url) {
+            this.background_url = background_url;
+        }
+
         public Integer getTag_count() {
             return tag_count;
         }
@@ -137,6 +147,7 @@ public class RecommendServiceBean {
                     ", created=" + created +
                     ", server_id='" + server_id + '\'' +
                     ", icon_url='" + icon_url + '\'' +
+                    ", background_url='" + background_url + '\'' +
                     ", tag_count=" + tag_count +
                     ", default_channel_id='" + default_channel_id + '\'' +
                     '}';

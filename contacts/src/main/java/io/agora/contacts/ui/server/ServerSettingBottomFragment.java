@@ -28,7 +28,7 @@ import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.model.ServerViewModel;
 
-public class ServerSettingBottomFragment  extends BaseInitFragment<FragmentServerSettingBinding> implements BottomSheetChildHelper, View.OnClickListener {
+public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServerSettingBinding> implements BottomSheetChildHelper, View.OnClickListener {
     private ServerViewModel mServerViewModel;
     private CircleServer server;
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
@@ -50,10 +50,11 @@ public class ServerSettingBottomFragment  extends BaseInitFragment<FragmentServe
                         ToastUtils.showShort(getString(R.string.leave_server_failure));
                     }
                 }
+
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    if(!TextUtils.isEmpty(message)) {
+                    if (!TextUtils.isEmpty(message)) {
                         ToastUtils.showShort(message);
                     }
                 }
@@ -76,8 +77,8 @@ public class ServerSettingBottomFragment  extends BaseInitFragment<FragmentServe
             }
         });
         LiveEventBus.get(Constants.SERVER_UPDATED, CircleServer.class).observe(this, serverUpdated -> {
-            if (serverUpdated != null&&server!=null&& android.text.TextUtils.equals(server.serverId,serverUpdated.serverId)) {
-                server=serverUpdated;
+            if (serverUpdated != null && server != null && android.text.TextUtils.equals(server.serverId, serverUpdated.serverId)) {
+                server = serverUpdated;
             }
         });
         mBinding.tvInvite.setOnClickListener(this);
@@ -110,14 +111,21 @@ public class ServerSettingBottomFragment  extends BaseInitFragment<FragmentServe
 
     @Override
     public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
-        titlebar.setTitle(getString(R.string.circle_server_setting));
-        titlebar.setLeftLayoutVisibility(View.VISIBLE);
-        titlebar.getRightImage().setVisibility(View.VISIBLE);
+        if (server != null) {
+            titlebar.setTitle(server.name);
+        }
+        titlebar.setLeftLayoutVisibility(View.GONE);
+        titlebar.getRightImage().setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showllFold(View llfold) {
+        llfold.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void setParentContainerFragment(BaseBottomSheetFragment parentContainerFragment) {
-        this.parentContainerFragment=parentContainerFragment;
+        this.parentContainerFragment = parentContainerFragment;
     }
 
     @Override
@@ -131,25 +139,25 @@ public class ServerSettingBottomFragment  extends BaseInitFragment<FragmentServe
             fragment.show(getParentFragmentManager());
         } else if (v.getId() == R.id.tv_edit_server) {
             //去编辑社区页面
-            EditServerActivity.actionStart(mContext,server);
-        } else if (v.getId() == R.id.tv_notification_setting){
+            EditServerActivity.actionStart(mContext, server);
+        } else if (v.getId() == R.id.tv_notification_setting) {
             //通知设定
             Intent intent = new Intent(mContext, ServerNotificationSettingActivity.class);
             startActivity(intent);
-        } else if (v.getId() == R.id.csl_mark_read){
+        } else if (v.getId() == R.id.csl_mark_read) {
             //标记为已读
 
-        } else if (v.getId() == R.id.csl_create_channel){
+        } else if (v.getId() == R.id.csl_create_channel) {
             //创建频道
             //去创建频道页面
-            CreateChannelActivity.actionStart(mContext,server);
-        } else if (v.getId() == R.id.csl_create_category){
+            CreateChannelActivity.actionStart(mContext, server);
+        } else if (v.getId() == R.id.csl_create_category) {
             //创建频道分组
-            CreateCategoryActivity.actionStart(mContext,server);
-        } else if (v.getId() == R.id.csl_server_members){
+            CreateCategoryActivity.actionStart(mContext, server);
+        } else if (v.getId() == R.id.csl_server_members) {
             //查看社区成员
-            ServerMembersActivity.actionStart(mContext,server);
-        } else if (v.getId() == R.id.csl_exit_server){
+            ServerMembersActivity.actionStart(mContext, server);
+        } else if (v.getId() == R.id.csl_exit_server) {
             //退出社区
             mServerViewModel.leaveServer(server.serverId);
         }

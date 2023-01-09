@@ -57,8 +57,6 @@ public class PreferenceManager {
 
 	private static String SHARED_KEY_ENABLE_TOKEN_LOGIN = "enable_token_login";
 
-	private static String SHARED_KEY_ENABLE_NOFIFY_ALL_MESSAGES = "enable_token_login";
-
 	@SuppressLint("CommitPrefEdits")
 	private PreferenceManager(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -334,14 +332,4 @@ public class PreferenceManager {
 	public boolean isEnableTokenLogin() {
 		return mSharedPreferences.getBoolean(SHARED_KEY_ENABLE_TOKEN_LOGIN, false);
 	}
-
-	public void setAllowNotifyAllMessages(boolean notifyAllMessages) {
-		editor.putBoolean(SHARED_KEY_ENABLE_NOFIFY_ALL_MESSAGES, notifyAllMessages);
-		editor.apply();
-	}
-
-	public boolean isAllowNotifyAllMessages() {
-		return mSharedPreferences.getBoolean(SHARED_KEY_ENABLE_NOFIFY_ALL_MESSAGES, false);
-	}
-
 }

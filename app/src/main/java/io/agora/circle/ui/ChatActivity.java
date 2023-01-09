@@ -33,7 +33,7 @@ import com.hyphenate.easeui.utils.ShowMode;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.chat.ui.ChatFragment;
-import io.agora.chat.viewmodel.ChatViewModel;
+import io.agora.service.model.ChatViewModel;
 import io.agora.circle.R;
 import io.agora.circle.databinding.ActivityChatBinding;
 import io.agora.common.dialog.AlertDialog;

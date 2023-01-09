@@ -100,6 +100,28 @@ public class ServerViewModel extends ServiceViewModel {
             });
         }
     }
+    public void updateServerBg(CircleServer circleServer, String bgPath) {
+        if (TextUtils.isEmpty(bgPath) || android.text.TextUtils.equals(circleServer.icon, bgPath)) {
+            updateServerLiveData.setSource(serverReposity.updateServerBg(circleServer.serverId, bgPath));
+        } else {
+            serverReposity.uploadFile(mContext, bgPath).observeForever(new Observer<Resource<String>>() {
+                @Override
+                public void onChanged(Resource<String> urlRescouce) {
+                    if (!TextUtils.isEmpty(urlRescouce.data)) {
+                        //上传图片成功
+                        updateServerLiveData.setSource(serverReposity.updateServerBg(circleServer.serverId, urlRescouce.data));
+                    } else {
+                        //由于livedata粘性的存在，这种方式会导致一进来就回调到这里，所以需要过滤下
+                        if (urlRescouce.errorCode == EMError.GENERAL_ERROR) {
+                            //上传图片失败
+                            Resource<CircleServer> value = Resource.error(urlRescouce.errorCode, urlRescouce.getMessage(mContext), null);
+                            updateServerLiveData.setValue(value);
+                        }
+                    }
+                }
+            });
+        }
+    }
     public void updateServer(String serverId, EMCircleServerAttribute attribute) {
         updateServerLiveData.setSource(serverReposity.updateServer(serverId,attribute));
     }

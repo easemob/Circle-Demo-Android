@@ -1,4 +1,4 @@
-package io.agora.chat.viewmodel;
+package io.agora.service.model;
 
 import android.app.Application;
 
@@ -8,10 +8,12 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.hyphenate.chat.EMChatRoom;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
+import com.hyphenate.chat.EMSilentModeParam;
+import com.hyphenate.chat.EMSilentModeResult;
 
 import java.util.List;
 
-import io.agora.service.model.ServiceViewModel;
 import io.agora.service.net.Resource;
 import io.agora.service.repo.EMChatManagerRepository;
 import io.agora.service.repo.EMChatRoomManagerRepository;
@@ -25,6 +27,7 @@ public class ChatViewModel extends ServiceViewModel {
     private SingleSourceLiveData<Resource<List<String>>> getNoPushUsersObservable;
     private SingleSourceLiveData<Resource<Boolean>> setNoPushUsersObservable;
     public SingleSourceLiveData<Resource<String>> deleteConversationLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<EMSilentModeResult>> setSilentModeForConversationLiveData = new SingleSourceLiveData<>();
 
     public ChatViewModel(@NonNull Application application) {
         super(application);
@@ -84,5 +87,9 @@ public class ChatViewModel extends ServiceViewModel {
 
     public void deleteConversationById(String conversationId) {
         deleteConversationLiveData.setSource(chatManagerRepository.deleteConversationById(conversationId));
+    }
+
+    public void setSilentModeForConversation(String conversationId, EMConversation.EMConversationType type, EMSilentModeParam param){
+        setSilentModeForConversationLiveData.setSource(chatManagerRepository.setSilentModeForConversation(conversationId,type,param));
     }
 }
