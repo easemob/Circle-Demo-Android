@@ -90,7 +90,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    return longClickListener.onClick(position);
+                    return longClickListener.onLongClick(position);
                 }
             });
         }
@@ -245,7 +245,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
 
     public interface ItemLongClickListener {
-        boolean onClick(int positon);
+        boolean onLongClick(int positon);
     }
 
     public interface SubViewClickListener {

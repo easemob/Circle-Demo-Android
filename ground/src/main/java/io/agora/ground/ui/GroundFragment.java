@@ -224,7 +224,7 @@ public class GroundFragment extends BaseInitFragment<FragmentGroundBinding> impl
     }
 
     private void showDialog(CircleServer circleServer) {
-        JoinServerBottomFragment fragment = new JoinServerBottomFragment();
+        ServerIntroductionBottomFragment fragment = new ServerIntroductionBottomFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constants.SERVER, circleServer);
         fragment.setArguments(bundle);

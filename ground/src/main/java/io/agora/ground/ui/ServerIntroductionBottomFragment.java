@@ -21,24 +21,29 @@ import com.hyphenate.easeui.utils.ShowMode;
 import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
+import java.util.Map;
+
 import io.agora.ground.R;
 import io.agora.ground.databinding.FragmentJoinServerBinding;
 import io.agora.ground.model.GroundViewModel;
+import io.agora.service.base.BaseBottomSheetFragment;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
+import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.repo.ServiceReposity;
 import io.agora.service.widget.FlowlayoutAdapter;
 
 /**
- * 广场页面点击item弹窗页
+ * 广场页面点击item、首页简介点击更多图标弹窗页
  */
-public class JoinServerBottomFragment extends BaseInitFragment<FragmentJoinServerBinding> implements BottomSheetChildHelper, View.OnClickListener {
+public class ServerIntroductionBottomFragment extends BaseInitFragment<FragmentJoinServerBinding> implements BottomSheetChildHelper, View.OnClickListener {
 
     private CircleServer server;
     private GroundViewModel mViewModel;
+    private BaseBottomSheetFragment parentFragment;
 
     @Override
     public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
@@ -56,6 +61,22 @@ public class JoinServerBottomFragment extends BaseInitFragment<FragmentJoinServe
         super.initView(savedInstanceState);
         Bundle arguments = getArguments();
         server = (CircleServer) arguments.get(Constants.SERVER);
+        if (server != null) {
+            Map<String, CircleServer> userJoinedSevers = AppUserInfoManager.getInstance().getUserJoinedSevers();
+            if (userJoinedSevers.get(server.serverId) != null) {
+                mBinding.btnJoinServer.setVisibility(View.GONE);
+            } else {
+                mBinding.btnJoinServer.setVisibility(View.VISIBLE);
+            }
+        }
+        mBinding.getRoot().post(new Runnable() {
+            @Override
+            public void run() {
+                if(parentFragment!=null) {
+                    parentFragment.setLayoutHeight(mBinding.cslIntroduction.getHeight());
+                }
+            }
+        });
     }
 
     @Override
@@ -96,6 +117,11 @@ public class JoinServerBottomFragment extends BaseInitFragment<FragmentJoinServe
     }
 
     @Override
+    public void setParentContainerFragment(BaseBottomSheetFragment fragment) {
+        this.parentFragment = fragment;
+    }
+
+    @Override
     protected void initData() {
         super.initData();
         if (server != null) {
@@ -126,7 +152,7 @@ public class JoinServerBottomFragment extends BaseInitFragment<FragmentJoinServe
                     textView.setText(server.tags.get(position).tag_name);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
                     textView.setTextColor(Color.WHITE);
-                    textView.setPadding(ConvertUtils.dp2px(5),ConvertUtils.dp2px(5),ConvertUtils.dp2px(5),ConvertUtils.dp2px(5));
+                    textView.setPadding(ConvertUtils.dp2px(5), ConvertUtils.dp2px(5), ConvertUtils.dp2px(5), ConvertUtils.dp2px(5));
                     textView.setBackground(mContext.getDrawable(io.agora.service.R.drawable.shape_white26fff_radius4));
                     return textView;
                 }
@@ -138,7 +164,7 @@ public class JoinServerBottomFragment extends BaseInitFragment<FragmentJoinServe
     public void onClick(View v) {
         if (v.getId() == R.id.btn_join_server) {
             mViewModel.joinServer(server.serverId);
-        }else if(v.getId()==R.id.ll_fold) {
+        } else if (v.getId() == R.id.ll_fold) {
             hide();
         }
     }

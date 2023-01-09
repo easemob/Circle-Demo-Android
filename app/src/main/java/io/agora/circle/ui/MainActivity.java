@@ -47,6 +47,7 @@ import io.agora.contacts.ui.channel.CreateChannelActivity;
 import io.agora.contacts.ui.channel.VoiceChannelDetailBottomFrament;
 import io.agora.contacts.ui.server.ServerSettingBottomFragment;
 import io.agora.ground.ui.GroundFragment;
+import io.agora.ground.ui.ServerIntroductionBottomFragment;
 import io.agora.home.ui.HomeFragment;
 import io.agora.mine.ui.MineFragment;
 import io.agora.service.base.BaseInitActivity;
@@ -189,6 +190,16 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
             @Override
             public void onChanged(CircleServer server) {
                 ServerSettingBottomFragment fragment = new ServerSettingBottomFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("server", server);
+                fragment.setArguments(bundle);
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(1));
+            }
+        });
+        LiveEventBus.get(Constants.SHOW_SERVER_INTRODUCTION_FRAGMENT, CircleServer.class).observe(this, new Observer<CircleServer>() {
+            @Override
+            public void onChanged(CircleServer server) {
+                ServerIntroductionBottomFragment fragment = new ServerIntroductionBottomFragment();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("server", server);
                 fragment.setArguments(bundle);

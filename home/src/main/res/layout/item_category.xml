@@ -5,9 +5,9 @@
     android:id="@+id/ll_channel_type"
     android:background="@color/black_141414"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="20dp"
+    android:layout_height="36dp"
     android:orientation="horizontal"
+    android:gravity="center_vertical"
     app:layout_constraintLeft_toLeftOf="@id/iv_server"
     app:layout_constraintRight_toRightOf="@id/iv_server"
     app:layout_constraintTop_toBottomOf="@id/tv_desc">

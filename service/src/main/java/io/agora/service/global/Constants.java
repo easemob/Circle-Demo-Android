@@ -23,6 +23,7 @@ public class Constants {
 
     public static final String SHOW_SERVER_INVITE_FRAGMENT = "show_server_invite_fragment";
     public static final String SHOW_SERVER_SETTING_FRAGMENT = "show_server_setting_fragment";
+    public static final String SHOW_SERVER_INTRODUCTION_FRAGMENT = "show_server_introduction_fragment";
     public static final String SHOW_CHANNEL_SETTING_FRAGMENT = "show_channel_setting_fragment";
     public static final String SHOW_CREATE_CHANNEL_FRAGMENT = "show_create_channel_fragment";
     public static final String SHOW_THREAD_SETTING_FRAGMENT = "show_thread_setting_fragment";
@@ -93,6 +94,7 @@ public class Constants {
 
 
     public static final String THREAD_ID = "thread_id";
+    public static final String VOICE_CHANNEL_MEMBER_HEAD_ID = "voice_channel_member_head_id";
     public static final String CHANNEL_NAME = "channel_name";
     public static final String THREAD_NAME = "thread_name";
     public static final String THREAD_DATA = "thread_data";

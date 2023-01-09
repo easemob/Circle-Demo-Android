@@ -7,5 +7,6 @@
     <string name="home_server_icon">社区封面</string>
     <string name="circle_in">加入</string>
     <string name="circle_thread">子区</string>
+    <string name="circle_voice_channel_member">语聊房成员</string>
 
 </resources>

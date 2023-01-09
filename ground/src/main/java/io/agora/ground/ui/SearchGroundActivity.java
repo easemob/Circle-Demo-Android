@@ -213,7 +213,7 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
             finish();
         } else {
             //弹框
-            JoinServerBottomFragment fragment = new JoinServerBottomFragment();
+            ServerIntroductionBottomFragment fragment = new ServerIntroductionBottomFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable(Constants.SERVER, circleServer);
             fragment.setArguments(bundle);

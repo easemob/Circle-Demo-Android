@@ -13,6 +13,7 @@ import com.hyphenate.chat.EMCircleChannelMode;
 import com.hyphenate.chat.EMCircleChannelStyle;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.ThreadData;
@@ -30,7 +31,7 @@ public class ChannelViewModel extends ServiceViewModel {
 
     private CircleChannelReposity channelReposity = new CircleChannelReposity();
     public SingleSourceLiveData<Resource<List<CircleUser>>> channelMembersLiveData = new SingleSourceLiveData<>();
-    public SingleSourceLiveData<Resource<List<CircleUser>>> voiceChannelMembersLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<ConcurrentHashMap<String,List<CircleUser>>>> voiceChannelMembersLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CircleChannel>> createChannelResultLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CircleChannel>> deleteChannelResultLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> joinChannelResultLiveData = new SingleSourceLiveData<>();

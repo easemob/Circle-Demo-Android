@@ -2,20 +2,25 @@ package io.agora.home.adapter;
 
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
+import com.hyphenate.easeui.widget.EaseImageView;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.common.base.BaseAdapter;
 import io.agora.home.R;
 import io.agora.home.bean.Node;
+import io.agora.rtc2.IRtcEngineEventHandler;
+import io.agora.service.global.Constants;
+import io.agora.service.managers.CircleRTCManager;
 
 public class ChannelListAdapter extends BaseAdapter<Node> {
 
@@ -30,7 +35,7 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         Node node = datas.get(position);
         switch (level) {
             case 0:
-                if(!node.getName().equals("Default Channel Category")) {
+                if (!node.getName().equals("Default Channel Category")) {
                     processCategoryItem(holder, node, position);
                 }
                 break;
@@ -38,64 +43,92 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
                 processChannelItem(holder, node, position);
                 break;
             case 2:
-                processThreadHeadView(holder, node, position);
+                processChannelSubItemHead(holder, node, position);
                 break;
             case 3:
-                processThreadItem(holder, node, position);
+                processChannelSubItem(holder, node, position);
                 break;
         }
     }
 
     private void processCategoryItem(ViewHolder holder, Node node, int position) {
-        LinearLayout llChannelType = holder.getView(R.id.ll_channel_type);
-//        if(node.getName().equals("Default Channel Category")) {
-//            llChannelType.setVisibility(View.GONE);
-//            return;
-//        }else{
-//            llChannelType.setVisibility(View.VISIBLE);
-//        }
-
         TextView tvCategoryName = holder.getView(R.id.tv_category_name);
-        ImageView ivArrow=holder.getView(R.id.iv_category_list);
-        ImageView ivAddChannel=holder.getView(R.id.iv_add_channel);
+        ImageView ivArrow = holder.getView(R.id.iv_category_list);
+        ImageView ivAddChannel = holder.getView(R.id.iv_add_channel);
         if (node != null) {
             tvCategoryName.setText(node.getName());
         } else {
             tvCategoryName.setText("");
         }
         //设置图标
-        if(!node.isExpand()) {
+        if (!node.isExpand()) {
             ivArrow.setImageResource(io.agora.service.R.drawable.circle_arrow_right_gray);
-        }else{
+        } else {
             ivArrow.setImageResource(io.agora.service.R.drawable.circle_arrow_up);
         }
         ivAddChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(clickListener!=null) {
-                    clickListener.onClick(v,position);
+                if (clickListener != null) {
+                    clickListener.onClick(v, position);
                 }
             }
         });
     }
 
-    private void processThreadItem(ViewHolder holder, Node node, int position) {
-        TextView tvThreadName = holder.getView(R.id.tv_thread_name);
-        if (node != null) {
-            tvThreadName.setText(node.getName());
-        } else {
-            tvThreadName.setText("");
+    private void processChannelSubItem(ViewHolder holder, Node node, int position) {
+        if(node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
+            //语聊房成员item
+            EaseImageView ivUser = holder.getView(R.id.iv_user_avatar);
+            TextView tvName = holder.getView(R.id.tv_nick_name);
+            ImageView ivMicOff = holder.getView(R.id.iv_mic_off);
+            Glide.with(mContext).load(node.getExt()).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(ivUser);
+            tvName.setText(node.getName()+"");
+            String channelId = node.getPId().substring(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID.length());
+
+            //设置是否在说话，静音状态等，仅仅针对当前语聊房的成员有效
+            if(TextUtils.equals(channelId,CircleRTCManager.getInstance().getChannelName())) {
+                ConcurrentHashMap<String, Boolean> uidsMuted = CircleRTCManager.getInstance().getUidsMuted();
+                ConcurrentHashMap<String, String> hxIdUids = CircleRTCManager.getInstance().getHxIdUids();
+                String uid = hxIdUids.get(node.getId());
+                if(uid!=null) {
+                    if(Boolean.TRUE.equals(uidsMuted.get(uid))) {
+                        ivMicOff.setVisibility(View.VISIBLE);
+                    }else{
+                        ivMicOff.setVisibility(View.GONE);
+                    }
+                }else{
+                    ivMicOff.setVisibility(View.GONE);
+                }
+                ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
+                if(uidsSpeak.get(node.getId())!=null) {
+                    ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
+                }else{
+                    ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
+                }
+            }else{
+                ivMicOff.setVisibility(View.GONE);
+                ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
+            }
+        }else{
+            TextView tvThreadName = holder.getView(R.id.tv_thread_name);
+            if (node != null) {
+                tvThreadName.setText(node.getName());
+            } else {
+                tvThreadName.setText("");
+            }
         }
     }
 
-    private void processThreadHeadView(ViewHolder holder, Node node, int position) {
+    private void processChannelSubItemHead(ViewHolder holder, Node node, int position) {
         ImageView ivThreadHeadIcon = holder.getView(R.id.iv_thread_head_icon);
+        TextView tvHeadName = holder.getView(R.id.tv_head_name);
         if (node != null) {
-            try {
-                ivThreadHeadIcon.setImageResource(node.getIcon());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(TextUtils.equals(node.getId(), Constants.VOICE_CHANNEL_MEMBER_HEAD_ID+node.getPId())) {
+                //语聊房成员item
+                tvHeadName.setText(mContext.getString(R.string.circle_voice_channel_member));
             }
+            ivThreadHeadIcon.setImageResource(node.getIcon());
         }
     }
 
@@ -104,6 +137,7 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         ImageView ivChannelIcon = holder.getView(R.id.iv_channel_icon);
         Glide.with(mContext).load(node.getIcon()).placeholder(R.drawable.circle_channel_public_icon).into(ivChannelIcon);
         TextView tvUnread = holder.getView(R.id.tv_unread);
+        TextView tvSeatCount = holder.getView(R.id.tv_count);
         if (node != null) {
             tvChannelName.setText(node.getName());
         } else {
@@ -119,6 +153,13 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
             tvUnread.setVisibility(View.VISIBLE);
         } else {
             tvUnread.setVisibility(View.GONE);
+        }
+
+        if (node.getChannelMode() == 1) {
+            tvSeatCount.setVisibility(View.VISIBLE);
+            tvSeatCount.setText(node.getSeatCount()+"");
+        } else {
+            tvSeatCount.setVisibility(View.GONE);
         }
 
     }

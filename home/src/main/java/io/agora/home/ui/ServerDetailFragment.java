@@ -69,6 +69,7 @@ import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
+import io.agora.service.db.entity.CircleUser;
 import io.agora.service.event.CategoryEvent;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
@@ -85,6 +86,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     private ConcurrentHashMap<String, ConcurrentHashMap<String, EMChatThread>> threads = new ConcurrentHashMap();//key:channelId , value:(key:threadId , value:thread)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleServer.Tag>> tags = new ConcurrentHashMap();//key:serverId , value:(key:tagId , value:tag)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleCategory>> categories = new ConcurrentHashMap();//key:serverId , value:(key:categoryId , value:category)
+    private ConcurrentHashMap<String,List<CircleUser>> channelUsers =new ConcurrentHashMap<>();
     private List<Node> sortedNodes = new ArrayList<>();//装在多级列表真正的数据
     private CircleServer currrentServer;
     private ShowMode showMode = ShowMode.NORMAL;
@@ -105,10 +107,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         adapter = new ChannelListAdapter(mContext, null, new BaseAdapter.MuitiTypeSupport() {
             @Override
             public int getLayoutId(int positon) {
-                int level = adapter.getDatas().get(positon).getLevel();
+                Node node = adapter.getDatas().get(positon);
+                int level = node.getLevel();
                 switch (level) {
                     case 0:
-                        if (!adapter.getDatas().get(positon).getName().equals(DEFAULT_CATEGORY_NAME)) {
+                        if (!node.getName().equals(DEFAULT_CATEGORY_NAME)) {
                             return R.layout.item_category;
                         } else {
                             return R.layout.item_category_1px_height;
@@ -116,8 +119,12 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     case 1:
                         return R.layout.item_channel;
                     case 2:
-                        return R.layout.item_thread_head;
+                        return R.layout.item_head;//子区/语聊房成员head
                     case 3:
+                        if(node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
+                            //语聊房成员item
+                            return R.layout.item_voice_channel_member;
+                        }
                         return R.layout.item_thread;
                 }
                 return R.layout.item_channel;
@@ -158,11 +165,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (showMode == ShowMode.NORMAL) {
             mBinding.btnJoinIn.setVisibility(View.GONE);
             mBinding.ivInvite.setVisibility(View.VISIBLE);
-            mBinding.ivMore.setVisibility(View.VISIBLE);
+            mBinding.ivServerMore.setVisibility(View.VISIBLE);
         } else if (showMode == ShowMode.SERVER_PREVIEW) {
             mBinding.btnJoinIn.setVisibility(View.VISIBLE);
             mBinding.ivInvite.setVisibility(View.GONE);
-            mBinding.ivMore.setVisibility(View.GONE);
+            mBinding.ivServerMore.setVisibility(View.GONE);
         }
     }
 
@@ -171,7 +178,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (!categories.containsKey(serverId)) {
             mServerViewModel.getServerCategories(serverId);
         } else {
-            refreshList();
+            buildDatasAndRefreshList();
         }
     }
 
@@ -180,7 +187,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (!channels.containsKey(serverId)) {
             mServerViewModel.getChannelData(serverId);
         } else {
-            refreshList();
+            buildDatasAndRefreshList();
         }
     }
 
@@ -219,13 +226,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 @Override
                 public void onSuccess(@Nullable List<CircleCategory> categories) {
                     getCategoryDataSuccess(categories);
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
 
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
             });
         });
@@ -236,14 +243,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             parseResource(response, new OnResourceParseCallback<List<CircleChannel>>() {
                 @Override
                 public void onSuccess(@Nullable List<CircleChannel> data) {
-
                     getChannelDataSuccess(data);
                 }
 
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
             });
         });
@@ -270,13 +276,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 @Override
                 public void onSuccess(@Nullable List<EMChatThread> chatThreads) {
                     getThreadDataSuccess(chatThreads);
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
 
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
             });
         });
@@ -310,6 +316,30 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         });
 
         mServerViewModel.selfRoleLiveData.observe(getViewLifecycleOwner(), response -> {
+        });
+        mChannelViewModel.voiceChannelMembersLiveData.observe(getViewLifecycleOwner(),response->{
+            parseResource(response, new OnResourceParseCallback<ConcurrentHashMap<String, List<CircleUser>>>() {
+                @Override
+                public void onSuccess(@Nullable ConcurrentHashMap<String, List<CircleUser>> data) {
+                    if(data!=null) {
+                        Iterator<String> iterator = data.keySet().iterator();
+                        boolean dataChanged=false;
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            List<CircleUser> oldUsers = channelUsers.get(key);
+                            List<CircleUser> newUsers = data.get(key);
+                            if((oldUsers==null||oldUsers.size()==0)&&(newUsers==null||newUsers.size()==0)) {
+                                break;
+                            }
+                            dataChanged=true;
+                            channelUsers.put(key,newUsers);
+                        }
+                        if(dataChanged) {
+                            buildDatasAndRefreshList();
+                        }
+                    }
+                }
+            });
         });
 
         LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE).observe(getViewLifecycleOwner(), obj -> {
@@ -355,7 +385,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 ConcurrentHashMap<String, EMChatThread> threadMap = threads.get(threadData.getThreadPId());
                 if (threadMap != null) {
                     threadMap.remove(threadData.getThreadId());
-                    refreshList();
+                    buildDatasAndRefreshList();
                 }
             }
         });
@@ -367,14 +397,14 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         LiveEventBus.get(Constants.THREAD_CHANGE, EMChatThread.class).observe(getViewLifecycleOwner(), thread -> {
             if (thread != null) {
                 getThreadsContainer(thread.getParentId()).put(thread.getChatThreadId(), thread);
-                refreshList();
+                buildDatasAndRefreshList();
             }
         });
         LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), event -> {
-            refreshList();
+            buildDatasAndRefreshList();
         });
         LiveEventBus.get(Constants.CONVERSATION_READ, EaseEvent.class).observe(getViewLifecycleOwner(), event -> {
-            refreshList();
+            buildDatasAndRefreshList();
         });
 
         LiveEventBus.get(Constants.CHANNEL_DESTORYED_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
@@ -407,11 +437,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         });
 
         LiveEventBus.get(Constants.CATEGORY_DELETE, CategoryEvent.class).observe(getViewLifecycleOwner(), categoryEvent -> {
-            if(categoryEvent!=null) {
+            if (categoryEvent != null) {
                 ConcurrentHashMap<String, CircleCategory> categoryContainer = getCategoryContainer(categoryEvent.serverId);
                 categoryContainer.remove(categoryEvent.categoryId);
-                if(android.text.TextUtils.equals(currrentServer.serverId,categoryEvent.serverId)) {
-                    refreshList();
+                if (android.text.TextUtils.equals(currrentServer.serverId, categoryEvent.serverId)) {
+                    buildDatasAndRefreshList();
                 }
             }
         });
@@ -460,7 +490,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (roleId == EMCircleUserRole.USER.getRoleId()) {//普通成员
             //移除私有频道
             removeAllPrivateChannels();
-            refreshList();
+            buildDatasAndRefreshList();
         } else if (roleId == EMCircleUserRole.MODERATOR.getRoleId()) {//管理员
             //重新拉取私有频道
             channels.clear();
@@ -531,13 +561,14 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             DatabaseManager.getInstance().getChannelDao().deleteByChannelId(targetChannelId);
             //对应channel的thread数据清空
             removeChannelThreads(targetServerId, targetChannelId);
+            channelUsers.remove(targetChannelId);
         }
     }
 
     private void removeChannelThreads(String targetServerId, String targetChannelId) {
         threads.remove(targetChannelId);
         if (android.text.TextUtils.equals(targetServerId, currrentServer.serverId) && showMode == ShowMode.NORMAL) {
-            refreshList();
+            buildDatasAndRefreshList();
         }
     }
 
@@ -623,7 +654,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
 
-    private synchronized void refreshList() {
+    /**
+     * 先重新组合数据，在刷新列表
+     */
+    private synchronized void buildDatasAndRefreshList() {
         List<Node> serverNodes = getServerNodes(currrentServer.serverId);
         if (serverNodes == null || serverNodes.size() == 0) {
             return;
@@ -672,16 +706,33 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             allNodes.add(categoryItemNode);
             //遍历每个分组下的所有channel
             List<CircleChannel> categoryChannels = tempCategoryContainer.get(categoryId);
-            if(categoryChannels==null) {
+            if (categoryChannels == null) {
                 continue;
             }
             for (CircleChannel channel : categoryChannels) {
                 //构造频道item数据
                 Node node = getChannelItemNode(channel);
-                if (channel.type == EMChannelStylePublic.getCode()) {
-                    node.setIcon(R.drawable.circle_channel_public_icon);
+                if (channel.channelMode == 0) {
+                    if (channel.type == EMChannelStylePublic.getCode()) {
+                        node.setIcon(R.drawable.circle_channel_public_icon);
+                    } else {
+                        node.setIcon(R.drawable.circle_channel_private_icon);
+                    }
                 } else {
-                    node.setIcon(R.drawable.circle_channel_private_icon);
+                    if (channel.type == EMChannelStylePublic.getCode()) {
+                        node.setIcon(R.drawable.circle_home_mic_public);
+                    } else {
+                        node.setIcon(R.drawable.circle_home_mic_private);
+                    }
+                    //是语聊房的话在下一级要添加"语聊房成员"item
+                    allNodes.add(getVoiceChannelMemberHeadNode(channel));
+                    //插入语聊房成员数据
+                    List<CircleUser> circleUsers = this.channelUsers.get(channel.channelId);
+                    if(circleUsers!=null) {
+                        for (int i = 0; i < circleUsers.size(); i++) {
+                            allNodes.add(getVoiceChannelMemberItemNode(channel,circleUsers.get(i)));
+                        }
+                    }
                 }
 //                node.setDefault(channel.isDefault);
                 allNodes.add(node);
@@ -707,6 +758,8 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private Node getChannelItemNode(CircleChannel channel) {
         Node node = new Node(channel.channelId, channel.categoryId, channel.name);
+        node.setSeatCount(channel.seatCount);
+        node.setChannelMode(channel.channelMode);
         return node;
     }
 
@@ -722,6 +775,19 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private Node getThreadHeadNode(EMChatThread chatThread) {
         Node node = new Node(Constants.THREAD_ID + chatThread.getParentId(), chatThread.getParentId(), chatThread.getChatThreadName());
+        return node;
+    }
+
+    private Node getVoiceChannelMemberHeadNode(CircleChannel channel) {
+        Node node = new Node(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + channel.channelId, channel.channelId, getString(R.string.circle_voice_channel_member));
+        node.setIcon(R.drawable.tree_ec);
+        return node;
+    }
+    private Node getVoiceChannelMemberItemNode(CircleChannel channel, CircleUser circleUser) {
+        Node node = new Node(circleUser.username,Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + channel.channelId, circleUser.getVisiableName());
+        if(!TextUtils.isEmpty(circleUser.avatar)) {
+            node.setExt(circleUser.avatar);
+        }
         return node;
     }
 
@@ -799,11 +865,12 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private void initListener() {
         mBinding.ivInvite.setOnClickListener(this);
-        mBinding.ivMore.setOnClickListener(this);
+        mBinding.ivServerMore.setOnClickListener(this);
         mBinding.btnJoinIn.setOnClickListener(this);
         adapter.setOnItemClickListener(this);
         adapter.setOnItemLongClickListener(this);
         mBinding.srlRefresh.setOnRefreshListener(this);
+        mBinding.ivDescMore.setOnClickListener(this);
     }
 
     @Override
@@ -814,12 +881,15 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             if (currrentServer != null) {
                 LiveEventBus.get(Constants.SHOW_SERVER_INVITE_FRAGMENT).post(currrentServer);
             }
-        } else if (v.getId() == R.id.iv_more) {
+        } else if (v.getId() == R.id.iv_server_more) {
             //弹框
             LiveEventBus.get(Constants.SHOW_SERVER_SETTING_FRAGMENT, CircleServer.class).post(currrentServer);
         } else if (v.getId() == R.id.btn_join_in) {
             //加入server
             mServerViewModel.joinServer(currrentServer.serverId);
+        }else if(v.getId()==R.id.iv_desc_more) {
+            //底部弹框显示社区介绍
+            LiveEventBus.get(Constants.SHOW_SERVER_INTRODUCTION_FRAGMENT, CircleServer.class).post(currrentServer);
         }
     }
 
@@ -831,10 +901,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             case 1:
                 //先判断是语聊频道还是文字频道
                 CircleChannel circleChannel = getChannelsContainer(currrentServer.serverId).get(node.getId());
-                if(circleChannel==null) {
+                if (circleChannel == null) {
                     break;
                 }
-                if(circleChannel.channelMode==0) {
+                if (circleChannel.channelMode == 0) {
                     //文字频道
                     //首先判断是否在这个频道里，没有就弹框
                     if (showMode == ShowMode.NORMAL) {
@@ -846,7 +916,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                         //预览模式直接跳转到会话页面
                         jumpToChannel(currrentServer.serverId, node.getId());
                     }
-                }else if(circleChannel.channelMode==1) {
+                } else if (circleChannel.channelMode == 1) {
                     //语聊频道 底部弹框
                     LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).post(circleChannel);
                 }
@@ -864,14 +934,27 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     break;
                 }
             case 2:
-                if (!node.isLeaf()) {
-                    node.setExpand(!node.isExpand());
-                    List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
-                    adapter.refresh(visiableNodes);
+                if(android.text.TextUtils.equals(node.getId(),Constants.VOICE_CHANNEL_MEMBER_HEAD_ID+node.getPId())) {
+                    //点击的是语聊房成员item
+                    if (!node.isLeaf()) {
+                        node.setExpand(!node.isExpand());
+                        List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
+                        adapter.refresh(visiableNodes);
+                    }else{
+                        //如果语聊房成员数据为空，则请求语聊房成员数据
+                        mChannelViewModel.getVoiceChannelMembers(currrentServer.serverId,node.getPId());
+                    }
+
+                }else{
+                    if (!node.isLeaf()) {
+                        node.setExpand(!node.isExpand());
+                        List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
+                        adapter.refresh(visiableNodes);
+                    }
                 }
                 break;
             case 3:
-                EMChatThread chatThread = getThreadsContainer(node.getParent().getpId()).get(node.getId());
+                EMChatThread chatThread = getThreadsContainer(node.getParent().getPId()).get(node.getId());
                 if (chatThread != null) {
                     ARouter.getInstance().build("/app/ChatThreadActivity")
                             .withString(CONVERSATION_ID, node.getId())
@@ -909,7 +992,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
     @Override
-    public boolean onClick(int positon) {
+    public boolean onLongClick(int positon) {
         List<Node> datas = adapter.getDatas();
         Node node = datas.get(positon);
         switch (node.getLevel()) {
@@ -947,7 +1030,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         alertDialog.setOnClickListener(R.id.tv_edit_category, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(category!=null) {
+                if (category != null) {
                     jumptoEditCategory(category);
                     alertDialog.dismiss();
                 }

@@ -25,6 +25,7 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.ThreadData;
@@ -711,11 +712,11 @@ public class CircleChannelReposity extends ServiceReposity {
 
     }
 
-    public LiveData<Resource<List<CircleUser>>> getVoiceChannelMembers(String serverId, String channelId) {
-        return new NetworkOnlyResource<List<CircleUser>>() {
+    public LiveData<Resource<ConcurrentHashMap<String,List<CircleUser>>>> getVoiceChannelMembers(String serverId, String channelId) {
+        return new NetworkOnlyResource<ConcurrentHashMap<String,List<CircleUser>>>() {
 
             @Override
-            protected void createCall(@NonNull ResultCallBack<LiveData<List<CircleUser>>> callBack) {
+            protected void createCall(@NonNull ResultCallBack<LiveData<ConcurrentHashMap<String,List<CircleUser>>>> callBack) {
                 int limit = 20;
                 List<CircleUser> users = new ArrayList<>();
                 doFetchVoiceChannelMembers(serverId, channelId, limit, users, null, callBack);
@@ -723,7 +724,7 @@ public class CircleChannelReposity extends ServiceReposity {
         }.asLiveData();
     }
 
-    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users,  String cursor, ResultCallBack<LiveData<List<CircleUser>>> callBack) {
+    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users,  String cursor, ResultCallBack<LiveData<ConcurrentHashMap<String,List<CircleUser>>>> callBack) {
         getCircleManager().fetchChannelMembers(serverID, channelID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleUser>>() {
             @Override
             public void onSuccess(EMCursorResult<EMCircleUser> value) {
@@ -740,9 +741,11 @@ public class CircleChannelReposity extends ServiceReposity {
                     }
                 }
                 if (!TextUtils.isEmpty(value.getCursor())) {
-                    doFetchChannelMembers(serverID, channelID, limit, users, value.getCursor(), callBack);
+                    doFetchVoiceChannelMembers(serverID, channelID, limit, users, value.getCursor(), callBack);
                 } else {
-                    callBack.onSuccess(createLiveData(users));
+                    ConcurrentHashMap<String, List<CircleUser>> usersHP = new ConcurrentHashMap<>();
+                    usersHP.put(channelID,users);
+                    callBack.onSuccess(createLiveData(usersHP));
                 }
             }
 

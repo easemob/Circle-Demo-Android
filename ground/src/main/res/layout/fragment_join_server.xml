@@ -10,6 +10,7 @@
         android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/csl_introduction"
             android:layout_width="match_parent"
             android:layout_height="0dp">
 
@@ -86,7 +87,8 @@
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginRight="30dp"
-                android:paddingBottom="100dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toTopOf="@id/btn_join_server"
                 app:layout_constraintTop_toBottomOf="@id/tv_desc" />
 
             <Button
@@ -100,7 +102,8 @@
                 android:text="@string/circle_join_server"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

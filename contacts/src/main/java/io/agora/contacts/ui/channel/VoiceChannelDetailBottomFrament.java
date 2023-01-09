@@ -60,7 +60,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
     private CircleChannel channel;
     private ChannelViewModel channelViewModel;
     private ServerViewModel serverViewModel;
-    private List<VoiceChannelUser> datas = new ArrayList<>();
+    private List<VoiceChannelUser> voiceChannelUsers = new ArrayList<>();
     private VoiceChannelListAdapter adapter;
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
     private IRtcEngineEventHandler eventHandler;
@@ -95,18 +95,19 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         channelViewModel = new ViewModelProvider(this).get(ChannelViewModel.class);
         serverViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
         channelViewModel.voiceChannelMembersLiveData.observe(getViewLifecycleOwner(), response -> {
-            parseResource(response, new OnResourceParseCallback<List<CircleUser>>() {
+            parseResource(response, new OnResourceParseCallback<ConcurrentHashMap<String,List<CircleUser>>>() {
                 @Override
-                public void onSuccess(@Nullable List<CircleUser> circleUsers) {
+                public void onSuccess(@Nullable ConcurrentHashMap<String,List<CircleUser>> circleUsersHp) {
                     //刷新列表
-                    if (circleUsers != null) {
-                        datas.clear();
+                    if (circleUsersHp != null&&channel!=null) {
+                        voiceChannelUsers.clear();
+                        List<CircleUser> circleUsers= circleUsersHp.get(channel.channelId);
                         for (CircleUser circleUser : circleUsers) {
                             VoiceChannelUser voiceChannelUser = new VoiceChannelUser(circleUser);
-                            datas.add(voiceChannelUser);
+                            voiceChannelUsers.add(voiceChannelUser);
                         }
                     }
-                    adapter.refresh(datas);
+                    adapter.refresh(voiceChannelUsers);
                     initInChannelReferenceButton();
                 }
             });
@@ -161,10 +162,10 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
                         dialog.dismiss();
                     }
                     //刷新列表
-                    if (datas != null) {
-                        for (int i = 0; i < datas.size(); i++) {
-                            if (datas.get(i).getUsername().equals(userRemoved)) {
-                                datas.remove(i);
+                    if (voiceChannelUsers != null) {
+                        for (int i = 0; i < voiceChannelUsers.size(); i++) {
+                            if (voiceChannelUsers.get(i).getUsername().equals(userRemoved)) {
+                                voiceChannelUsers.remove(i);
                                 i--;
                             }
                         }
@@ -264,7 +265,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         String currentUserName = AppUserInfoManager.getInstance().getCurrentUserName();
         mBinding.btnJoinVoiceChannel.setVisibility(View.VISIBLE);
         mBinding.cslMuteExit.setVisibility(View.GONE);
-        for (VoiceChannelUser data : datas) {
+        for (VoiceChannelUser data : voiceChannelUsers) {
             if (TextUtils.equals(data.username, currentUserName)) {//我在语聊房
                 mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
                 mBinding.cslMuteExit.setVisibility(View.VISIBLE);
@@ -471,7 +472,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
 
     @Override
     public void onClick(View itemView, int position) {
-        CircleUser circleUser = datas.get(position);
+        CircleUser circleUser = voiceChannelUsers.get(position);
         if (circleUser != null) {
             if (!TextUtils.equals(circleUser.username, AppUserInfoManager.getInstance().getCurrentUserName())) {
                 showUserInfoBottomDialog(circleUser);

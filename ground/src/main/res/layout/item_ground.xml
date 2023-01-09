@@ -102,6 +102,7 @@
         android:layout_marginBottom="8dp"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
