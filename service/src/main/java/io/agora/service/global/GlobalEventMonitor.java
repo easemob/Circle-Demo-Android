@@ -13,6 +13,7 @@ import androidx.annotation.StringRes;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.EMChatThreadChangeListener;
+import com.hyphenate.EMCircleCategoryListener;
 import com.hyphenate.EMCircleChannelListener;
 import com.hyphenate.EMCircleServerListener;
 import com.hyphenate.EMConnectionListener;
@@ -60,12 +61,15 @@ import io.agora.service.bean.server.ServerMemberNotifyBean;
 import io.agora.service.bean.server.ServerMembersNotifyBean;
 import io.agora.service.bean.server.ServerRoleChangeNotifyBean;
 import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.dao.CircleCategoryDao;
 import io.agora.service.db.dao.CircleChannelDao;
 import io.agora.service.db.dao.CircleServerDao;
 import io.agora.service.db.dao.CircleUserDao;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
+import io.agora.service.event.CategoryEvent;
 import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.repo.EMContactManagerRepository;
 import io.agora.service.repo.EMPushManagerRepository;
@@ -87,6 +91,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
     private final ChatContactListener chatContactListener;
     private final ChatConversationListener chatConversationListener;
     private final ChatServerListener chatServerListener;
+    private final ChatCategoryListener chatCategoryListener;
     private final ChatChannelListener chatChannelListener;
     private final ChatThreadListener chatThreadListener;
     private boolean isGroupsSyncedWithServer = false;
@@ -105,6 +110,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         chatContactListener = new ChatContactListener();
         chatConversationListener = new ChatConversationListener();
         chatServerListener = new ChatServerListener();
+        chatCategoryListener = new ChatCategoryListener();
         chatChannelListener = new ChatChannelListener();
         chatThreadListener = new ChatThreadListener();
         initListener();
@@ -141,6 +147,8 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         EMClient.getInstance().chatManager().addConversationListener(chatConversationListener);
         //添加对社区的监听
         EMClient.getInstance().chatCircleManager().addServerListener(chatServerListener);
+        //添加对分组的监听
+        EMClient.getInstance().chatCircleManager().addCategoryListener(chatCategoryListener);
         //添加对频道的监听
         EMClient.getInstance().chatCircleManager().addChannelListener(chatChannelListener);
         //添加对子区的监听
@@ -466,6 +474,46 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
     }
 
+    private class ChatCategoryListener implements EMCircleCategoryListener {
+
+        @Override
+        public void onCreateCategory(String serverId, String categoryId, String categoryName, String creater) {
+            CircleCategory category = new CircleCategory(serverId, categoryId, categoryName);
+            DatabaseManager.getInstance().getCagegoryDao().insert(category);
+        }
+
+        @Override
+        public void onDeleteCategory(String serverId, String categoryId, String initiator) {
+            //从数据库总删除
+            DatabaseManager.getInstance().getCagegoryDao().deleteByCagegoryId(categoryId);
+            //发出广播通知分组删除
+            CategoryEvent categoryEvent = new CategoryEvent();
+            categoryEvent.serverId = serverId;
+            categoryEvent.categoryId = categoryId;
+            LiveEventBus.get(Constants.CATEGORY_DELETE, CategoryEvent.class).post(categoryEvent);
+        }
+
+        @Override
+        public void onUpdateCategory(String serverId, String categoryId, String categoryName, String initiator) {
+            CircleCategoryDao cagegoryDao = DatabaseManager.getInstance().getCagegoryDao();
+            CircleCategory category = cagegoryDao.getCategoryByCagegoryID(categoryId);
+            if (category != null) {
+                category.categoryName = categoryName;
+                cagegoryDao.updateChannel(category);
+            }
+        }
+
+        @Override
+        public void onTransferChannel(String serverId, String sourceCategoryId, String newCategoryId, String channelId, String initiator) {
+            CircleChannelDao channelDao = DatabaseManager.getInstance().getChannelDao();
+            CircleChannel channel = channelDao.getChannelByChannelID(channelId);
+            if (channel != null) {
+                channel.categoryId = newCategoryId;
+                channelDao.updateChannel(channel);
+            }
+        }
+    }
+
     private class ChatChannelListener implements EMCircleChannelListener {
 
         @Override
@@ -587,21 +635,21 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onChatThreadCreated(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 LiveEventBus.get(Constants.THREAD_CHANGE).post(event.getChatThread());
             }
         }
 
         @Override
         public void onChatThreadUpdated(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 LiveEventBus.get(Constants.THREAD_CHANGE).post(event.getChatThread());
             }
         }
 
         @Override
         public void onChatThreadDestroyed(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 EMChatThread chatThread = event.getChatThread();
                 ThreadData threadData = new ThreadData(chatThread.getChatThreadName(), chatThread.getChatThreadId(), chatThread.getParentId());
                 LiveEventBus.get(Constants.THREAD_DESTROY).post(threadData);
@@ -1024,7 +1072,25 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
                 case CIRCLE_SERVER_INVITE_USER:
                     // 当前设备在其他设备上邀请其他用户加入社区。
+
                     break;
+                case CIRCLE_CATEGORY_CREATE:
+                    // 当前设备在其他设备上创建分组。
+
+                    break;
+                case CIRCLE_CATEGORY_DELETE:
+                    // 当前设备在其他设备上删除分组。
+
+                    break;
+                case CIRCLE_CATEGORY_UPDATE:
+                    // 当前设备在其他设备上更新分组。
+
+                    break;
+                case CIRCLE_CATEGORY_TRANSFER_CHANNEL:
+                    // 当前设备在其他设备上转移分组。
+
+                    break;
+
             }
 
         }

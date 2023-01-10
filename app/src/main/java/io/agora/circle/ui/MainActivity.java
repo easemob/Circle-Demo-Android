@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
@@ -55,6 +56,7 @@ import io.agora.service.bean.GetRTCTokenBean;
 import io.agora.service.callbacks.CircleRTCListener;
 import io.agora.service.callbacks.CircleRTCTokenCallback;
 import io.agora.service.callbacks.OnResourceParseCallback;
+import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
@@ -210,6 +212,22 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
             @Override
             public void onChanged(CircleServer server) {
                 CreateChannelActivity.actionStart(MainActivity.this,server);
+            }
+        });
+        LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, FragmentManager.class).observe(this, new Observer<FragmentManager>() {
+            @Override
+            public void onChanged(FragmentManager fragmentManager) {
+                String channelId = CircleRTCManager.getInstance().getChannelId();
+                if(!TextUtils.isEmpty(channelId)) {
+                    CircleChannel channel = DatabaseManager.getInstance().getChannelDao().getChannelByChannelID(channelId);
+                    if(channel!=null) {
+                        VoiceChannelDetailBottomFrament fragment = new VoiceChannelDetailBottomFrament();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable(Constants.CHANNEL, channel);
+                        fragment.setArguments(bundle);
+                        fragment.show(fragmentManager, ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(410));
+                    }
+                }
             }
         });
         LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).observe(this, new Observer<CircleChannel>() {

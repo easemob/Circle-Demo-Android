@@ -269,7 +269,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             if (TextUtils.equals(data.username, currentUserName)) {//我在语聊房
                 mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
                 mBinding.cslMuteExit.setVisibility(View.VISIBLE);
-                if (!TextUtils.equals(CircleRTCManager.getInstance().getChannelName(), channel.channelId)) {
+                if (!TextUtils.equals(CircleRTCManager.getInstance().getChannelId(), channel.channelId)) {
                     try {
                         CircleRTCManager.getInstance().joinChannel(channel.channelId);
                     } catch (Exception e) {

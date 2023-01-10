@@ -10,6 +10,7 @@ import com.hyphenate.chat.EMCircleChannelCategory;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.service.callbacks.ResultCallBack;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.event.CategoryEvent;
 import io.agora.service.global.Constants;
@@ -27,6 +28,8 @@ public class CircleCagegoryReposity extends ServiceReposity {
                     @Override
                     public void onSuccess(EMCircleChannelCategory value) {
                         callBack.onSuccess(createLiveData(value));
+                        //插入数据库
+                        getCategoryDao().insert(new CircleCategory(value));
                     }
 
                     @Override
@@ -47,6 +50,8 @@ public class CircleCagegoryReposity extends ServiceReposity {
                     @Override
                     public void onSuccess() {
                         callBack.onSuccess(createLiveData(true));
+                        //从数据库总删除
+                        getCategoryDao().deleteByCagegoryId(categoryId);
                         //发出广播通知分组删除
                         CategoryEvent categoryEvent = new CategoryEvent();
                         categoryEvent.serverId = serverId;

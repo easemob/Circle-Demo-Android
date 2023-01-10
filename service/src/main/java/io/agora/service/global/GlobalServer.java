@@ -69,6 +69,9 @@ public class GlobalServer {
         options.setRestServer("aws-im-bj-web-245870899.cn-north-1.elb.amazonaws.com.cn");
         options.setIMServer("aws-im-bj-msync-dc5e2e76b0d58215.elb.cn-north-1.amazonaws.com.cn");
         options.setImPort(6717);
+//        options.setRestServer("a1-hsb.easemob.com");
+//        options.setIMServer("106.75.100.247");
+//        options.setImPort(6717);
 
 //        options.setAppKey(BuildConfig.circle_appkey);
 

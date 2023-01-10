@@ -87,7 +87,7 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
             String channelId = node.getPId().substring(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID.length());
 
             //设置是否在说话，静音状态等，仅仅针对当前语聊房的成员有效
-            if(TextUtils.equals(channelId,CircleRTCManager.getInstance().getChannelName())) {
+            if(TextUtils.equals(channelId,CircleRTCManager.getInstance().getChannelId())) {
                 ConcurrentHashMap<String, Boolean> uidsMuted = CircleRTCManager.getInstance().getUidsMuted();
                 ConcurrentHashMap<String, String> hxIdUids = CircleRTCManager.getInstance().getHxIdUids();
                 String uid = hxIdUids.get(node.getId());

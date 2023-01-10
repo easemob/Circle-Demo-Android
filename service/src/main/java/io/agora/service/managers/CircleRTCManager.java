@@ -7,11 +7,11 @@ import android.text.TextUtils;
 
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.hyphenate.EMResultCallBack;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.util.EMLog;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class CircleRTCManager {
     private String appId = "ba85504621304fb894790708d304794f";
     private RtcEngine mRtcEngine;
     private ChannelMediaOptions options;
-    private String channelName;
+    private String channelId;
     private String currentUid;
     private CopyOnWriteArrayList<String> uidsInChannel = new CopyOnWriteArrayList<>();//在频道里的成员
     private ConcurrentHashMap<String, Boolean> uidsMuted = new ConcurrentHashMap<>();
@@ -54,8 +54,9 @@ public class CircleRTCManager {
         public void onUserJoined(int uid, int elapsed) {
             EMLog.e("mRtcEventHandler", "onUserJoined uid=" + uid);
             uidsInChannel.add(String.valueOf(uid));
-            //自己维护uid跟username的映射关系，设置给聊天室kv
             ThreadUtils.runOnUiThread(() -> {
+                //有人进来时主动拉一次key value值
+                fetchChatRoomAttribute(channelId);
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onUserJoined(uid, elapsed);
                 }
@@ -68,19 +69,8 @@ public class CircleRTCManager {
 
             currentUid = String.valueOf(uid);
             uidsInChannel.add(String.valueOf(uid));
-            uidHxIds.put(String.valueOf(uid),AppUserInfoManager.getInstance().getCurrentUserName());
-            hxIdUids.put(AppUserInfoManager.getInstance().getCurrentUserName(),String.valueOf(uid));
-
-            //设置语聊房kv属性值
-            Map<String, String> attributeMap = new HashMap<>();
-            attributeMap.put(String.valueOf(uid), AppUserInfoManager.getInstance().getCurrentUserName());
-            EMClient.getInstance().chatroomManager().asyncSetChatroomAttributes(channelName, attributeMap, true, new EMResultCallBack<Map<String, Integer>>() {
-                @Override
-                public void onResult(int code, Map<String, Integer> value) {
-
-                }
-            });
             ThreadUtils.runOnUiThread(() -> {
+                setChannelAttribute(channelId,AppUserInfoManager.getInstance().getCurrentUserName(),String.valueOf(uid) );
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onJoinChannelSuccess(channel, uid, elapsed);
                 }
@@ -110,7 +100,7 @@ public class CircleRTCManager {
             hxIdUids.clear();
             uidsSpeak.clear();
             currentUid = null;
-            channelName=null;
+            channelId =null;
             ThreadUtils.runOnUiThread(() -> {
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onLeaveChannel(stats);
@@ -194,7 +184,7 @@ public class CircleRTCManager {
                     if(speaker.uid!=0) {//非本地用户
                         hxUserId = uidHxIds.get(String.valueOf(speaker.uid));
                     }
-//                    EMLog.d("uidsSpeak"," hxuserid="+hxUserId+" speakers.uid="+speaker.uid+" speakers.volume="+speaker.volume);
+                    EMLog.d("uidsSpeak"," hxuserid="+hxUserId+" speakers.uid="+speaker.uid+" speakers.volume="+speaker.volume);
                     if(hxUserId!=null) {
                         if(speaker.volume>0) {
                             uidsSpeak.put(hxUserId,speaker);
@@ -232,6 +222,54 @@ public class CircleRTCManager {
         }
     };
 
+    private void setChannelAttribute(String channelName, String key, String value) {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //设置语聊房kv属性值
+                EMClient.getInstance().chatroomManager().asyncSetChatroomAttributeForced(channelName, key, value, true, new EMCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        EMLog.e("onAttributesUpdate","asyncSetChatroomAttributeForced-->  onSuccess()");
+                        fetchChatRoomAttribute(channelName);
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        EMLog.e("onAttributesUpdate","asyncSetChatroomAttributeForced-->  error="+error);
+                    }
+                });
+            }
+        });
+    }
+
+    private void fetchChatRoomAttribute(String channelName) {
+        ThreadUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                EMClient.getInstance().chatroomManager().asyncFetchChatRoomAllAttributesFromServer(channelName, new EMValueCallBack<Map<String, String>>() {
+                    @Override
+                    public void onSuccess(Map<String, String> attributeMap) {
+//                        EMLog.e("onAttributesUpdate","fetchChatRoomAttribute onSuccess, attributeMap.size="+attributeMap.size());
+                        Iterator<String> iterator = attributeMap.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();//环信Id
+                            String value = attributeMap.get(key);//声网uid
+                            EMLog.e("onAttributesUpdate","fetchChatRoomAttribute hxid="+key+",uid="+value);
+                            uidHxIds.put(value, key);
+                            hxIdUids.put(key,value);
+                        }
+                    }
+
+                    @Override
+                    public void onError(int error, String errorMsg) {
+                        EMLog.e("onAttributesUpdate","fetchChatRoomAttribute onError="+errorMsg);
+                    }
+                });
+            }
+        });
+    }
+
 
     public static CircleRTCManager getInstance() {
         return ourInstance;
@@ -262,11 +300,13 @@ public class CircleRTCManager {
         EMClient.getInstance().chatroomManager().addChatRoomChangeListener(new SimpleChatRoomChangeListener() {
             @Override
             public void onAttributesUpdate(String chatRoomId, Map<String, String> attributeMap, String from) {
-                if (TextUtils.equals(chatRoomId, channelName)) {
+               EMLog.e("onAttributesUpdate","chatRoomId="+chatRoomId+",attributeMap="+attributeMap+",from="+from);
+                if (TextUtils.equals(chatRoomId, channelId)) {
                     Iterator<String> iterator = attributeMap.keySet().iterator();
-                    if (iterator.hasNext()) {
+                    while (iterator.hasNext()) {
                         String key = iterator.next();//环信Id
                         String value = attributeMap.get(key);//声网uid
+                        EMLog.e("onAttributesUpdate","hxid="+key+",uid="+value);
                         uidHxIds.put(value, key);
                         hxIdUids.put(key,value);
                     }
@@ -281,21 +321,21 @@ public class CircleRTCManager {
         return this;
     }
 
-    public void joinChannel(String channelName) throws Exception {
+    public void joinChannel(String channelId) throws Exception {
         //同时只允许进一个频道，进下一个频道前退出上一个频道。
-        if(this.channelName!=null&&!TextUtils.equals(this.channelName,channelName)) {
+        if(this.channelId !=null&&!TextUtils.equals(this.channelId,channelId)) {
             ToastUtils.showShort("you should leave previous voice channel first");
             return;
         }
-        this.channelName = channelName;
+        this.channelId = channelId;
         if (circleRTCListener == null) {
             throw new Exception("you should register circleRTCListener first");
         }
-        circleRTCListener.onGenerateRTCToken(channelName, new CircleRTCTokenCallback() {
+        circleRTCListener.onGenerateRTCToken(channelId, new CircleRTCTokenCallback() {
             @Override
             public void setToken(String rctToken, int uid) {
                 //uid传入0，agora sdk内部会给我们随机分配一个uid
-                mRtcEngine.joinChannel(rctToken, channelName, uid, options);
+                mRtcEngine.joinChannel(rctToken, channelId, uid, options);
             }
         });
     }
@@ -310,8 +350,8 @@ public class CircleRTCManager {
     }
 
 
-    public String getChannelName() {
-        return channelName;
+    public String getChannelId() {
+        return channelId;
     }
 
     public void registerCircleRTCListener(CircleRTCListener listener) {

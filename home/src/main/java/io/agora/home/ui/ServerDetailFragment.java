@@ -57,6 +57,7 @@ import io.agora.home.adapter.ChannelListAdapter;
 import io.agora.home.bean.Node;
 import io.agora.home.databinding.FragmentServerDetailBinding;
 import io.agora.home.utils.TreeHelper;
+import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.bean.ChannelInviteData;
 import io.agora.service.bean.CustomInfo;
@@ -73,14 +74,24 @@ import io.agora.service.db.entity.CircleUser;
 import io.agora.service.event.CategoryEvent;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.model.ChannelViewModel;
 import io.agora.service.repo.ServiceReposity;
 
-public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailBinding> implements View.OnClickListener, BaseAdapter.ItemClickListener, OnRefreshListener, BaseAdapter.ItemLongClickListener {
+public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailBinding> implements View.OnClickListener,
+        BaseAdapter.ItemClickListener, OnRefreshListener, BaseAdapter.ItemLongClickListener {
 
     private ServerDetailViewModel mServerViewModel;
     private ChannelViewModel mChannelViewModel;
     private ChannelListAdapter adapter;
+    private IRtcEngineEventHandler eventHandler=new IRtcEngineEventHandler() {
+        @Override
+        public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
+            if(adapter!=null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleChannel>> channels = new ConcurrentHashMap();//key:serverId , value:(key:channelId , value:channel)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, EMChatThread>> threads = new ConcurrentHashMap();//key:channelId , value:(key:threadId , value:thread)
@@ -821,7 +832,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             for (CircleChannel channel : data) {
                 ConcurrentHashMap<String, CircleChannel> channelsContainer = getChannelsContainer(channel.serverId);
                 channelsContainer.put(channel.channelId, channel);
-                mServerViewModel.getChannelThreads(channel.channelId);
+                if(channel.channelMode==0) {
+                    mServerViewModel.getChannelThreads(channel.channelId);
+                }else{
+                    buildDatasAndRefreshList();
+                }
             }
         }
     }
@@ -871,6 +886,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         adapter.setOnItemLongClickListener(this);
         mBinding.srlRefresh.setOnRefreshListener(this);
         mBinding.ivDescMore.setOnClickListener(this);
+        CircleRTCManager.getInstance().registerRTCEventListener(eventHandler);
     }
 
     @Override
@@ -1042,5 +1058,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         ARouter.getInstance().build("/contacts/EditCategoryActivity")
                 .withSerializable(Constants.CATEGORY, circleCategory)
                 .navigation();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(eventHandler!=null) {
+            CircleRTCManager.getInstance().unRegisterRTCEventListener(eventHandler);
+        }
     }
 }

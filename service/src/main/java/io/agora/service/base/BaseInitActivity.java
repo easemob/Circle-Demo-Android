@@ -15,20 +15,24 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ViewDataBinding;
+import androidx.fragment.app.FragmentManager;
 
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ScreenUtils;
+import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.common.base.BaseActivity;
 import io.agora.common.dialog.AlertDialog;
 import io.agora.service.R;
 import io.agora.service.callbacks.CircleVoiceChannelStateListener;
 import io.agora.service.callbacks.OnResourceParseCallback;
+import io.agora.service.global.Constants;
 import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.net.Resource;
 import io.agora.service.net.Status;
 
-public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseActivity<T> implements CircleVoiceChannelStateListener, View.OnTouchListener {
+public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseActivity<T> implements
+        CircleVoiceChannelStateListener, View.OnTouchListener {
 
     private AlertDialog alertDialog;
     private TextView tvMessage;
@@ -42,12 +46,19 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
         floatView = (ImageView) LayoutInflater.from(this).inflate(R.layout.layout_float_voice_channel, decoreview, false);
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(ScreenUtils.getScreenWidth() - ConvertUtils.dp2px(24)-ConvertUtils.dp2px(48),
-                ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(94)-ConvertUtils.dp2px(48),
+                ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(150)-ConvertUtils.dp2px(48),
                 0,
                 0);
         floatView.setLayoutParams(layoutParams);
         decoreview.addView(floatView);
         floatView.setOnTouchListener(this);
+        floatView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //语聊频道 底部弹框
+                LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, FragmentManager.class).post(getSupportFragmentManager());
+            }
+        });
     }
 
     @Override
@@ -152,13 +163,12 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) v.getLayoutParams();
                 layoutParams.setMargins(left + moveX, top + moveY, 0, 0);
                 v.setLayoutParams(layoutParams);
-
                 break;
             case MotionEvent.ACTION_UP:
 
                 break;
         }
-        return true;
+        return !isEnableClick;
     }
 
     public <T> void parseResource(Resource<T> response, @NonNull OnResourceParseCallback<T> callback) {

@@ -88,6 +88,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         mBinding.cslCreateChannel.setOnClickListener(this);
         mBinding.cslCreateCategory.setOnClickListener(this);
         mBinding.cslServerMembers.setOnClickListener(this);
+        mBinding.cslExitServer.setOnClickListener(this);
     }
 
     private void initRoleRelatedViewVisiablity(EMCircleUserRole role) {
@@ -140,10 +141,12 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         } else if (v.getId() == R.id.tv_edit_server) {
             //去编辑社区页面
             EditServerActivity.actionStart(mContext, server);
+            hide();
         } else if (v.getId() == R.id.tv_notification_setting) {
             //通知设定
             Intent intent = new Intent(mContext, ServerNotificationSettingActivity.class);
             startActivity(intent);
+            hide();
         } else if (v.getId() == R.id.csl_mark_read) {
             //标记为已读
 
@@ -151,9 +154,11 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
             //创建频道
             //去创建频道页面
             CreateChannelActivity.actionStart(mContext, server);
+            hide();
         } else if (v.getId() == R.id.csl_create_category) {
             //创建频道分组
             CreateCategoryActivity.actionStart(mContext, server);
+            hide();
         } else if (v.getId() == R.id.csl_server_members) {
             //查看社区成员
             ServerMembersActivity.actionStart(mContext, server);

@@ -35,7 +35,7 @@ public class CircleChannel implements Serializable, Parcelable {
     public int inviteMode;
     public boolean isDefault;
     public int type;
-    public int channelMode;
+    public int channelMode;//0:文字频道 1：语聊频道
     public int seatCount;
     public String rtcName;
     public List<CircleUser> channelUsers;

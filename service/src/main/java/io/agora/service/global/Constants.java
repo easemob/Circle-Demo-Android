@@ -127,6 +127,12 @@ public class Constants {
     public static final String SERVER_DESTROYED_NOTIFY = "server_destroyed_notify";
     public static final String SERVER_UPDATED_NOTIFY = "server_updated_notify";
 
+    public static final String CATEGORY_CREATED_NOTIFY = "category_created_notify";
+    public static final String CATEGORY_DESTORYED_NOTIFY = "category_destoryed_notify";
+    public static final String CATEGORY_UPDATED_NOTIFY = "category_updated_notify";
+    public static final String CATEGORY_CHANNEL_ADDED_NOTIFY = "category_channel_added_notify";
+    public static final String CATEGORY_CHANNEL_REMOVED_NOTIFY = "category_channel_removed_notify";
+
     public static final String CHANNEL_CREATED_NOTIFY = "channel_created_notify";
     public static final String CHANNEL_DESTORYED_NOTIFY = "channel_destoryed_notify";
     public static final String CHANNEL_UPDATED_NOTIFY = "channel_updated_notify";
