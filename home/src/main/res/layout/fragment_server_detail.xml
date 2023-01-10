@@ -120,6 +120,7 @@
 
         <ImageView
             android:id="@+id/iv_desc_more"
+            android:padding="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/circle_arrow_down_white"

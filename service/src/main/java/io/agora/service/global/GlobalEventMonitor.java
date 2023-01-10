@@ -499,7 +499,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
             CircleCategory category = cagegoryDao.getCategoryByCagegoryID(categoryId);
             if (category != null) {
                 category.categoryName = categoryName;
-                cagegoryDao.updateChannel(category);
+                cagegoryDao.updateCategory(category);
             }
         }
 

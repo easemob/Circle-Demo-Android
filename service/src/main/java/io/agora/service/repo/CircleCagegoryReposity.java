@@ -76,12 +76,13 @@ public class CircleCagegoryReposity extends ServiceReposity {
                 getCircleManager().updateCategory(serverId, categoryId, categoryName, new EMValueCallBack<EMCircleChannelCategory>() {
                     @Override
                     public void onSuccess(EMCircleChannelCategory value) {
-
+                        getCategoryDao().updateCategory(new CircleCategory(value));
+                        callBack.onSuccess(createLiveData(true));
                     }
 
                     @Override
                     public void onError(int error, String errorMsg) {
-
+                        callBack.onError(error, errorMsg);
                     }
                 });
             }

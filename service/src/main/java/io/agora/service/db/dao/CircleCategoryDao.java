@@ -28,7 +28,7 @@ public interface CircleCategoryDao {
     int deleteByCagegoryId(String id);
 
     @Update
-    void updateChannel(CircleCategory category);
+    void updateCategory(CircleCategory category);
 
     @Query("SELECT * FROM circle_category")
     List<CircleCategory> getAllCategories();
