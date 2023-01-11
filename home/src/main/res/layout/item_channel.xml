@@ -61,7 +61,7 @@
         android:id="@+id/tv_unread"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="16dp"
         android:background="@drawable/unread_count_bg"
         android:gravity="center"
         android:minWidth="17dp"

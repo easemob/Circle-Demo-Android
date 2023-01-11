@@ -128,7 +128,13 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 int randomServerIcon = ServiceReposity.getRandomServerIcon(server.serverId);
                 Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvIcon);
 
-                canCheckHolder.mTvUnRead.setVisibility(View.GONE);
+                Integer count = mUnreadMap.get(server.serverId);
+                if (count != null && count.intValue() != 0) {
+                    canCheckHolder.mTvUnRead.setVisibility(View.VISIBLE);
+                    canCheckHolder.mTvUnRead.setText(EaseCommonUtils.handleBigNum(count.intValue()));
+                } else {
+                    canCheckHolder.mTvUnRead.setVisibility(View.GONE);
+                }
                 if (mCheckedPos == position) {
                     mOnMenuClickListener.onItemClick(mCheckedPos, server);
                 }
@@ -155,6 +161,10 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void setUnreadMap(String groundId, int finalCount, int pos) {
         mUnreadMap.put(groundId, finalCount);
         notifyItemChanged(pos);
+    }
+    public void setUnreadMap(String groundId, int finalCount) {
+        mUnreadMap.put(groundId, finalCount);
+        notifyDataSetChanged();
     }
 
     public interface OnMenuClickListener<T> {

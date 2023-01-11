@@ -47,7 +47,8 @@ public class VoiceChannelListAdapter extends BaseAdapter<VoiceChannelUser> {
             imageView.setVisibility(View.GONE);
         }
         ConcurrentHashMap<String,IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
-        if(uidsSpeak.get(voiceChannelUser.username)!=null) {
+        IRtcEngineEventHandler.AudioVolumeInfo audioVolumeInfo = uidsSpeak.get(voiceChannelUser.username);
+        if(audioVolumeInfo!=null&&audioVolumeInfo.volume>3) {
             ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
         }else{
             ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));

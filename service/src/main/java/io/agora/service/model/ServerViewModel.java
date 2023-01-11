@@ -16,6 +16,7 @@ import com.hyphenate.chat.EMCircleServerAttribute;
 import com.hyphenate.chat.EMCircleUserRole;
 
 import java.util.List;
+import java.util.Map;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.db.entity.CircleCategory;
@@ -49,6 +50,7 @@ public class ServerViewModel extends ServiceViewModel {
     public SingleSourceLiveData<Resource<String>> removeUserFromServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CustomInfo>> checkSelfIsInServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<List<CircleCategory>>> getServerCategoriesLiveData=new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<Map<String,List<String>>>> getJoinedChannelIdsInServerLiveData=new SingleSourceLiveData<>();
 
 
     public ServerViewModel(@NonNull Application application) {
@@ -205,5 +207,8 @@ public class ServerViewModel extends ServiceViewModel {
 
     public void getServerCategories(String serverId){
         getServerCategoriesLiveData.setSource(serverReposity.getServerCategories(serverId));
+    }
+    public void getJoinedChannelIdsInServer(String serverId){
+        getJoinedChannelIdsInServerLiveData.setSource(serverReposity.fetchJoinedChannelIdsInServer(serverId));
     }
 }

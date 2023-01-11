@@ -32,7 +32,9 @@ import com.hyphenate.exceptions.HyphenateException;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.RecommendServiceBean;
@@ -791,4 +793,44 @@ public class CircleServerReposity extends ServiceReposity {
             }
         });
     }
+    public LiveData<Resource<Map<String,List<String>>>> fetchJoinedChannelIdsInServer(String serverId) {
+       return new NetworkOnlyResource<Map<String,List<String>>>(){
+
+           @Override
+           protected void createCall(@NonNull ResultCallBack<LiveData<Map<String,List<String>>>> callBack) {
+               int limit = 50;
+               Map<String,List<String>> map=new HashMap();
+               List<String> channelIds = new ArrayList<>();
+               map.put(serverId,channelIds);
+               doFetchJoinedChannelIdsInServer(serverId, limit, map, null, callBack);
+           }
+       }.asLiveData();
+
+    }
+
+    private void doFetchJoinedChannelIdsInServer(String serverId, int limit, Map<String,List<String>> map, String cursor, ResultCallBack<LiveData<Map<String,List<String>>>> callBack) {
+        getCircleManager().fetchJoinedChannelIdsInServer(serverId, limit, cursor, new EMValueCallBack<EMCursorResult<String>>() {
+            @Override
+            public void onSuccess(EMCursorResult<String> value) {
+                List<String> datas = value.getData();
+                if (!CollectionUtils.isEmpty(datas)) {
+                    map.get(serverId).addAll(datas);
+                }
+                if (!TextUtils.isEmpty(value.getCursor())) {
+                    doFetchJoinedChannelIdsInServer(serverId, limit, map, value.getCursor(), callBack);
+                } else {
+                    //保存在单例里
+                    Map<String, List<String>> globalChannelIds = AppUserInfoManager.getInstance().getChannelIds();
+                    globalChannelIds.putAll(map);
+                    callBack.onSuccess(createLiveData(map));
+                }
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+                callBack.onError(error, errorMsg);
+            }
+        });
+    }
+
 }

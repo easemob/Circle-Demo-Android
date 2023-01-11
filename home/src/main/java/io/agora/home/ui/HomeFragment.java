@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.blankj.utilcode.util.MapUtils;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.easeui.model.EaseEvent;
 import com.hyphenate.easeui.utils.ShowMode;
@@ -16,6 +17,7 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -79,9 +81,26 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                             joinedServers.put(circleServer.serverId, circleServer);
                             //缓存到内存中
                             joinedServersCache.put(circleServer.serverId, circleServer);
+                            //拉取每个server跟channelId的映射关系
+                            mViewModel.getJoinedChannelIdsInServer(circleServer.serverId);
                         }
                     }
                     mAdapter.setData(joinedServers.values());
+                }
+            });
+        });
+
+        mViewModel.getJoinedChannelIdsInServerLiveData.observe(getViewLifecycleOwner(), obj -> {
+            parseResource(obj, new OnResourceParseCallback<Map<String, List<String>>>() {
+                @Override
+                public void onSuccess(@Nullable Map<String, List<String>> channelIds) {
+                    if (!MapUtils.isEmpty(channelIds)) {
+                        //更新目标server的未读数
+                        Iterator<String> iterator = channelIds.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            getServerUnreadCount(iterator.next());
+                        }
+                    }
                 }
             });
         });
@@ -133,31 +152,46 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
             }
         });
         //监听未读数
-        LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CHAT_ROOM_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONVERSATION_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONVERSATION_READ, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_ADD, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_UPDATE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
+        LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CHAT_ROOM_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONVERSATION_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONVERSATION_READ, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_ADD, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_UPDATE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
         LiveEventBus.get(Constants.MESSAGE_CALL_SAVE, Boolean.class).observe(getViewLifecycleOwner(), bool -> {
-            getConversationData(null);
+            getSingleChatConversationUreadData(null);
         });
         LiveEventBus.get(Constants.MESSAGE_NOT_SEND, Boolean.class).observe(getViewLifecycleOwner(), bool -> {
-            getConversationData(null);
+            getSingleChatConversationUreadData(null);
         });
     }
 
-    public void getConversationData(EaseEvent change) {
+    public void getSingleChatConversationUreadData(EaseEvent change) {
         int unreadMsgCount = 0;
-        List<EMConversation> conversations = mViewModel.getConversationsWithType(EMConversation.EMConversationType.Chat);
-        for (EMConversation conversation : conversations) {
+        List<EMConversation> singleChatConversations = mViewModel.getConversationsWithType(EMConversation.EMConversationType.Chat);
+        for (EMConversation conversation : singleChatConversations) {
             unreadMsgCount += conversation.getUnreadMsgCount();
         }
         mAdapter.setUnreadMap("-1", unreadMsgCount, 0);
+
+        Iterator<String> iterator = joinedServers.keySet().iterator();
+        while (iterator.hasNext()) {
+            String serverId = iterator.next();
+            getServerUnreadCount(serverId);
+        }
+    }
+
+    public void getServerUnreadCount(String serverId) {
+        List<EMConversation> conversations = mViewModel.getConversationsByServerId(serverId);
+        int unreadMsgCount = 0;
+        for (int i = 0; i < conversations.size(); i++) {
+            unreadMsgCount += conversations.get(i).getUnreadMsgCount();
+            mAdapter.setUnreadMap(serverId, unreadMsgCount);
+        }
     }
 
     @Override
@@ -180,6 +214,7 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
 
         //获取server列表
         mViewModel.getJoinedServerList();
+
     }
 
     @Override

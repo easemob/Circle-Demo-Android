@@ -176,7 +176,6 @@ public class CircleRTCManager {
         public void onAudioVolumeIndication(AudioVolumeInfo[] speakers, int totalVolume) {
 //            EMLog.e("mRtcEventHandler","onAudioVolumeIndication speakers size=" + speakers.length+"，totalVolume="+totalVolume);
             ThreadUtils.runOnUiThread(() -> {
-                uidsSpeak.clear();
                 int maxVolume = 0;
                 if (speakers != null && speakers.length > 0) {
 
@@ -185,12 +184,15 @@ public class CircleRTCManager {
                         if (speaker.uid != 0) {//非本地用户
                             hxUserId = uidHxIds.get(String.valueOf(speaker.uid));
                         }
-                        EMLog.d("uidsSpeak", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
+                        EMLog.d("uidsSpeak=", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
                         if (hxUserId != null) {
                             uidsSpeak.put(hxUserId, speaker);
+                            EMLog.d("uidsSpeak=","speakers.hxUserId="+hxUserId);
                         }
                         maxVolume = Math.max(maxVolume, speaker.volume);
                     }
+                    EMLog.d("uidsSpeak=","speakers.size()="+speakers.length);
+                    EMLog.d("uidsSpeak=","uidsSpeak.size()="+uidsSpeak.size());
                 }
                 for (CircleVoiceChannelStateListener stateListener : voiceChannelStateListeners) {
                     if (currentUid != null) {

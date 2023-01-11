@@ -13,11 +13,16 @@ import io.agora.service.model.ServerViewModel;
 
 
 public class HomeViewModel extends ServerViewModel {
-    public ConversationReposity reposity=new ConversationReposity();
+    public ConversationReposity reposity = new ConversationReposity();
+
     public HomeViewModel(@NonNull Application application) {
         super(application);
     }
+
     public List<EMConversation> getConversationsWithType(EMConversation.EMConversationType type) {
         return reposity.getConversationsWithType(type);
+    }
+    public List<EMConversation> getConversationsByServerId(String serverId){
+        return reposity.getConversationsByServerId(serverId);
     }
 }
