@@ -134,7 +134,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     case 3:
                         if(node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
                             //语聊房成员item
-                            return R.layout.item_voice_channel_member;
+                            return R.layout.item_home_voice_channel_member;
                         }
                         return R.layout.item_thread;
                 }
@@ -204,7 +204,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private void setServerData(CircleServer server) {
         int randomServerIcon = ServiceReposity.getRandomServerIcon(server.serverId);
-        Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(mBinding.ivServer);
+        Glide.with(mContext).load(server.background).placeholder(randomServerIcon).into(mBinding.ivServer);
         mBinding.tvServerName.setText(server.name);
         String desc = server.desc;
         if (TextUtils.isEmpty(desc)) {
@@ -1002,6 +1002,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     @Override
     public void onRefresh(RefreshLayout refreshLayout) {
         if (currrentServer != null) {
+            //重新拉当前分组数据
+            categories.remove(currrentServer.serverId);
+            mServerViewModel.getServerCategories(currrentServer.serverId);
+            //重新拉当前channel数据
             channels.remove(currrentServer.serverId);
             mServerViewModel.getChannelData(currrentServer.serverId);
         }

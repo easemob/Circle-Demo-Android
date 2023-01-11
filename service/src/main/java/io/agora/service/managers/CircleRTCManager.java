@@ -45,7 +45,7 @@ public class CircleRTCManager {
     private String currentUid;
     private CopyOnWriteArrayList<String> uidsInChannel = new CopyOnWriteArrayList<>();//在频道里的成员
     private ConcurrentHashMap<String, Boolean> uidsMuted = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String,IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, String> uidHxIds = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, String> hxIdUids = new ConcurrentHashMap<>();
     private final IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() {
@@ -70,7 +70,7 @@ public class CircleRTCManager {
             currentUid = String.valueOf(uid);
             uidsInChannel.add(String.valueOf(uid));
             ThreadUtils.runOnUiThread(() -> {
-                setChannelAttribute(channelId,AppUserInfoManager.getInstance().getCurrentUserName(),String.valueOf(uid) );
+                setChannelAttribute(channelId, AppUserInfoManager.getInstance().getCurrentUserName(), String.valueOf(uid));
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onJoinChannelSuccess(channel, uid, elapsed);
                 }
@@ -100,7 +100,7 @@ public class CircleRTCManager {
             hxIdUids.clear();
             uidsSpeak.clear();
             currentUid = null;
-            channelId =null;
+            channelId = null;
             ThreadUtils.runOnUiThread(() -> {
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onLeaveChannel(stats);
@@ -124,7 +124,7 @@ public class CircleRTCManager {
 
         @Override
         public void onUserMuteAudio(int uid, boolean muted) {
-            EMLog.e("mRtcEventHandler", "onUserMuteAudio uid=" + uid+",muted="+muted);
+            EMLog.e("mRtcEventHandler", "onUserMuteAudio uid=" + uid + ",muted=" + muted);
             ThreadUtils.runOnUiThread(() -> {
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onUserMuteAudio(uid, muted);
@@ -145,18 +145,18 @@ public class CircleRTCManager {
 
         @Override
         public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
-            EMLog.e("mRtcEventHandler", "onAudioPublishStateChanged channel=" + channel+",oldState="+oldState+",newState="+newState+",elapseSinceLastState="+elapseSinceLastState);
-            if(currentUid!=null) {
-                if(newState==PUB_STATE_NO_PUBLISHED) {//静音
-                    uidsMuted.put(currentUid,true);
-                }else{
-                    uidsMuted.put(currentUid,false);
+            EMLog.e("mRtcEventHandler", "onAudioPublishStateChanged channel=" + channel + ",oldState=" + oldState + ",newState=" + newState + ",elapseSinceLastState=" + elapseSinceLastState);
+            if (currentUid != null) {
+                if (newState == PUB_STATE_NO_PUBLISHED) {//静音
+                    uidsMuted.put(currentUid, true);
+                } else {
+                    uidsMuted.put(currentUid, false);
                 }
             }
 
             ThreadUtils.runOnUiThread(() -> {
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
-                    eventHandler.onAudioPublishStateChanged(channel, oldState,newState,elapseSinceLastState );
+                    eventHandler.onAudioPublishStateChanged(channel, oldState, newState, elapseSinceLastState);
                 }
             });
         }
@@ -175,46 +175,40 @@ public class CircleRTCManager {
         @Override
         public void onAudioVolumeIndication(AudioVolumeInfo[] speakers, int totalVolume) {
 //            EMLog.e("mRtcEventHandler","onAudioVolumeIndication speakers size=" + speakers.length+"，totalVolume="+totalVolume);
-            uidsSpeak.clear();
-            int maxVolume = 0;
-            if (speakers != null && speakers.length > 0) {
-
-                for (AudioVolumeInfo speaker : speakers) {
-                    String hxUserId=AppUserInfoManager.getInstance().getCurrentUserName();
-                    if(speaker.uid!=0) {//非本地用户
-                        hxUserId = uidHxIds.get(String.valueOf(speaker.uid));
-                    }
-                    EMLog.d("uidsSpeak"," hxuserid="+hxUserId+" speakers.uid="+speaker.uid+" speakers.volume="+speaker.volume);
-                    if(hxUserId!=null) {
-                        if(speaker.volume>0) {
-                            uidsSpeak.put(hxUserId,speaker);
-                        }else{
-                            uidsSpeak.remove(hxUserId);
-                        }
-                    }
-
-                    maxVolume = Math.max(maxVolume, speaker.volume);
-                }
-            }
-
-            for (CircleVoiceChannelStateListener stateListener : voiceChannelStateListeners) {
-                if(currentUid!=null) {
-                    if (maxVolume > 3) {
-                        if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
-                            stateListener.onSelfMicOffAndSpeaking();
-                        } else {
-                            stateListener.onSelfMicOnAndSpeaking();
-                        }
-                    } else {
-                        if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
-                            stateListener.onSelfMicOffAndNoSpeaking();
-                        } else {
-                            stateListener.onSelfMicOnAndNoSpeaking();
-                        }
-                    }
-                }
-            }
             ThreadUtils.runOnUiThread(() -> {
+                uidsSpeak.clear();
+                int maxVolume = 0;
+                if (speakers != null && speakers.length > 0) {
+
+                    for (AudioVolumeInfo speaker : speakers) {
+                        String hxUserId = AppUserInfoManager.getInstance().getCurrentUserName();
+                        if (speaker.uid != 0) {//非本地用户
+                            hxUserId = uidHxIds.get(String.valueOf(speaker.uid));
+                        }
+                        EMLog.d("uidsSpeak", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
+                        if (hxUserId != null) {
+                            uidsSpeak.put(hxUserId, speaker);
+                        }
+                        maxVolume = Math.max(maxVolume, speaker.volume);
+                    }
+                }
+                for (CircleVoiceChannelStateListener stateListener : voiceChannelStateListeners) {
+                    if (currentUid != null) {
+                        if (maxVolume > 3) {
+                            if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
+                                stateListener.onSelfMicOffAndSpeaking();
+                            } else {
+                                stateListener.onSelfMicOnAndSpeaking();
+                            }
+                        } else {
+                            if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
+                                stateListener.onSelfMicOffAndNoSpeaking();
+                            } else {
+                                stateListener.onSelfMicOnAndNoSpeaking();
+                            }
+                        }
+                    }
+                }
                 for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                     eventHandler.onAudioVolumeIndication(speakers, totalVolume);
                 }
@@ -230,13 +224,13 @@ public class CircleRTCManager {
                 EMClient.getInstance().chatroomManager().asyncSetChatroomAttributeForced(channelName, key, value, true, new EMCallBack() {
                     @Override
                     public void onSuccess() {
-                        EMLog.e("onAttributesUpdate","asyncSetChatroomAttributeForced-->  onSuccess()");
+                        EMLog.e("onAttributesUpdate", "asyncSetChatroomAttributeForced-->  onSuccess()");
                         fetchChatRoomAttribute(channelName);
                     }
 
                     @Override
                     public void onError(int code, String error) {
-                        EMLog.e("onAttributesUpdate","asyncSetChatroomAttributeForced-->  error="+error);
+                        EMLog.e("onAttributesUpdate", "asyncSetChatroomAttributeForced-->  error=" + error);
                     }
                 });
             }
@@ -250,20 +244,20 @@ public class CircleRTCManager {
                 EMClient.getInstance().chatroomManager().asyncFetchChatRoomAllAttributesFromServer(channelName, new EMValueCallBack<Map<String, String>>() {
                     @Override
                     public void onSuccess(Map<String, String> attributeMap) {
-//                        EMLog.e("onAttributesUpdate","fetchChatRoomAttribute onSuccess, attributeMap.size="+attributeMap.size());
+                        EMLog.e("onAttributesUpdate", "fetchChatRoomAttribute onSuccess, attributeMap.size=" + attributeMap.size());
                         Iterator<String> iterator = attributeMap.keySet().iterator();
                         while (iterator.hasNext()) {
                             String key = iterator.next();//环信Id
                             String value = attributeMap.get(key);//声网uid
-                            EMLog.e("onAttributesUpdate","fetchChatRoomAttribute hxid="+key+",uid="+value);
+                            EMLog.e("onAttributesUpdate", "fetchChatRoomAttribute hxid=" + key + ",uid=" + value);
                             uidHxIds.put(value, key);
-                            hxIdUids.put(key,value);
+                            hxIdUids.put(key, value);
                         }
                     }
 
                     @Override
                     public void onError(int error, String errorMsg) {
-                        EMLog.e("onAttributesUpdate","fetchChatRoomAttribute onError="+errorMsg);
+                        EMLog.e("onAttributesUpdate", "fetchChatRoomAttribute onError=" + errorMsg);
                     }
                 });
             }
@@ -300,15 +294,15 @@ public class CircleRTCManager {
         EMClient.getInstance().chatroomManager().addChatRoomChangeListener(new SimpleChatRoomChangeListener() {
             @Override
             public void onAttributesUpdate(String chatRoomId, Map<String, String> attributeMap, String from) {
-               EMLog.e("onAttributesUpdate","chatRoomId="+chatRoomId+",attributeMap="+attributeMap+",from="+from);
+                EMLog.e("onAttributesUpdate", "chatRoomId=" + chatRoomId + ",attributeMap=" + attributeMap + ",from=" + from);
                 if (TextUtils.equals(chatRoomId, channelId)) {
                     Iterator<String> iterator = attributeMap.keySet().iterator();
                     while (iterator.hasNext()) {
                         String key = iterator.next();//环信Id
                         String value = attributeMap.get(key);//声网uid
-                        EMLog.e("onAttributesUpdate","hxid="+key+",uid="+value);
+                        EMLog.e("onAttributesUpdate", "hxid=" + key + ",uid=" + value);
                         uidHxIds.put(value, key);
-                        hxIdUids.put(key,value);
+                        hxIdUids.put(key, value);
                     }
                 }
             }
@@ -323,7 +317,7 @@ public class CircleRTCManager {
 
     public void joinChannel(String channelId) throws Exception {
         //同时只允许进一个频道，进下一个频道前退出上一个频道。
-        if(this.channelId !=null&&!TextUtils.equals(this.channelId,channelId)) {
+        if (this.channelId != null && !TextUtils.equals(this.channelId, channelId)) {
             ToastUtils.showShort("you should leave previous voice channel first");
             return;
         }
@@ -402,7 +396,7 @@ public class CircleRTCManager {
         return currentUid;
     }
 
-    public ConcurrentHashMap<String,IRtcEngineEventHandler.AudioVolumeInfo> getUidsSpeak() {
+    public ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> getUidsSpeak() {
         return uidsSpeak;
     }
 

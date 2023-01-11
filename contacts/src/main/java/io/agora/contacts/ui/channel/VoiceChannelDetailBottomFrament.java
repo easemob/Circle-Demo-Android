@@ -315,7 +315,6 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
                     onFetchSelfRoleSuccess(selfRole);
                 }
             });
-            Log.e("TAG", "channelId==" + channel.channelId);
         }
         adapter = new VoiceChannelListAdapter(mContext, R.layout.item_voice_channel_member);
         mBinding.recycleview.setAdapter(adapter);
