@@ -65,7 +65,6 @@
                 android:id="@+id/csl_mark_read"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView

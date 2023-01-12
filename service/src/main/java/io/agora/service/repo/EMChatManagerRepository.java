@@ -14,6 +14,7 @@ import com.hyphenate.chat.EMSilentModeParam;
 import com.hyphenate.chat.EMSilentModeResult;
 import com.hyphenate.easeui.modules.conversation.model.EaseConversationInfo;
 import com.hyphenate.exceptions.HyphenateException;
+import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.agora.service.callbacks.ResultCallBack;
+import io.agora.service.global.Constants;
+import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.net.ErrorCode;
 import io.agora.service.net.NetworkOnlyResource;
 import io.agora.service.net.Resource;
@@ -227,4 +230,21 @@ public class EMChatManagerRepository extends ServiceReposity {
         }.asLiveData();
     }
 
+    public LiveData<Resource<Boolean>> markServerMessagesAsRead(String serverId) {
+
+        return new NetworkOnlyResource<Boolean>() {
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
+                List<String> ids = AppUserInfoManager.getInstance().getChannelIds().get(serverId);
+                for (int i = 0; i < ids.size(); i++) {
+                    EMConversation conversation = getChatManager().getConversation(ids.get(i));
+                    if (conversation != null) {
+                        conversation.markAllMessagesAsRead();
+                    }
+                }
+                callBack.onSuccess(createLiveData(true));
+                LiveEventBus.get(Constants.NOTIFY_CHANGE).post(null);
+            }
+        }.asLiveData();
+    }
 }

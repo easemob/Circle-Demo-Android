@@ -1,5 +1,7 @@
 package io.agora.circle.ui;
 
+import static io.agora.service.global.Constants.CHANNEL;
+
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
@@ -44,6 +46,7 @@ import io.agora.circle.model.MainViewModel;
 import io.agora.common.base.BaseFragment;
 import io.agora.contacts.ui.ContactsFragment;
 import io.agora.contacts.ui.InviteUserToServerBottomFragment;
+import io.agora.contacts.ui.channel.ChannelSettingBottomFragment;
 import io.agora.contacts.ui.channel.CreateChannelActivity;
 import io.agora.contacts.ui.channel.VoiceChannelDetailBottomFrament;
 import io.agora.contacts.ui.server.ServerSettingBottomFragment;
@@ -228,6 +231,16 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
                         fragment.show(fragmentManager, ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(410));
                     }
                 }
+            }
+        });
+        LiveEventBus.get(Constants.SHOW_CHANNEL_SETTING_FRAGMENT, CircleChannel.class).observe(this, new Observer<CircleChannel>() {
+            @Override
+            public void onChanged(CircleChannel channel) {
+                ChannelSettingBottomFragment fragment = new ChannelSettingBottomFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(CHANNEL, channel);
+                fragment.setArguments(bundle);
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight()-ConvertUtils.dp2px(1));
             }
         });
         LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).observe(this, new Observer<CircleChannel>() {

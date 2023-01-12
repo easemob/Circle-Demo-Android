@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
 import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
@@ -138,19 +139,24 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
             ThreadListActivity.actionStart(mContext, channel);
         } else if (v.getId() == R.id.tv_edit_channel) {
             //跳转去编辑频道页面
-            EditChannelActivity.actionStart(mContext,channel);
-        } else if(v.getId()==R.id.tv_notification_setting) {
-            ChannelNotificationSettingActivity.actionStart(mContext,channel);
-        }else if(v.getId()==R.id.csl_mark_read) {
+            EditChannelActivity.actionStart(mContext, channel);
+        } else if (v.getId() == R.id.tv_notification_setting) {
+            ChannelNotificationSettingActivity.actionStart(mContext, channel);
+        } else if (v.getId() == R.id.csl_mark_read) {
             //标记为已读
-            EMClient.getInstance().chatManager().getConversation(channel.channelId).markAllMessagesAsRead();
-        }else if(v.getId()==R.id.csl_move_channel) {
+            EMConversation conversation = EMClient.getInstance().chatManager().getConversation(channel.channelId);
+            if (conversation != null) {
+                conversation.markAllMessagesAsRead();
+            }
+            LiveEventBus.get(Constants.NOTIFY_CHANGE).post(null);
+            hide();
+        } else if (v.getId() == R.id.csl_move_channel) {
             //移动频道至
-            MoveChannelActivity.actionStart(mContext,channel);
-        }else if(v.getId()==R.id.csl_channel_members) {
+            MoveChannelActivity.actionStart(mContext, channel);
+        } else if (v.getId() == R.id.csl_channel_members) {
             //查看频道成员
-            ChannelMembersActivity.actionStart(mContext,channel);
-        }else if(v.getId()==R.id.csl_leave_channel) {
+            ChannelMembersActivity.actionStart(mContext, channel);
+        } else if (v.getId() == R.id.csl_leave_channel) {
             //离开频道
             mChannelViewModel.leaveChannel(channel);
         }

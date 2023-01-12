@@ -26,10 +26,12 @@ import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.model.ChatViewModel;
 import io.agora.service.model.ServerViewModel;
 
 public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServerSettingBinding> implements BottomSheetChildHelper, View.OnClickListener {
     private ServerViewModel mServerViewModel;
+    private ChatViewModel mChatViewModel;
     private CircleServer server;
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
     private BaseBottomSheetFragment parentContainerFragment;
@@ -39,6 +41,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         super.initConfig();
 
         mServerViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
+        mChatViewModel=new ViewModelProvider(this).get(ChatViewModel.class);
         mServerViewModel.leaveServerResultLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<Boolean>() {
                 @Override
@@ -57,6 +60,14 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
                     if (!TextUtils.isEmpty(message)) {
                         ToastUtils.showShort(message);
                     }
+                }
+            });
+        });
+        mChatViewModel.markServerMessagesAsReadLiveData.observe(getViewLifecycleOwner(),response->{
+            parseResource(response, new OnResourceParseCallback<Boolean>() {
+                @Override
+                public void onSuccess(@Nullable Boolean data) {
+                    hide();
                 }
             });
         });
@@ -149,7 +160,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
             hide();
         } else if (v.getId() == R.id.csl_mark_read) {
             //标记为已读
-
+            mChatViewModel.markServerMessagesAsRead(server.serverId);
         } else if (v.getId() == R.id.csl_create_channel) {
             //创建频道
             //去创建频道页面

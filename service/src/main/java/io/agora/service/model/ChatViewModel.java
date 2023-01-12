@@ -28,6 +28,7 @@ public class ChatViewModel extends ServiceViewModel {
     private SingleSourceLiveData<Resource<Boolean>> setNoPushUsersObservable;
     public SingleSourceLiveData<Resource<String>> deleteConversationLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<EMSilentModeResult>> setSilentModeForConversationLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<Boolean>> markServerMessagesAsReadLiveData = new SingleSourceLiveData<>();
 
     public ChatViewModel(@NonNull Application application) {
         super(application);
@@ -91,5 +92,9 @@ public class ChatViewModel extends ServiceViewModel {
 
     public void setSilentModeForConversation(String conversationId, EMConversation.EMConversationType type, EMSilentModeParam param){
         setSilentModeForConversationLiveData.setSource(chatManagerRepository.setSilentModeForConversation(conversationId,type,param));
+    }
+
+    public void markServerMessagesAsRead(String serverId) {
+        markServerMessagesAsReadLiveData.setSource(chatManagerRepository.markServerMessagesAsRead(serverId));
     }
 }

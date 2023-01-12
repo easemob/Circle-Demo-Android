@@ -457,6 +457,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             }
         });
 
+        LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), easeEvent -> {
+            if(adapter!=null) {
+                //刷新未读数
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
             refreshByRoleChanged(serverRoleMap);
         });
@@ -1024,7 +1031,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 break;
             case 1:
                 //长按频道
-
+                showChannelSettingBottomFragment(currrentServer.serverId,node.getId());
                 break;
             case 2:
                 break;
@@ -1032,6 +1039,13 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 break;
         }
         return false;
+    }
+
+    private void showChannelSettingBottomFragment(String serverId, String channelId) {
+        CircleChannel circleChannel = getChannelsContainer(serverId).get(channelId);
+        if(circleChannel!=null) {
+            LiveEventBus.get(Constants.SHOW_CHANNEL_SETTING_FRAGMENT,CircleChannel.class).post(circleChannel);
+        }
     }
 
     private void showCategoryBottomDialog(CircleCategory category) {
