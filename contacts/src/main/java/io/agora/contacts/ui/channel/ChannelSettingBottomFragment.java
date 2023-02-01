@@ -125,6 +125,11 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     }
 
     @Override
+    public void showllFold(View llfold) {
+        llfold.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_invite) {
             //跳转去邀请好友页面

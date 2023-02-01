@@ -217,8 +217,8 @@ public class ServerMembersFragment extends ContactListFragment implements  View.
     public void onItemSubViewClick(View view, int position) {
         if (view.getId() == R.id.presenceView) {
             List<CircleUser> datas = mListAdapter.getData();
-            if (datas != null) {
-                CircleUser circleUser = datas.get(position - 1);
+            if (datas != null&&position<datas.size()&&position>=0) {
+                CircleUser circleUser = datas.get(position);
                 if (circleUser != null) {
                     if (!TextUtils.equals(circleUser.username, AppUserInfoManager.getInstance().getCurrentUserName())) {
                         showUserInfoBottomDialog(circleUser);

@@ -22,7 +22,7 @@ import java.util.List;
 import io.agora.common.base.BaseAdapter;
 import io.agora.contacts.R;
 import io.agora.contacts.adapter.CategoryListAdapter;
-import io.agora.contacts.bean.CircleCategoryData;
+import io.agora.service.bean.CircleCategoryData;
 import io.agora.contacts.databinding.ActivityMoveChannelBinding;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.OnResourceParseCallback;

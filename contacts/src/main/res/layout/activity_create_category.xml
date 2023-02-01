@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/shape_line_2e2e2e_bg"
             android:hint="@string/input_category_name"
-            android:maxLength="16"
+            android:maxLength="50"
             android:minHeight="40dp"
             android:onClick="@{(v)->vm.delete(v)}"
             android:text="@={vm.cagegoryName}"

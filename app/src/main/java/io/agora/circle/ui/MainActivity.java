@@ -55,6 +55,7 @@ import io.agora.ground.ui.ServerIntroductionBottomFragment;
 import io.agora.home.ui.HomeFragment;
 import io.agora.mine.ui.MineFragment;
 import io.agora.service.base.BaseInitActivity;
+import io.agora.service.bean.CircleCategoryData;
 import io.agora.service.bean.GetRTCTokenBean;
 import io.agora.service.callbacks.CircleRTCListener;
 import io.agora.service.callbacks.CircleRTCTokenCallback;
@@ -126,7 +127,7 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
         initListener();
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
-        viewModel.getRTCTokenLiveData.observeForever(response -> {
+        viewModel.getRTCTokenLiveData.observeForever( response -> {
             parseResource(response, new OnResourceParseCallback<GetRTCTokenBean>() {
                 @Override
                 public void onSuccess(@Nullable GetRTCTokenBean getRTCTokenBean) {
@@ -135,6 +136,11 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
                             circleRTCTokenCallback.setToken(getRTCTokenBean.getAccessToken(), Integer.parseInt(getRTCTokenBean.getAgoraUid()));
                         }
                     }
+                }
+
+                @Override
+                public void onError(int code, String message) {
+                    super.onError(code, message);
                 }
             });
         });
@@ -211,10 +217,12 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
                 fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(1));
             }
         });
-        LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).observe(this, new Observer<CircleServer>() {
+        LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleCategoryData.class).observe(this, new Observer<CircleCategoryData>() {
             @Override
-            public void onChanged(CircleServer server) {
-                CreateChannelActivity.actionStart(MainActivity.this,server);
+            public void onChanged(CircleCategoryData categoryData) {
+                if(categoryData!=null) {
+                    CreateChannelActivity.actionStart(MainActivity.this,categoryData.serverId,categoryData.categoryId);
+                }
             }
         });
         LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, FragmentManager.class).observe(this, new Observer<FragmentManager>() {

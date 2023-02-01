@@ -155,13 +155,14 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             setText(holder.serverName, bean.name);
             setText(holder.tvDesc, bean.desc);
             Glide.with(holder.ivServer)
-                    .load(ServiceReposity.getRandomServerIcon(bean.serverId))
+                    .load(bean.background)
                     .placeholder(ServiceReposity.getRandomServerIcon(bean.serverId))
                     .into(holder.ivServer);
             Glide.with(holder.ivServerIcon)
                     .load(bean.icon)
                     .placeholder(ServiceReposity.getRandomServerIcon(bean.serverId))
                     .into(holder.ivServerIcon);
+            holder.llTags.removeAllViews();
             for (CircleServer.Tag tag : bean.tags) {
                 if (mContext != null && !TextUtils.isEmpty(tag.tag_name)) {
                     TextView textView = new TextView(mContext);

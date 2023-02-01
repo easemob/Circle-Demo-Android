@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import com.blankj.utilcode.util.CollectionUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
-import com.hyphenate.EMCallBack;
 import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMCircleChannel;
 import com.hyphenate.chat.EMCircleServer;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMCustomMessageBody;
@@ -37,6 +37,7 @@ import io.agora.service.bean.CustomInfo;
 import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
+import io.agora.service.managers.CircleRTCManager;
 
 public class CircleUtils {
 
@@ -223,21 +224,23 @@ public class CircleUtils {
         joinChannelBinding.btnJoinImmediately.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EMClient.getInstance().chatCircleManager().acceptChannelInvitation(customInfo.getServerId(), customInfo.getChannelId(), customInfo.getInviter(), new EMCallBack() {
+                EMClient.getInstance().chatCircleManager().acceptChannelInvitation(customInfo.getServerId(), customInfo.getChannelId(), customInfo.getInviter(), new EMValueCallBack<EMCircleChannel>() {
                     @Override
-                    public void onSuccess() {
+                    public void onSuccess(EMCircleChannel circleChannel) {
                         ToastUtils.showShort(activity.getString(R.string.circle_join_in_channel_success));
                         LiveEventBus.get(Constants.ACCEPT_INVITE_CHANNEL).post(new ChannelInviteData(customInfo.getServerId(), customInfo.getChannelId()));
-
-                        CustomInfo customInfo = new CustomInfo();
-                        customInfo.setServerId(customInfo.getServerId());
-                        customInfo.setServerName(customInfo.getServerName());
-                        customInfo.setServerIcon(customInfo.getServerIcon());
-                        customInfo.setChannelDesc(customInfo.getChannelDesc());
-                        customInfo.setChannelId(customInfo.getChannelId());
-                        customInfo.setChannelName(customInfo.getChannelName());
-
-                        sendInviteCustomMessage(Constants.ACCEPT_INVITE_CHANNEL, customInfo, customInfo.getChannelId());
+                        if(circleChannel.getMode().getCode()==0) {
+                            //普通频道处理逻辑
+                            sendInviteCustomMessage(Constants.ACCEPT_INVITE_CHANNEL, customInfo, customInfo.getChannelId());
+                        }else{
+                            //语聊频道处理逻辑
+                            //加入语聊房
+                            try {
+                                CircleRTCManager.getInstance().joinChannel(circleChannel.getChannelId());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     @Override

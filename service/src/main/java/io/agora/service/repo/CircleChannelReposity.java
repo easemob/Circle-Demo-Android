@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.ThreadData;
+import io.agora.service.bean.channel.ChannelUpdateNotifyBean;
 import io.agora.service.callbacks.ResultCallBack;
 import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.dao.CircleChannelDao;
@@ -699,6 +700,8 @@ public class CircleChannelReposity extends ServiceReposity {
                 getCircleManager().joinChannel(channel.serverId, channel.channelId, new EMValueCallBack<EMCircleChannel>() {
                     @Override
                     public void onSuccess(EMCircleChannel value) {
+                        ChannelUpdateNotifyBean updateNotifyBean = new ChannelUpdateNotifyBean(channel.serverId, channel.channelId, userId, channel.name, channel.desc);
+                        LiveEventBus.get(Constants.CHANNEL_JOIN).post(updateNotifyBean);
                         callBack.onSuccess(createLiveData(userId));
                     }
 

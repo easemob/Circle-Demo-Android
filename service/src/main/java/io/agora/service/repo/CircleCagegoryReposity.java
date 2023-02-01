@@ -93,7 +93,7 @@ public class CircleCagegoryReposity extends ServiceReposity {
         return new NetworkOnlyResource<String>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<String>> callBack) {
-                getCircleManager().transferCategory(serverId, newCategoryId, channelId, new EMCallBack() {
+                getCircleManager().transferChannel(serverId, newCategoryId, channelId, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         //更新数据库

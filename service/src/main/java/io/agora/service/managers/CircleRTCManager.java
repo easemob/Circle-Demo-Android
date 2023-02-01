@@ -4,6 +4,7 @@ import static io.agora.rtc2.Constants.PUB_STATE_NO_PUBLISHED;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
@@ -32,13 +33,15 @@ import io.agora.service.callbacks.SimpleChatRoomChangeListener;
  * RTC相关管理类
  */
 public class CircleRTCManager {
+    private String TAG = getClass().getSimpleName();
 
     private static final CircleRTCManager ourInstance = new CircleRTCManager();
     private CircleRTCListener circleRTCListener;
     private CopyOnWriteArrayList<IRtcEngineEventHandler> eventHandlers = new CopyOnWriteArrayList();
     private CopyOnWriteArrayList<CircleVoiceChannelStateListener> voiceChannelStateListeners = new CopyOnWriteArrayList();
     // 填写项目的 App ID，可在 Agora 控制台中生成。
-    private String appId = "ba85504621304fb894790708d304794f";
+//    private String appId = "ba85504621304fb894790708d304794f";
+    private String appId = "15cb0d28b87b425ea613fc46f7c9f974";
     private RtcEngine mRtcEngine;
     private ChannelMediaOptions options;
     private String channelId;
@@ -93,22 +96,8 @@ public class CircleRTCManager {
 
         @Override
         public void onLeaveChannel(RtcStats stats) {
-            EMLog.e("mRtcEventHandler", "onLeaveChannel");
-            uidsInChannel.clear();
-            uidsMuted.clear();
-            uidHxIds.clear();
-            hxIdUids.clear();
-            uidsSpeak.clear();
-            currentUid = null;
-            channelId = null;
-            ThreadUtils.runOnUiThread(() -> {
-                for (IRtcEngineEventHandler eventHandler : eventHandlers) {
-                    eventHandler.onLeaveChannel(stats);
-                }
-                for (CircleVoiceChannelStateListener voiceChannelStateListener : voiceChannelStateListeners) {
-                    voiceChannelStateListener.onVoiceChannelLeave();
-                }
-            });
+            EMLog.e("TAG", "onLeaveChannel");
+            callbackOnLeaveChannel(stats);
         }
 
         @Override
@@ -187,12 +176,12 @@ public class CircleRTCManager {
                         EMLog.d("uidsSpeak=", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
                         if (hxUserId != null) {
                             uidsSpeak.put(hxUserId, speaker);
-                            EMLog.d("uidsSpeak=","speakers.hxUserId="+hxUserId);
+                            EMLog.d("uidsSpeak=", "speakers.hxUserId=" + hxUserId);
                         }
                         maxVolume = Math.max(maxVolume, speaker.volume);
                     }
-                    EMLog.d("uidsSpeak=","speakers.size()="+speakers.length);
-                    EMLog.d("uidsSpeak=","uidsSpeak.size()="+uidsSpeak.size());
+                    EMLog.d("uidsSpeak=", "speakers.size()=" + speakers.length);
+                    EMLog.d("uidsSpeak=", "uidsSpeak.size()=" + uidsSpeak.size());
                 }
                 for (CircleVoiceChannelStateListener stateListener : voiceChannelStateListeners) {
                     if (currentUid != null) {
@@ -217,6 +206,25 @@ public class CircleRTCManager {
             });
         }
     };
+
+    private void callbackOnLeaveChannel(IRtcEngineEventHandler.RtcStats stats) {
+        uidsInChannel.clear();
+        uidsMuted.clear();
+        uidHxIds.clear();
+        hxIdUids.clear();
+        uidsSpeak.clear();
+        currentUid = null;
+        channelId = null;
+        ThreadUtils.runOnUiThread(() -> {
+            for (IRtcEngineEventHandler eventHandler : eventHandlers) {
+                eventHandler.onLeaveChannel(stats);
+            }
+            for (CircleVoiceChannelStateListener voiceChannelStateListener : voiceChannelStateListeners) {
+                voiceChannelStateListener.onVoiceChannelLeave();
+            }
+        });
+
+    }
 
     private void setChannelAttribute(String channelName, String key, String value) {
         ThreadUtils.runOnUiThread(new Runnable() {
@@ -266,13 +274,11 @@ public class CircleRTCManager {
         });
     }
 
-
     public static CircleRTCManager getInstance() {
         return ourInstance;
     }
 
-    private CircleRTCManager() {
-    }
+    private CircleRTCManager() {}
 
     public CircleRTCManager init(Context context) {
         try {
@@ -327,12 +333,15 @@ public class CircleRTCManager {
         if (circleRTCListener == null) {
             throw new Exception("you should register circleRTCListener first");
         }
-        circleRTCListener.onGenerateRTCToken(channelId, new CircleRTCTokenCallback() {
-            @Override
-            public void setToken(String rctToken, int uid) {
-                //uid传入0，agora sdk内部会给我们随机分配一个uid
-                mRtcEngine.joinChannel(rctToken, channelId, uid, options);
-            }
+        ThreadUtils.runOnUiThread(() -> {
+            circleRTCListener.onGenerateRTCToken(channelId, new CircleRTCTokenCallback() {
+                @Override
+                public void setToken(String rctToken, int uid) {
+                    //uid传入0，agora sdk内部会给我们随机分配一个uid
+                    Log.e("TAG", "mRtcEngine.joinChannel");
+                    mRtcEngine.joinChannel(rctToken, channelId, uid, options);
+                }
+            });
         });
     }
 
@@ -340,11 +349,15 @@ public class CircleRTCManager {
         mRtcEngine.enableLocalAudio(muted);
     }
 
-
     public void leaveChannel() {
-        mRtcEngine.leaveChannel();
+        if (TextUtils.isEmpty(currentUid)) {
+            EMLog.e("TAG", "leaveChannel ->currentUid isEmpty");
+            callbackOnLeaveChannel(null);
+        } else {
+            EMLog.e("TAG", "mRtcEngine.leaveChannel();");
+            mRtcEngine.leaveChannel();
+        }
     }
-
 
     public String getChannelId() {
         return channelId;

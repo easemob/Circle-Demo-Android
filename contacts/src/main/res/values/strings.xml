@@ -91,7 +91,7 @@
     <string name="circle_cagegory_name">分组名称</string>
     <string name="input_category_name">输入分组名称</string>
     <string name="circle_edit_server_cover_hint">头像建议比例1:1，2M以下，支持GIF\n社区封面建议比例16:7，2M以下，支持GIF</string>
-    <string name="circle_overview">概揽</string>
+    <string name="circle_overview">概览</string>
     <string name="circle_server_setting_private_switch_hint">公开社区可以在广场中被搜到，私密社区不可以被搜到</string>
     <string name="circle_whether_private_server">是否为公开社区</string>
     <string name="circle_edit_channel_category">编辑频道分组</string>

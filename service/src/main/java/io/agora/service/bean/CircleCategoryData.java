@@ -1,4 +1,4 @@
-package io.agora.contacts.bean;
+package io.agora.service.bean;
 
 
 import com.hyphenate.chat.EMCircleChannelCategory;

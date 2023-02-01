@@ -46,6 +46,8 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
         if (channel != null) {
             mBinding.swiPrivate.getSwitch().setChecked(channel.type == 0);
             mBinding.groupCount.setVisibility(channel.channelMode == 1 ? View.VISIBLE : View.GONE);
+            mBinding.seekbar.setProgress(channel.seatCount);
+            mBinding.tvCount.setText(String.valueOf(channel.seatCount));
         }
     }
 
@@ -68,6 +70,9 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             parseResource(response, new OnResourceParseCallback<CircleChannel>() {
                 @Override
                 public void onSuccess(@Nullable CircleChannel channel) {
+                    if(channel!=null) {
+                        mBinding.tvCount.setText(String.valueOf(channel.seatCount));
+                    }
                     ToastUtils.showShort(getString(io.agora.service.R.string.update_channel_success));
                 }
 

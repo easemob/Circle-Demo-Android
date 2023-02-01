@@ -9,6 +9,7 @@ public class CustomInfo {
     private String channelId;
     private String channelName;
     private String channelDesc;
+    private String categoryId;
 
     private boolean isIn;
     private String inviter;//邀请者
@@ -94,5 +95,13 @@ public class CustomInfo {
 
     public void setInviter(String inviter) {
         this.inviter = inviter;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
     }
 }

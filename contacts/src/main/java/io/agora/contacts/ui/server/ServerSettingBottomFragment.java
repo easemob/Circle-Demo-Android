@@ -164,7 +164,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         } else if (v.getId() == R.id.csl_create_channel) {
             //创建频道
             //去创建频道页面
-            CreateChannelActivity.actionStart(mContext, server);
+            CreateChannelActivity.actionStart(mContext, server.serverId,null);
             hide();
         } else if (v.getId() == R.id.csl_create_category) {
             //创建频道分组

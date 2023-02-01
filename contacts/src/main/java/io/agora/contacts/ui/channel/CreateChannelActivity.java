@@ -17,14 +17,11 @@ import com.hyphenate.chat.EMCircleChannelMode;
 import com.hyphenate.chat.EMCircleChannelRank;
 import com.hyphenate.chat.EMCircleChannelStyle;
 
-import java.io.Serializable;
-
 import io.agora.contacts.R;
 import io.agora.contacts.databinding.ActivityCreateChannelBinding;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
-import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.model.ChannelViewModel;
 import io.agora.service.widget.SwitchItemView;
@@ -36,13 +33,15 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
     public int mMaxNameNum = 16;
 
     private ChannelViewModel mViewModel;
-    private CircleServer server;
+    private String serverId;
+    private String categoryId;
     private EMCircleChannelStyle style = EMCircleChannelStyle.EMChannelStylePublic;
     private EMCircleChannelMode mode = EMCircleChannelMode.EMCircleChannelModeChat;
 
-    public static void actionStart(Context context, CircleServer server) {
+    public static void actionStart(Context context, String serverId,String categoryId) {
         Intent intent = new Intent(context, CreateChannelActivity.class);
-        intent.putExtra(Constants.SERVER, (Serializable) server);
+        intent.putExtra(Constants.SERVER_ID, serverId);
+        intent.putExtra(Constants.CATEGORY_ID, categoryId);
         context.startActivity(intent);
     }
 
@@ -142,7 +141,8 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
     @Override
     protected void initData() {
         super.initData();
-        server = (CircleServer) getIntent().getSerializableExtra(Constants.SERVER);
+        serverId = getIntent().getStringExtra(Constants.SERVER_ID);
+        categoryId = getIntent().getStringExtra(Constants.CATEGORY_ID);
         mBinding.setVm(mViewModel);
     }
 
@@ -169,7 +169,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
             attribute.setDesc(desc);
             attribute.setRank(EMCircleChannelRank.RANK_2000);
             attribute.setType(style);
-            mViewModel.createChannel(mode, server.serverId, null, attribute, style);
+            mViewModel.createChannel(mode, serverId, categoryId, attribute, style);
         } else if (v.getId() == R.id.iv_back) {
             finish();
         }

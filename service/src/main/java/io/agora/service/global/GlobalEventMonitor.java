@@ -27,6 +27,7 @@ import com.hyphenate.chat.EMChatThreadEvent;
 import com.hyphenate.chat.EMCircleChannel;
 import com.hyphenate.chat.EMCircleChannelInviteInfo;
 import com.hyphenate.chat.EMCircleServerEvent;
+import com.hyphenate.chat.EMCircleUser;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
@@ -550,17 +551,22 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
 
         @Override
-        public void onMemberJoinedChannel(String serverId, String channelId, String member) {
+        public void onMemberJoinedChannel(String serverId, String channelId, EMCircleUser circleUser) {
             CircleChannel channel = getChannelDao().getChannelByChannelID(channelId);
             if (channel != null) {
                 List<CircleUser> channelUsers = channel.channelUsers;
                 if (channelUsers != null) {
-                    channelUsers.add(new CircleUser(member));
+                    CircleUser user = new CircleUser();
+                    user.setRoleID(circleUser.getRole().getRoleId());
+                    user.setUsername(circleUser.getUserId());
+                    channelUsers.add(user);
                     getChannelDao().updateChannel(channel);
                 }
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_channel, member, channel.name));
+                if(!TextUtils.isEmpty(channel.name)) {
+                    ToastUtils.showShort(applicationContext.getString(R.string.circle_join_channel, circleUser.getUserId(), channel.name));
+                }
             }
-            LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, member));
+            LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, circleUser.getUserId()));
         }
 
         @Override
@@ -585,7 +591,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onMemberRemovedFromChannel(String serverId, String channelId, String member, String initiator) {
-            LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY).post(new ChannelMemberRemovedNotifyBean(serverId, channelId, member, initiator));
+            LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY).post(new ChannelMemberRemovedNotifyBean(serverId, channelId,initiator, member ));
         }
 
         @Override
@@ -607,6 +613,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                     info.setChannelId(inviteInfo.getChannelId());
                     info.setChannelDesc(inviteInfo.getChannelDesc());
                     info.setChannelName(inviteInfo.getChannelName());
+                    info.setCategoryId(inviteInfo.getCategoryId());
 
                     CircleUtils.showChannelInviteDialog(currentActivity, info);
                     LiveEventBus.get(Constants.RECEIVE_INVITATION_NOTIFY).post(new ChannelInvitationNotifyBean(inviteInfo, inviter));

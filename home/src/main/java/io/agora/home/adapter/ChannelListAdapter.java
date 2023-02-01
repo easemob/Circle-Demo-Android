@@ -127,6 +127,8 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
             if(TextUtils.equals(node.getId(), Constants.VOICE_CHANNEL_MEMBER_HEAD_ID+node.getPId())) {
                 //语聊房成员item
                 tvHeadName.setText(mContext.getString(R.string.circle_voice_channel_member));
+            }else{
+                tvHeadName.setText(mContext.getString(R.string.circle_thread));
             }
             ivThreadHeadIcon.setImageResource(node.getIcon());
         }

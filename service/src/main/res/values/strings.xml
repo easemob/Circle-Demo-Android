@@ -239,7 +239,7 @@
     <string name="circle_edit_channel">编辑频道</string>
     <string name="circlr_move_channel">频道分组</string>
     <string name="circle_default_category">默认分组</string>
-    <string name="circle_channel_overview_title">频道概揽</string>
+    <string name="circle_channel_overview_title">频道概览</string>
     <string name="circle_whether_private_channel">是否为公开频道</string>
     <string name="circle_change_channel_category">更改频道分组</string>
     <string name="circle_leave_channel">离开频道</string>

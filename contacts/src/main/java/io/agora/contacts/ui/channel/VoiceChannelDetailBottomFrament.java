@@ -38,6 +38,7 @@ import io.agora.contacts.ui.InviteUserToChannelBottomFragment;
 import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.bean.channel.ChannelEventNotifyBean;
+import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.DatabaseManager;
@@ -63,7 +64,51 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
     private List<VoiceChannelUser> voiceChannelUsers = new ArrayList<>();
     private VoiceChannelListAdapter adapter;
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
-    private IRtcEngineEventHandler eventHandler;
+    private IRtcEngineEventHandler eventHandler = new IRtcEngineEventHandler() {
+        @Override
+        public void onJoinChannelSuccess(String channelName, int uid, int elapsed) {
+            super.onJoinChannelSuccess(channelName, uid, elapsed);
+            //默认设置自己闭麦
+            CircleRTCManager.getInstance().muteSelf(false);
+            mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
+            mBinding.cslMuteExit.setVisibility(View.VISIBLE);
+            channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
+        }
+
+        @Override
+        public void onUserJoined(int uid, int elapsed) {
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onUserOffline(int uid, int reason) {
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onLocalAudioStateChanged(int state, int error) {
+        }
+
+        @Override
+        public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
+            initInChannelReferenceButton();
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onLeaveChannel(RtcStats stats) {
+            //退出声网后再退聊天室
+            if (channel != null) {
+                channelViewModel.leaveChannel(channel);
+            }
+        }
+
+        @Override
+        public void onAudioVolumeIndication(AudioVolumeInfo[] speakers, int totalVolume) {
+            Log.e("uidsSpeak", "onAudioVolumeIndication notifyDataSetChanged");
+            adapter.notifyDataSetChanged();
+        }
+    };
     private AlertDialog dialog;
     private CircleUser selectedUser;
 
@@ -95,19 +140,20 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         channelViewModel = new ViewModelProvider(this).get(ChannelViewModel.class);
         serverViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
         channelViewModel.voiceChannelMembersLiveData.observe(getViewLifecycleOwner(), response -> {
-            parseResource(response, new OnResourceParseCallback<ConcurrentHashMap<String,List<CircleUser>>>() {
+            parseResource(response, new OnResourceParseCallback<ConcurrentHashMap<String, List<CircleUser>>>() {
                 @Override
-                public void onSuccess(@Nullable ConcurrentHashMap<String,List<CircleUser>> circleUsersHp) {
+                public void onSuccess(@Nullable ConcurrentHashMap<String, List<CircleUser>> circleUsersHp) {
                     //刷新列表
-                    if (circleUsersHp != null&&channel!=null) {
+                    if (circleUsersHp != null && channel != null) {
                         voiceChannelUsers.clear();
-                        List<CircleUser> circleUsers= circleUsersHp.get(channel.channelId);
+                        List<CircleUser> circleUsers = circleUsersHp.get(channel.channelId);
                         for (CircleUser circleUser : circleUsers) {
                             VoiceChannelUser voiceChannelUser = new VoiceChannelUser(circleUser);
                             voiceChannelUsers.add(voiceChannelUser);
                         }
                     }
                     adapter.refresh(voiceChannelUsers);
+                    checkRTCState();
                     initInChannelReferenceButton();
                 }
             });
@@ -124,7 +170,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    if (!TextUtils.isEmpty(message)) {
+                    if (!TextUtils.isEmpty(message)&&code!=205) {//205 -> user is not in channel
                         ToastUtils.showShort(message);
                     }
                 }
@@ -183,67 +229,24 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             });
         });
 
-
-
-        eventHandler = new IRtcEngineEventHandler() {
-            @Override
-            public void onJoinChannelSuccess(String channelName, int uid, int elapsed) {
-                super.onJoinChannelSuccess(channelName, uid, elapsed);
-                //默认设置自己闭麦
-                CircleRTCManager.getInstance().muteSelf(true);
-                mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
-                mBinding.cslMuteExit.setVisibility(View.VISIBLE);
+        LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), channelEventNotifyBean -> {
+            if (channel != null) {
                 channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             }
-
-            @Override
-            public void onUserJoined(int uid, int elapsed) {
-                adapter.notifyDataSetChanged();
+        });
+        LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), channelEventNotifyBean -> {
+            if (channel != null) {
+                channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             }
-
-            @Override
-            public void onUserOffline(int uid, int reason) {
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onLocalAudioStateChanged(int state, int error) {
-
-            }
-
-            @Override
-            public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onLeaveChannel(RtcStats stats) {
-                //退出声网后再退聊天室
-                if (channel != null) {
-                    channelViewModel.leaveChannel(channel);
+        });
+        LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelMemberRemovedNotifyBean.class).observe(getViewLifecycleOwner(), channelMemberRemovedNotifyBean -> {
+            if (channel != null) {
+                if(TextUtils.equals(channelMemberRemovedNotifyBean.getMember(),AppUserInfoManager.getInstance().getCurrentUserName())) {
+                    //被踢的人是自己就退出RTC频道
+                    CircleRTCManager.getInstance().leaveChannel();
                 }
-            }
-
-            @Override
-            public void onAudioVolumeIndication(AudioVolumeInfo[] speakers, int totalVolume) {
-                Log.e("uidsSpeak", "onAudioVolumeIndication notifyDataSetChanged");
-                adapter.notifyDataSetChanged();
-            }
-        };
-
-        LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(),channelEventNotifyBean->{
-            if(channel!=null) {
-                channelViewModel.getVoiceChannelMembers(channel.serverId,channel.channelId);
-            }
-        });
-        LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(),channelEventNotifyBean->{
-            if(channel!=null) {
-                channelViewModel.getVoiceChannelMembers(channel.serverId,channel.channelId);
-            }
-        });
-        LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(),channelEventNotifyBean->{
-            if(channel!=null) {
-                channelViewModel.getVoiceChannelMembers(channel.serverId,channel.channelId);
+                //刷新列表
+                channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             }
         });
         mBinding.ivSetting.setOnClickListener(this);
@@ -256,19 +259,10 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
 
     }
 
-    private void onFetchSelfRoleSuccess(EMCircleUserRole role) {
-        selfRole = role;
-        mBinding.ivSetting.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
-    }
-
-    private void initInChannelReferenceButton() {
+    private void checkRTCState() {
         String currentUserName = AppUserInfoManager.getInstance().getCurrentUserName();
-        mBinding.btnJoinVoiceChannel.setVisibility(View.VISIBLE);
-        mBinding.cslMuteExit.setVisibility(View.GONE);
         for (VoiceChannelUser data : voiceChannelUsers) {
             if (TextUtils.equals(data.username, currentUserName)) {//我在语聊房
-                mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
-                mBinding.cslMuteExit.setVisibility(View.VISIBLE);
                 if (!TextUtils.equals(CircleRTCManager.getInstance().getChannelId(), channel.channelId)) {
                     try {
                         CircleRTCManager.getInstance().joinChannel(channel.channelId);
@@ -279,15 +273,40 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
                 break;
             }
         }
+    }
+
+    private void onFetchSelfRoleSuccess(EMCircleUserRole role) {
+        selfRole = role;
+        mBinding.ivSetting.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
+    }
+
+    private void initInChannelReferenceButton() {
+        String currentUserName = AppUserInfoManager.getInstance().getCurrentUserName();
+        boolean inRTCChannel = false;
+        for (VoiceChannelUser data : voiceChannelUsers) {
+            if (TextUtils.equals(data.username, currentUserName)) {//我在语聊房
+                inRTCChannel = true;
+                break;
+            }
+        }
+        if (inRTCChannel) {
+            mBinding.btnJoinVoiceChannel.setVisibility(View.GONE);
+            mBinding.cslMuteExit.setVisibility(View.VISIBLE);
+            mBinding.ivAddFriend.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.btnJoinVoiceChannel.setVisibility(View.VISIBLE);
+            mBinding.cslMuteExit.setVisibility(View.GONE);
+            mBinding.ivAddFriend.setVisibility(View.GONE);
+        }
         ConcurrentHashMap<String, Boolean> uidsMuted = CircleRTCManager.getInstance().getUidsMuted();
         String currentUid = CircleRTCManager.getInstance().getCurrentUid();
-        if(currentUid!=null) {
+        if (currentUid != null) {
             if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
                 //开麦状态
-                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_gray);
+                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_white);
             } else {
                 //闭麦状态
-                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_white);
+                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_gray);
             }
         }
     }
@@ -338,7 +357,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             //关闭麦克风
             ConcurrentHashMap<String, Boolean> uidsMuted = CircleRTCManager.getInstance().getUidsMuted();
             String currentUid = CircleRTCManager.getInstance().getCurrentUid();
-            if (currentUid!=null&&Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
+            if (currentUid != null && Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
                 CircleRTCManager.getInstance().muteSelf(true);
             } else {
                 CircleRTCManager.getInstance().muteSelf(false);
@@ -364,8 +383,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             if (dialog != null) {
                 dialog.dismiss();
             }
-            getActivity().finish();
-        }else if (v.getId() == R.id.tv_kick) {
+        } else if (v.getId() == R.id.tv_kick) {
             //踢出频道
             if (selectedUser != null) {
                 channelViewModel.removeUserFromChannel(channel.serverId, channel.channelId, selectedUser.getUsername());

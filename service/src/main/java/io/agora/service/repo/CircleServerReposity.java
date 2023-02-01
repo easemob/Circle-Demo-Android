@@ -159,6 +159,7 @@ public class CircleServerReposity extends ServiceReposity {
                             if (response != null) {
                                 int resCode = response.first;
                                 String responseInfo = response.second;
+//                                EMLog.e("EMARHttpAPI",responseInfo);
                                 RecommendServiceBean recommendServiceBean = new Gson().fromJson(responseInfo, RecommendServiceBean.class);
                                 if (resCode == 200 && recommendServiceBean != null && !CollectionUtils.isEmpty(recommendServiceBean.getServers())) {
                                     List<CircleServer> servers = new ArrayList<>();

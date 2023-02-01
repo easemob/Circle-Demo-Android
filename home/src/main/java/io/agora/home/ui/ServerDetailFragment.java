@@ -60,10 +60,12 @@ import io.agora.home.utils.TreeHelper;
 import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.bean.ChannelInviteData;
+import io.agora.service.bean.CircleCategoryData;
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.ThreadData;
 import io.agora.service.bean.channel.ChannelEventNotifyBean;
 import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
+import io.agora.service.bean.channel.ChannelUpdateNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.DatabaseManager;
@@ -84,20 +86,19 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     private ServerDetailViewModel mServerViewModel;
     private ChannelViewModel mChannelViewModel;
     private ChannelListAdapter adapter;
-    private IRtcEngineEventHandler eventHandler=new IRtcEngineEventHandler() {
+    private IRtcEngineEventHandler eventHandler = new IRtcEngineEventHandler() {
         @Override
         public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
-            if(adapter!=null) {
+            if (adapter != null) {
                 adapter.notifyDataSetChanged();
             }
         }
     };
-
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleChannel>> channels = new ConcurrentHashMap();//key:serverId , value:(key:channelId , value:channel)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, EMChatThread>> threads = new ConcurrentHashMap();//key:channelId , value:(key:threadId , value:thread)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleServer.Tag>> tags = new ConcurrentHashMap();//key:serverId , value:(key:tagId , value:tag)
     private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleCategory>> categories = new ConcurrentHashMap();//key:serverId , value:(key:categoryId , value:category)
-    private ConcurrentHashMap<String,List<CircleUser>> channelUsers =new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, CircleUser>> channelUsers = new ConcurrentHashMap<>();//key:channelId , value:(key:userId , value:circlUser)
     private List<Node> sortedNodes = new ArrayList<>();//装在多级列表真正的数据
     private CircleServer currrentServer;
     private ShowMode showMode = ShowMode.NORMAL;
@@ -132,7 +133,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     case 2:
                         return R.layout.item_head;//子区/语聊房成员head
                     case 3:
-                        if(node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
+                        if (node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
                             //语聊房成员item
                             return R.layout.item_home_voice_channel_member;
                         }
@@ -328,24 +329,31 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
         mServerViewModel.selfRoleLiveData.observe(getViewLifecycleOwner(), response -> {
         });
-        mChannelViewModel.voiceChannelMembersLiveData.observe(getViewLifecycleOwner(),response->{
+        mChannelViewModel.voiceChannelMembersLiveData.observe(getViewLifecycleOwner(), response -> {
             parseResource(response, new OnResourceParseCallback<ConcurrentHashMap<String, List<CircleUser>>>() {
                 @Override
                 public void onSuccess(@Nullable ConcurrentHashMap<String, List<CircleUser>> data) {
-                    if(data!=null) {
+                    if (data != null) {
                         Iterator<String> iterator = data.keySet().iterator();
-                        boolean dataChanged=false;
+                        boolean dataChanged = false;
                         while (iterator.hasNext()) {
                             String key = iterator.next();
-                            List<CircleUser> oldUsers = channelUsers.get(key);
+                            ConcurrentHashMap<String, CircleUser> oldMap = channelUsers.get(key);
                             List<CircleUser> newUsers = data.get(key);
-                            if((oldUsers==null||oldUsers.size()==0)&&(newUsers==null||newUsers.size()==0)) {
-                                break;
+                            if(oldMap!=null) {
+                                Collection<CircleUser> oldUsers = oldMap.values();
+                                if ((oldUsers == null || oldUsers.size() == 0) && (newUsers == null || newUsers.size() == 0)) {
+                                    break;
+                                }
                             }
-                            dataChanged=true;
-                            channelUsers.put(key,newUsers);
+                            dataChanged = true;
+                            ConcurrentHashMap<String, CircleUser> temp = new ConcurrentHashMap<>();
+                            for (int i = 0; i < newUsers.size(); i++) {
+                                temp.put(newUsers.get(i).getUsername(), newUsers.get(i));
+                            }
+                            channelUsers.put(key, temp);
                         }
-                        if(dataChanged) {
+                        if (dataChanged) {
                             buildDatasAndRefreshList();
                         }
                     }
@@ -382,6 +390,23 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     removeChannel(circleChannel.serverId, circleChannel.channelId);
                 } else {
                     removeChannelThreads(circleChannel.serverId, circleChannel.channelId);
+                }
+                //自己走应该把当前语聊房里所有成员数据都清空，因为出来了就收不到成员进出的通知了，避免不刷新成员列表
+                //移除自己
+                channelUsers.get(circleChannel.channelId).clear();
+                buildDatasAndRefreshList();
+            }
+        });
+        LiveEventBus.get(Constants.CHANNEL_JOIN, ChannelUpdateNotifyBean.class).observe(this,bean->{
+            //自己加入某个语聊频道
+            if(bean!=null) {
+                CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
+                if(circleChannel.channelMode==1) {
+                    ConcurrentHashMap<String, CircleUser> users = channelUsers.get(bean.getChannelId());
+                    if(users!=null&&users.size()>0){
+                        //重新拉取语聊房成员列表
+                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(),bean.getChannelId());
+                    }
                 }
             }
         });
@@ -433,8 +458,36 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                         removeChannelThreads(bean.getServerId(), bean.getChannelId());
                     }
                 }
+                //移除自己
+                channelUsers.get(bean.getChannelId()).remove(bean.getMember());
+                buildDatasAndRefreshList();
             }
         });
+
+        LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (bean != null) {
+                CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
+                //移除自己
+                channelUsers.get(bean.getChannelId()).remove(bean.getUserId());
+                if(circleChannel.channelMode==1) {
+                    buildDatasAndRefreshList();
+                }
+            }
+        });
+        LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (bean != null) {
+                //添加user到语聊成员列表中
+                CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
+                if(circleChannel.channelMode==1) {//语聊房
+                    ConcurrentHashMap<String, CircleUser> users = channelUsers.get(bean.getChannelId());
+                    if(users!=null&&users.size()>0){
+                        //重新拉取语聊房成员列表
+                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(),bean.getChannelId());
+                    }
+                }
+            }
+        });
+
         LiveEventBus.get(Constants.SERVER_UPDATED_NOTIFY, EMCircleServerEvent.class).observe(getViewLifecycleOwner(), event -> {
             //社区其他信息已在GlobalEventMonitor通过room传递给首页livedata更新，此处只用更新tag即可
             mServerViewModel.fetchServerTags(event.getId());
@@ -458,7 +511,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         });
 
         LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), easeEvent -> {
-            if(adapter!=null) {
+            if (adapter != null) {
                 //刷新未读数
                 adapter.notifyDataSetChanged();
             }
@@ -585,9 +638,6 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private void removeChannelThreads(String targetServerId, String targetChannelId) {
         threads.remove(targetChannelId);
-        if (android.text.TextUtils.equals(targetServerId, currrentServer.serverId) && showMode == ShowMode.NORMAL) {
-            buildDatasAndRefreshList();
-        }
     }
 
     private void refreshServerData(CircleServer serverModified) {
@@ -599,6 +649,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     threads.remove(channelId);
                 }
             }
+            categories.remove(serverModified.serverId);
             channels.remove(serverModified.serverId);
             tags.remove(serverModified.serverId);
 
@@ -745,10 +796,12 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     //是语聊房的话在下一级要添加"语聊房成员"item
                     allNodes.add(getVoiceChannelMemberHeadNode(channel));
                     //插入语聊房成员数据
-                    List<CircleUser> circleUsers = this.channelUsers.get(channel.channelId);
-                    if(circleUsers!=null) {
-                        for (int i = 0; i < circleUsers.size(); i++) {
-                            allNodes.add(getVoiceChannelMemberItemNode(channel,circleUsers.get(i)));
+                    ConcurrentHashMap<String, CircleUser> channelUsersMap = this.channelUsers.get(channel.channelId);
+                    if (channelUsersMap != null&&channelUsersMap.size()>0) {
+                        Iterator<CircleUser> iterator = channelUsersMap.values().iterator();
+                        while (iterator.hasNext()){
+                            CircleUser circleUser = iterator.next();
+                            allNodes.add(getVoiceChannelMemberItemNode(channel,circleUser));
                         }
                     }
                 }
@@ -801,9 +854,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         node.setIcon(R.drawable.tree_ec);
         return node;
     }
+
     private Node getVoiceChannelMemberItemNode(CircleChannel channel, CircleUser circleUser) {
-        Node node = new Node(circleUser.username,Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + channel.channelId, circleUser.getVisiableName());
-        if(!TextUtils.isEmpty(circleUser.avatar)) {
+        Node node = new Node(circleUser.username, Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + channel.channelId, circleUser.getVisiableName());
+        if (!TextUtils.isEmpty(circleUser.avatar)) {
             node.setExt(circleUser.avatar);
         }
         return node;
@@ -839,9 +893,9 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             for (CircleChannel channel : data) {
                 ConcurrentHashMap<String, CircleChannel> channelsContainer = getChannelsContainer(channel.serverId);
                 channelsContainer.put(channel.channelId, channel);
-                if(channel.channelMode==0) {
+                if (channel.channelMode == 0) {
                     mServerViewModel.getChannelThreads(channel.channelId);
-                }else{
+                } else {
                     buildDatasAndRefreshList();
                 }
             }
@@ -910,7 +964,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         } else if (v.getId() == R.id.btn_join_in) {
             //加入server
             mServerViewModel.joinServer(currrentServer.serverId);
-        }else if(v.getId()==R.id.iv_desc_more) {
+        } else if (v.getId() == R.id.iv_desc_more) {
             //底部弹框显示社区介绍
             LiveEventBus.get(Constants.SHOW_SERVER_INTRODUCTION_FRAGMENT, CircleServer.class).post(currrentServer);
         }
@@ -950,25 +1004,26 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     //点击的是"+"号，创建频道
                     if (showMode == ShowMode.NORMAL) {
                         //去创建频道
-                        LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleServer.class).post(currrentServer);
+                        CircleCategoryData categoryData = new CircleCategoryData(currrentServer.serverId, node.getId(), node.getName());
+                        LiveEventBus.get(Constants.SHOW_CREATE_CHANNEL_FRAGMENT, CircleCategoryData.class).post(categoryData);
                     } else {
                         ToastUtils.showShort(getString(io.agora.service.R.string.circle_preview_mode));
                     }
                     break;
                 }
             case 2:
-                if(android.text.TextUtils.equals(node.getId(),Constants.VOICE_CHANNEL_MEMBER_HEAD_ID+node.getPId())) {
+                if (android.text.TextUtils.equals(node.getId(), Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + node.getPId())) {
                     //点击的是语聊房成员item
                     if (!node.isLeaf()) {
                         node.setExpand(!node.isExpand());
                         List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
                         adapter.refresh(visiableNodes);
-                    }else{
+                    } else {
                         //如果语聊房成员数据为空，则请求语聊房成员数据
-                        mChannelViewModel.getVoiceChannelMembers(currrentServer.serverId,node.getPId());
+                        mChannelViewModel.getVoiceChannelMembers(currrentServer.serverId, node.getPId());
                     }
 
-                }else{
+                } else {
                     if (!node.isLeaf()) {
                         node.setExpand(!node.isExpand());
                         List<Node> visiableNodes = TreeHelper.filterVisibleNode(sortedNodes);
@@ -1031,7 +1086,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 break;
             case 1:
                 //长按频道
-                showChannelSettingBottomFragment(currrentServer.serverId,node.getId());
+                showChannelSettingBottomFragment(currrentServer.serverId, node.getId());
                 break;
             case 2:
                 break;
@@ -1043,8 +1098,8 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private void showChannelSettingBottomFragment(String serverId, String channelId) {
         CircleChannel circleChannel = getChannelsContainer(serverId).get(channelId);
-        if(circleChannel!=null) {
-            LiveEventBus.get(Constants.SHOW_CHANNEL_SETTING_FRAGMENT,CircleChannel.class).post(circleChannel);
+        if (circleChannel != null && circleChannel.channelMode == 0) {//文字频道才弹框
+            LiveEventBus.get(Constants.SHOW_CHANNEL_SETTING_FRAGMENT, CircleChannel.class).post(circleChannel);
         }
     }
 
@@ -1081,7 +1136,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(eventHandler!=null) {
+        if (eventHandler != null) {
             CircleRTCManager.getInstance().unRegisterRTCEventListener(eventHandler);
         }
     }

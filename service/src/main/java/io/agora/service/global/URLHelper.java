@@ -9,8 +9,8 @@ import com.hyphenate.cloud.EMHttpClient;
 public class URLHelper {
 
     public final static String GET_RECOMMEND_SERVER_URL = getBaseUrl()+"/circle/server/recommend/list";
-//    public final static String UPLOAD_IMAGE_URL = getBaseUrl()+"/chatfiles";
-    public final static String UPLOAD_IMAGE_URL = "https://a1.easemob.com/easemob-demo/circle/chatfiles";
+    public final static String UPLOAD_IMAGE_URL = getBaseUrl()+"/chatfiles";
+//    public final static String UPLOAD_IMAGE_URL = "https://a1.easemob.com/easemob-demo/circle/chatfiles";
 
     public static String getBaseUrl() {
 //        return EMHttpClient.getInstance().chatConfig().a(true, false);

@@ -7,7 +7,7 @@ import java.util.List;
 
 import io.agora.common.base.BaseAdapter;
 import io.agora.contacts.R;
-import io.agora.contacts.bean.CircleCategoryData;
+import io.agora.service.bean.CircleCategoryData;
 
 
 public class CategoryListAdapter extends BaseAdapter<CircleCategoryData> {

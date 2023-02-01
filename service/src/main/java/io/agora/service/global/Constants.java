@@ -15,6 +15,7 @@ public class Constants {
     public static final String LEAVE_OR_DELETE_SERVER = "leave_or_delete_server";
     public static final String CHANNEL_CHANGED = "channel_changed";
     public static final String CHANNEL_LEAVE = "channel_leave";
+    public static final String CHANNEL_JOIN = "channel_join";
     public static final String CHANNEL_DELETE = "channel_delete";
     public static final String NOTIFY_CHANGE = "notify_change";
     public static final String CATEGORY_DELETE = "category_delete";
@@ -82,6 +83,7 @@ public class Constants {
     public static final String SERVER = "server";
     public static final String SERVERS = "servers";
 
+    public static final String CATEGORY_ID = "category_id";
     public static final String CHANNEL_ID = "channel_id";
     public static final String MESSAGE_ID = "message_id";
 

@@ -97,9 +97,9 @@
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="68dp"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/csl_name_desc" />
 
         <Button
@@ -121,6 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@color/black"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <ImageButton
