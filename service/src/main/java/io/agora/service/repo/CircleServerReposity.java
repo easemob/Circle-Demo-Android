@@ -18,7 +18,7 @@ import com.blankj.utilcode.util.ThreadUtils;
 import com.google.gson.Gson;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMValueCallBack;
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 import com.hyphenate.chat.EMCircleServer;
 import com.hyphenate.chat.EMCircleServerAttribute;
 import com.hyphenate.chat.EMCircleServerSearchType;
@@ -772,12 +772,12 @@ public class CircleServerReposity extends ServiceReposity {
     }
 
     private void doFetchServerCategories(String serverID, int limit, List<CircleCategory> categories, String cursor, ResultCallBack<LiveData<List<CircleCategory>>> callBack) {
-        getCircleManager().fetchCategoryInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleChannelCategory>>() {
+        getCircleManager().fetchCategoriesInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleCategory>>() {
             @Override
-            public void onSuccess(EMCursorResult<EMCircleChannelCategory> value) {
-                List<EMCircleChannelCategory> datas = value.getData();
+            public void onSuccess(EMCursorResult<EMCircleCategory> value) {
+                List<EMCircleCategory> datas = value.getData();
                 if (!CollectionUtils.isEmpty(datas)) {
-                    for (EMCircleChannelCategory data : datas) {
+                    for (EMCircleCategory data : datas) {
                         categories.add(new CircleCategory(data));
                     }
                 }

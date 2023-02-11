@@ -9,7 +9,7 @@
         android:id="@+id/iv_smile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/circle_smile"
+        android:src="@drawable/circle_earth"
         app:layout_constraintBottom_toTopOf="@id/tv_hint"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

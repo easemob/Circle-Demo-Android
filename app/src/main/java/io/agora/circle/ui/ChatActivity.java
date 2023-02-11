@@ -32,17 +32,21 @@ import com.hyphenate.easeui.provider.EaseUserProfileProvider;
 import com.hyphenate.easeui.utils.ShowMode;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
+import java.util.List;
+
 import io.agora.chat.ui.ChatFragment;
-import io.agora.service.model.ChatViewModel;
 import io.agora.circle.R;
 import io.agora.circle.databinding.ActivityChatBinding;
 import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.ui.channel.ChannelSettingBottomFragment;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.bean.ThreadData;
+import io.agora.service.bean.server.ServerMembersNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.global.Constants;
+import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.model.ChatViewModel;
 import io.agora.service.utils.GroupHelper;
 
 @Route(path = "/chat/ChatActivity")
@@ -235,7 +239,7 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(CHANNEL, channel);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight()-ConvertUtils.dp2px(1));
+                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(1));
             }
         });
         LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(this, event -> {
@@ -293,6 +297,21 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
             if (circleChannel != null) {
                 if (TextUtils.equals(conversationId, circleChannel.channelId)) {
                     finish();
+                }
+            }
+        });
+        LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(this, bean -> {
+            if (bean != null) {
+                List<String> ids = bean.getIds();
+                if (ids != null) {
+                    for (int i = 0; i < ids.size(); i++) {
+                        if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName()) &&
+                                channel != null &&
+                                TextUtils.equals(bean.getServerId(), channel.serverId)) {
+                            finish();
+                            break;
+                        }
+                    }
                 }
             }
         });

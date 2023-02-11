@@ -166,4 +166,6 @@ public class Constants {
     public static final String SHOW_RED_DOT ="show_red_dot" ;
 
     public static final String DEFAULT_CATEGORY_NAME ="Default Channel Category" ;
+    public static final int CHANNEL_MAX_USERS_2000 = 2000;
+    public static final int CHANNEL_MAX_USERS_20 = 20;
 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMValueCallBack;
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.service.callbacks.ResultCallBack;
@@ -19,14 +19,14 @@ import io.agora.service.net.Resource;
 
 public class CircleCagegoryReposity extends ServiceReposity {
 
-    public LiveData<Resource<EMCircleChannelCategory>> createCategory(String serverId, String categoryName) {
-        return new NetworkOnlyResource<EMCircleChannelCategory>() {
+    public LiveData<Resource<EMCircleCategory>> createCategory(String serverId, String categoryName) {
+        return new NetworkOnlyResource<EMCircleCategory>() {
 
             @Override
-            protected void createCall(@NonNull ResultCallBack<LiveData<EMCircleChannelCategory>> callBack) {
-                getCircleManager().createCategory(serverId, categoryName, new EMValueCallBack<EMCircleChannelCategory>() {
+            protected void createCall(@NonNull ResultCallBack<LiveData<EMCircleCategory>> callBack) {
+                getCircleManager().createCategory(serverId, categoryName, new EMValueCallBack<EMCircleCategory>() {
                     @Override
-                    public void onSuccess(EMCircleChannelCategory value) {
+                    public void onSuccess(EMCircleCategory value) {
                         callBack.onSuccess(createLiveData(value));
                         //插入数据库
                         getCategoryDao().insert(new CircleCategory(value));
@@ -46,7 +46,7 @@ public class CircleCagegoryReposity extends ServiceReposity {
         return new NetworkOnlyResource<Boolean>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
-                getCircleManager().destoryCategory(serverId, categoryId, new EMCallBack() {
+                getCircleManager().destroyCategory(serverId, categoryId, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         callBack.onSuccess(createLiveData(true));
@@ -73,9 +73,9 @@ public class CircleCagegoryReposity extends ServiceReposity {
         return new NetworkOnlyResource<Boolean>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
-                getCircleManager().updateCategory(serverId, categoryId, categoryName, new EMValueCallBack<EMCircleChannelCategory>() {
+                getCircleManager().updateCategory(serverId, categoryId, categoryName, new EMValueCallBack<EMCircleCategory>() {
                     @Override
-                    public void onSuccess(EMCircleChannelCategory value) {
+                    public void onSuccess(EMCircleCategory value) {
                         getCategoryDao().updateCategory(new CircleCategory(value));
                         callBack.onSuccess(createLiveData(true));
                     }
@@ -93,7 +93,7 @@ public class CircleCagegoryReposity extends ServiceReposity {
         return new NetworkOnlyResource<String>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<String>> callBack) {
-                getCircleManager().transferChannel(serverId, newCategoryId, channelId, new EMCallBack() {
+                getCircleManager().transferChannel(serverId,channelId, newCategoryId, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         //更新数据库

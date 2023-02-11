@@ -156,7 +156,7 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             setText(holder.tvDesc, bean.desc);
             Glide.with(holder.ivServer)
                     .load(bean.background)
-                    .placeholder(ServiceReposity.getRandomServerIcon(bean.serverId))
+                    .placeholder(ServiceReposity.getRandomServerBg(bean.serverId))
                     .into(holder.ivServer);
             Glide.with(holder.ivServerIcon)
                     .load(bean.icon)

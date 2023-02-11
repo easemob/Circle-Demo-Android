@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.android.arouter.utils.TextUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 
 import java.io.Serializable;
 
@@ -47,9 +47,9 @@ public class CreateCategoryActivity extends BaseInitActivity<ActivityCreateCateg
         super.initConfig();
         mViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         mViewModel.createCategoryLiveData.observe(this, response -> {
-            parseResource(response, new OnResourceParseCallback<EMCircleChannelCategory>() {
+            parseResource(response, new OnResourceParseCallback<EMCircleCategory>() {
                 @Override
-                public void onSuccess(@Nullable EMCircleChannelCategory circleChannel) {
+                public void onSuccess(@Nullable EMCircleCategory circleChannel) {
                     ToastUtils.showShort(getString(io.agora.service.R.string.create_category_success));
                     finish();
                 }

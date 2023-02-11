@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "486af3e2270c4c6edebfc2c61f6db614",
+    "identityHash": "c360be6e6eb3bdcff8b3bb863570c722",
     "entities": [
       {
         "tableName": "circle_server",
@@ -348,7 +348,7 @@
       },
       {
         "tableName": "circle_category",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`categoryId` TEXT NOT NULL, `serverId` TEXT, `categoryName` TEXT, PRIMARY KEY(`categoryId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`categoryId` TEXT NOT NULL, `serverId` TEXT, `categoryName` TEXT, `isdefault` INTEGER NOT NULL, PRIMARY KEY(`categoryId`))",
         "fields": [
           {
             "fieldPath": "categoryId",
@@ -367,6 +367,12 @@
             "columnName": "categoryName",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "isdefault",
+            "columnName": "isdefault",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -382,7 +388,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '486af3e2270c4c6edebfc2c61f6db614')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c360be6e6eb3bdcff8b3bb863570c722')"
     ]
   }
 }

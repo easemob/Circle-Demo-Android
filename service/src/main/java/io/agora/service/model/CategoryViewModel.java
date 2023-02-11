@@ -6,7 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
 
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 
 import io.agora.service.net.Resource;
 import io.agora.service.repo.CircleCagegoryReposity;
@@ -19,7 +19,7 @@ public class CategoryViewModel extends ServiceViewModel{
 
     public ObservableField<String> cagegoryName = new ObservableField<>();
     private CircleCagegoryReposity categoryReposity = new CircleCagegoryReposity();
-    public SingleSourceLiveData<Resource<EMCircleChannelCategory>> createCategoryLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<EMCircleCategory>> createCategoryLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<Boolean>> deleteCategoryLiveData=new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<Boolean>> updateCategoryLiveData=new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> transferCategoryLiveData=new SingleSourceLiveData<>();

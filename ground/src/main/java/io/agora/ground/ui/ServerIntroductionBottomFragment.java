@@ -126,8 +126,8 @@ public class ServerIntroductionBottomFragment extends BaseInitFragment<FragmentJ
         super.initData();
         if (server != null) {
             Glide.with(mContext)
-                    .load(ServiceReposity.getRandomServerIcon(server.serverId))
-                    .placeholder(ServiceReposity.getRandomServerIcon(server.serverId))
+                    .load(server.background)
+                    .placeholder(ServiceReposity.getRandomServerBg(server.serverId))
                     .into(mBinding.ivServer);
             Glide.with(mContext)
                     .load(server.icon)

@@ -45,7 +45,7 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     private void initRoleRelatedViewVisiablity(EMCircleUserRole role) {
         mBinding.tvEditChannel.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
         mBinding.cslMoveChannel.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
-        mBinding.cslLeaveChannel.setVisibility(role == EMCircleUserRole.USER ? View.VISIBLE : View.GONE);
+//        mBinding.cslLeaveChannel.setVisibility(role == EMCircleUserRole.USER ? View.VISIBLE : View.GONE);
     }
 
     @Override

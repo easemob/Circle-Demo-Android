@@ -204,7 +204,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
     private void setServerData(CircleServer server) {
-        int randomServerIcon = ServiceReposity.getRandomServerIcon(server.serverId);
+        int randomServerIcon = ServiceReposity.getRandomServerBg(server.serverId);
         Glide.with(mContext).load(server.background).placeholder(randomServerIcon).into(mBinding.ivServer);
         mBinding.tvServerName.setText(server.name);
         String desc = server.desc;
@@ -541,8 +541,9 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (serverRoleMap != null) {
             Integer roleId = serverRoleMap.get(currrentServer.serverId);
             if (roleId != null) {
-                initViewByRole(roleId.intValue());
-                initDataByRole(roleId.intValue());
+                //暂时先不用刷新
+//                initViewByRole(roleId.intValue());
+//                initDataByRole(roleId.intValue());
             }
         }
     }

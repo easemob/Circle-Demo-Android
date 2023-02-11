@@ -657,10 +657,6 @@ public class EaseChatFragment extends EaseBaseFragment implements OnChatLayoutLi
     }
 
     @Override
-    public void onCircleServerEvent(int event, String serverId, List<String> usernames) {
-    }
-
-    @Override
     public void onCircleChannelEvent(int event, String channelId, List<String> usernames) {
     }
 

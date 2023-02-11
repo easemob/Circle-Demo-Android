@@ -29,6 +29,7 @@ import io.agora.contacts.adapter.ContactListAdapter;
 import io.agora.contacts.databinding.DialogUserinfoBottomBinding;
 import io.agora.contacts.ui.ContactListFragment;
 import io.agora.service.bean.server.ServerMemberNotifyBean;
+import io.agora.service.bean.server.ServerRoleChangeNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
@@ -154,7 +155,11 @@ public class ServerMembersFragment extends ContactListFragment implements  View.
                 mServerViewModel.getServerMembers(server.serverId);
             }
         });
-
+        LiveEventBus.get(Constants.SERVER_ROLE_ASSIGNED_NOTIFY, ServerRoleChangeNotifyBean.class).observe(getViewLifecycleOwner(),bean->{
+            if (bean != null && TextUtils.equals(bean.getServerId(), server.serverId)) {
+                mServerViewModel.getServerMembers(server.serverId);
+            }
+        });
         AppUserInfoManager.getInstance().getCurrentUserLiveData().observe(getViewLifecycleOwner(), circleUser -> {
             this.currentUser = circleUser;
         });
@@ -172,6 +177,7 @@ public class ServerMembersFragment extends ContactListFragment implements  View.
                 }
             }
         });
+
     }
 
 

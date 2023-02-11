@@ -232,7 +232,7 @@ public class ServerOverviewActivity extends BaseInitActivity<ActivityServerOverv
     public void onClick(View v) {
         if (v.getId() == R.id.iv_back) {
             finish();
-        } else if(v.getId()==R.id.tv_save) {
+        } else if (v.getId() == R.id.tv_save) {
             String name = mBinding.edtServerName.getText().toString().trim();
             String desc = mBinding.edtServerDesc.getText().toString().trim();
             if (TextUtils.isEmpty(name)) {
@@ -241,9 +241,9 @@ public class ServerOverviewActivity extends BaseInitActivity<ActivityServerOverv
             }
             showLoading(null);
             mViewModel.updateServer(server, server.icon, name, desc);
-        }else if (v.getId() == R.id.iv_add_tag) {
+        } else if (v.getId() == R.id.iv_add_tag) {
             int childCount = mBinding.llContainerTags.getChildCount();
-            if (childCount > 10) {
+            if (childCount >= 10) {
                 ToastUtils.showShort(getString(io.agora.service.R.string.circle_tags_to_max, "10"));
                 return;
             }
@@ -261,9 +261,17 @@ public class ServerOverviewActivity extends BaseInitActivity<ActivityServerOverv
                         @Override
                         public void onClick(View v) {
                             String tag = edtTag.getText().toString().trim();
-                            if (!TextUtils.isEmpty(tag) && server != null) {
-                                //更新到服务器
-                                mViewModel.addTagToServer(server, tag);
+                            if(TextUtils.isEmpty(tag)) {
+                                ToastUtils.showShort(getString(R.string.circle_tag_is_empty));
+                            }else{
+                                if((!checkTagExist(tag))) {
+                                    if ( server != null) {
+                                        //更新到服务器
+                                        mViewModel.addTagToServer(server, tag);
+                                    }
+                                }else{
+                                    ToastUtils.showShort(getString(R.string.circle_tag_exist));
+                                }
                             }
                         }
                     })
@@ -307,6 +315,17 @@ public class ServerOverviewActivity extends BaseInitActivity<ActivityServerOverv
                 }
             });
         }
+    }
+
+    private boolean checkTagExist(String tag) {
+        if (server != null&&server.tags!=null) {
+            for (int i = 0; i < server.tags.size(); i++) {
+                if (android.text.TextUtils.equals(tag, server.tags.get(i).tag_name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void insertContainer(List<CircleServer.Tag> tags) {

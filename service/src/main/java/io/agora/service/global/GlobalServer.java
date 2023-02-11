@@ -159,6 +159,9 @@ public class GlobalServer {
                         if (!appModel.getSettingMsgNotification()) {
                             return false;
                         } else {
+                            if(message.isChatThreadMessage()) {
+                                return false;
+                            }
                             String chatUsename = null;
                             List<String> notNotifyIds = null;
                             // get user or group id which was blocked to show message notifications

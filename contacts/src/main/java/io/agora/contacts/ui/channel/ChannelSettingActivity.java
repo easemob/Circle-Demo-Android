@@ -93,7 +93,7 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser&&channel != null) {
                     EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
-                    attribute.setSeatCount(progress);
+                    attribute.setMaxUsers(progress);
                     mViewModel.updateChannel(channel, attribute);
                 }
             }

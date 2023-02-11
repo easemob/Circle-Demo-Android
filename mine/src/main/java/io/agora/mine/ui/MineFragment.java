@@ -95,23 +95,6 @@ public class MineFragment extends BaseInitFragment<FragmentMineBinding> implemen
     }
 
     private void showLogoutDialog() {
-//        AlertDialog dialog = new AlertDialog.Builder(mContext)
-//                .setTitle(R.string.circle_logout)
-//                .setMessage(R.string.circle_logout_message)
-//                .setPositiveButton(R.string.circle_logout_exit, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        logout();
-//                        dialog.dismiss();
-//                    }
-//                })
-//                .setNeutralButton(R.string.circle_logout_cancel, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        dialog.dismiss();
-//                    }
-//                })
-//                .show();
 
         dialog = new AlertDialog.Builder(mContext)
                 .setContentView(R.layout.dialog_logout)

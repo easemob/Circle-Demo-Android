@@ -19,6 +19,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.Serializable;
 
+import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.R;
 import io.agora.contacts.databinding.ActivityEditServerBinding;
 import io.agora.service.base.BaseInitActivity;
@@ -37,6 +38,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
     private CircleServer server;
     private RxPermissions rxPermissions;
     private ServerViewModel mViewModel;
+    private AlertDialog dialog;
 
     public static void actionStart(Context context, CircleServer server) {
         Intent intent = new Intent(context, EditServerActivity.class);
@@ -111,7 +113,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         rxPermissions = new RxPermissions(this);
         server = (CircleServer) getIntent().getSerializableExtra(Constants.SERVER);
         if (server != null) {
-            Glide.with(this).load(server.background).placeholder(ServiceReposity.getRandomServerIcon(server.serverId)).into(mBinding.ivServerBg);
+            Glide.with(this).load(server.background).placeholder(ServiceReposity.getRandomServerBg(server.serverId)).into(mBinding.ivServerBg);
             Glide.with(this).load(server.icon).placeholder(ServiceReposity.getRandomServerIcon(server.serverId)).into(mBinding.ivServerIcon);
         }
     }
@@ -169,6 +171,28 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         }
     }
 
+    private void showDissolveServerDialog() {
+
+        dialog = new AlertDialog.Builder(this)
+                .setContentView(R.layout.dialog_dissolve_server)
+                .setText(R.id.tv_content, getString(R.string.circle_delete_server_message, server!=null?server.name:""))
+                .setOnClickListener(R.id.tv_confirm, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mViewModel.deleteServer(server.serverId);
+                        dialog.dismiss();
+                    }
+                })
+                .setOnClickListener(R.id.tv_cancel, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(true)
+                .show();
+    }
+
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.csl_server_setting) {
@@ -176,7 +200,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         } else if (v.getId() == R.id.csl_server_overview) {
             ServerOverviewActivity.actionStart(this, server);
         } else if (v.getId() == R.id.csl_server_dissolve) {
-            mViewModel.deleteServer(server.serverId);
+            showDissolveServerDialog();
         } else if (v.getId() == R.id.btn_edit_cover) {
             //去相册选择
             //申请权限

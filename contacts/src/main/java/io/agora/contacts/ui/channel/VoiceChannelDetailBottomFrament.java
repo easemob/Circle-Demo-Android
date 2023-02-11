@@ -302,11 +302,11 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         String currentUid = CircleRTCManager.getInstance().getCurrentUid();
         if (currentUid != null) {
             if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
-                //开麦状态
-                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_white);
-            } else {
                 //闭麦状态
                 mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_off_gray);
+            } else {
+                //开麦状态
+                mBinding.ibMicOff.setImageResource(io.agora.service.R.drawable.circle_voice_mic_on_white);
             }
         }
     }

@@ -194,7 +194,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
             }
         });
         tvEditThread.setOnClickListener(this);
-        mListAdapter.setOnItemClickListener(this);
+//        mListAdapter.setOnItemClickListener(this);
     }
 
     @Override

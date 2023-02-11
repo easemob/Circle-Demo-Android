@@ -84,6 +84,10 @@ public class ServiceReposity {
         }
         return icons.get(i-1);
     }
+    @DrawableRes
+    public static int getRandomServerBg(String serverId) {
+        return R.drawable.circle_server_bg;
+    }
 
     /**
      * Data to be loaded after login
@@ -102,7 +106,6 @@ public class ServiceReposity {
                         } else {
                             callBack.onError(ErrorCode.NOT_LOGIN);
                         }
-
                     });
                 } else {
                     callBack.onError(ErrorCode.NOT_LOGIN);

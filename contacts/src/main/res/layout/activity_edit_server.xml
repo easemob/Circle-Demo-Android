@@ -50,7 +50,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cls_titlebar"
             app:radius="12dp"
-            tools:src="@drawable/cover03" />
+            tools:src="@drawable/circle_server_bg" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
@@ -108,6 +108,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="right"
+            android:lineSpacingExtra="2dp"
             android:text="@string/circle_edit_server_cover_hint"
             android:textColor="@color/color_gray_747577"
             android:textSize="12sp"
@@ -145,7 +146,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+               android:layout_marginRight="24dp"
                 android:src="@drawable/circle_arrow_gray_right"
                 app:layout_constraintBottom_toBottomOf="@id/tv_server_overview"
                 app:layout_constraintRight_toRightOf="parent"
@@ -154,8 +155,8 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="12dp"
                 android:background="@color/black_333333"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -194,7 +195,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+               android:layout_marginRight="24dp"
                 android:src="@drawable/circle_arrow_gray_right"
                 app:layout_constraintBottom_toBottomOf="@id/tv_server_setting"
                 app:layout_constraintRight_toRightOf="parent"
@@ -203,8 +204,8 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="12dp"
                 android:background="@color/black_333333"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -243,7 +244,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+               android:layout_marginRight="24dp"
                 android:src="@drawable/circle_arrow_gray_right"
                 app:layout_constraintBottom_toBottomOf="@id/tv_server_dissolve"
                 app:layout_constraintRight_toRightOf="parent"
@@ -252,8 +253,8 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="12dp"
                 android:background="@color/black_333333"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"

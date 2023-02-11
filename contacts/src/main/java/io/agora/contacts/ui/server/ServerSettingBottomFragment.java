@@ -104,9 +104,9 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
 
     private void initRoleRelatedViewVisiablity(EMCircleUserRole role) {
         mBinding.cslCreateChannel.setVisibility(role == EMCircleUserRole.OWNER ? View.VISIBLE : View.GONE);
-        mBinding.cslCreateCategory.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
+        mBinding.cslCreateCategory.setVisibility(role == EMCircleUserRole.OWNER ? View.VISIBLE : View.GONE);
         mBinding.tvEditServer.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
-        mBinding.cslExitServer.setVisibility(role == EMCircleUserRole.USER ? View.VISIBLE : View.GONE);
+        mBinding.cslExitServer.setVisibility(role == EMCircleUserRole.OWNER ? View.GONE : View.VISIBLE);
     }
 
     @Override

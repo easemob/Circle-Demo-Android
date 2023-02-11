@@ -295,7 +295,7 @@ public class CircleChannelReposity extends ServiceReposity {
 
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<CircleChannel>> callBack) {
-                getCircleManager().createChannel(mode, serverId, categoryId, attribute, new EMValueCallBack<EMCircleChannel>() {
+                getCircleManager().createChannel(serverId, categoryId, attribute, mode, new EMValueCallBack<EMCircleChannel>() {
 
                     @Override
                     public void onSuccess(EMCircleChannel value) {
@@ -715,11 +715,11 @@ public class CircleChannelReposity extends ServiceReposity {
 
     }
 
-    public LiveData<Resource<ConcurrentHashMap<String,List<CircleUser>>>> getVoiceChannelMembers(String serverId, String channelId) {
-        return new NetworkOnlyResource<ConcurrentHashMap<String,List<CircleUser>>>() {
+    public LiveData<Resource<ConcurrentHashMap<String, List<CircleUser>>>> getVoiceChannelMembers(String serverId, String channelId) {
+        return new NetworkOnlyResource<ConcurrentHashMap<String, List<CircleUser>>>() {
 
             @Override
-            protected void createCall(@NonNull ResultCallBack<LiveData<ConcurrentHashMap<String,List<CircleUser>>>> callBack) {
+            protected void createCall(@NonNull ResultCallBack<LiveData<ConcurrentHashMap<String, List<CircleUser>>>> callBack) {
                 int limit = 20;
                 List<CircleUser> users = new ArrayList<>();
                 doFetchVoiceChannelMembers(serverId, channelId, limit, users, null, callBack);
@@ -727,7 +727,7 @@ public class CircleChannelReposity extends ServiceReposity {
         }.asLiveData();
     }
 
-    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users,  String cursor, ResultCallBack<LiveData<ConcurrentHashMap<String,List<CircleUser>>>> callBack) {
+    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users, String cursor, ResultCallBack<LiveData<ConcurrentHashMap<String, List<CircleUser>>>> callBack) {
         getCircleManager().fetchChannelMembers(serverID, channelID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleUser>>() {
             @Override
             public void onSuccess(EMCursorResult<EMCircleUser> value) {
@@ -747,7 +747,7 @@ public class CircleChannelReposity extends ServiceReposity {
                     doFetchVoiceChannelMembers(serverID, channelID, limit, users, value.getCursor(), callBack);
                 } else {
                     ConcurrentHashMap<String, List<CircleUser>> usersHP = new ConcurrentHashMap<>();
-                    usersHP.put(channelID,users);
+                    usersHP.put(channelID, users);
                     callBack.onSuccess(createLiveData(usersHP));
                 }
             }

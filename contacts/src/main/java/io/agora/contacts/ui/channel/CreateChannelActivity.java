@@ -1,5 +1,7 @@
 package io.agora.contacts.ui.channel;
 
+import static com.hyphenate.chat.EMCircleChannelMode.EMCircleChannelModeChat;
+
 import android.content.Context;
 import android.content.Intent;
 import android.text.Editable;
@@ -14,7 +16,6 @@ import com.alibaba.android.arouter.utils.TextUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleChannelAttribute;
 import com.hyphenate.chat.EMCircleChannelMode;
-import com.hyphenate.chat.EMCircleChannelRank;
 import com.hyphenate.chat.EMCircleChannelStyle;
 
 import io.agora.contacts.R;
@@ -36,7 +37,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
     private String serverId;
     private String categoryId;
     private EMCircleChannelStyle style = EMCircleChannelStyle.EMChannelStylePublic;
-    private EMCircleChannelMode mode = EMCircleChannelMode.EMCircleChannelModeChat;
+    private EMCircleChannelMode mode = EMCircleChannelModeChat;
 
     public static void actionStart(Context context, String serverId,String categoryId) {
         Intent intent = new Intent(context, CreateChannelActivity.class);
@@ -81,7 +82,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.rb_text_channel) {
-                    mode = EMCircleChannelMode.EMCircleChannelModeChat;
+                    mode = EMCircleChannelModeChat;
                 } else if (checkedId == R.id.rb_voice_channel) {
                     mode = EMCircleChannelMode.EMCircleChannelModeVoice;
                 }
@@ -167,7 +168,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
             EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
             attribute.setName(name);
             attribute.setDesc(desc);
-            attribute.setRank(EMCircleChannelRank.RANK_2000);
+            attribute.setMaxUsers(mode==EMCircleChannelModeChat?Constants.CHANNEL_MAX_USERS_2000:Constants.CHANNEL_MAX_USERS_20);
             attribute.setType(style);
             mViewModel.createChannel(mode, serverId, categoryId, attribute, style);
         } else if (v.getId() == R.id.iv_back) {

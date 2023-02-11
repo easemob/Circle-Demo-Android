@@ -7,7 +7,7 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 
 import java.io.Serializable;
 
@@ -19,18 +19,28 @@ public class CircleCategory implements Serializable {
     public String categoryId;
     public String serverId;
     public String categoryName;
+    public boolean isdefault;
 
+    @Ignore
     public CircleCategory(String serverId, String categoryId, String categoryName) {
         this.serverId = serverId;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }
 
+    public CircleCategory(String serverId, String categoryId, String categoryName,boolean isdefault) {
+        this.serverId = serverId;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.isdefault=isdefault;
+    }
+
     @Ignore
-    public CircleCategory(EMCircleChannelCategory emCircleChannelCategory){
+    public CircleCategory(EMCircleCategory emCircleChannelCategory){
         serverId=emCircleChannelCategory.getServerId();
         categoryId=emCircleChannelCategory.getCategoryId();
         categoryName=emCircleChannelCategory.getName();
+        isdefault=emCircleChannelCategory.isDefault();
     }
 
 }

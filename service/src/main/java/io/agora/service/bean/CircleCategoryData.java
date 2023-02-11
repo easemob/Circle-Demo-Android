@@ -1,7 +1,7 @@
 package io.agora.service.bean;
 
 
-import com.hyphenate.chat.EMCircleChannelCategory;
+import com.hyphenate.chat.EMCircleCategory;
 
 import io.agora.service.db.entity.CircleCategory;
 
@@ -12,7 +12,7 @@ public class CircleCategoryData extends CircleCategory {
         super(serverId, categoryId, categoryName);
     }
 
-    public CircleCategoryData(EMCircleChannelCategory emCircleChannelCategory) {
+    public CircleCategoryData(EMCircleCategory emCircleChannelCategory) {
         super(emCircleChannelCategory);
     }
 
