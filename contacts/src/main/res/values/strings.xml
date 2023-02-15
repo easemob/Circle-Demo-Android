@@ -28,7 +28,9 @@
     <string name="circle_create_channel">创建频道</string>
     <string name="circle_set_server">编辑社区</string>
     <string name="delete_channel_success">删除频道成功</string>
+    <string name="delete_voice_channel_success">删除语聊房成功</string>
     <string name="delete_channel_failure">删除频道失败</string>
+    <string name="delete_voice_channel_failure">删除语聊房失败</string>
     <string name="leave_channel_success">离开频道成功</string>
     <string name="leave_channel_failure">离开频道失败</string>
     <string name="circle_channel_setting">频道设置</string>
@@ -79,6 +81,7 @@
     <string name="circle_inviting">邀请中</string>
     <string name="circle_invite">邀请</string>
     <string name="circle_no_threadlist">没有子区\n长按频道内消息创建子区</string>
+    <string name="circle_invite_to_join_voice_channel">加入语聊房聊起来吧</string>
     <string name="circle_self_click">不能和自己建立会话</string>
     <string name="circle_mark_read">标记为已读</string>
     <string name="circle_create_category">创建频道分组</string>
@@ -101,5 +104,6 @@
     <string name="circle_tag_is_empty">标签为空</string>
     <string name="circle_tag_exist">社区标签已存在</string>
     <string name="circle_delete_server_message">确认解散社区 %1$s ？此操作不可撤回。</string>
+    <string name="circle_delete_channel_message">确认删除频道 %1$s ？此操作不可撤回。</string>
 
 </resources>

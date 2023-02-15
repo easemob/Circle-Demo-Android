@@ -64,7 +64,7 @@ public class MineFragment extends BaseInitFragment<FragmentMineBinding> implemen
                 .load(currentUser.getAvatar())
                 .placeholder(io.agora.service.R.drawable.circle_default_avatar)
                 .into(mBinding.ivUser);
-        mBinding.tvNickName.setText(currentUser.getNickname());
+        mBinding.tvNickName.setText(currentUser.getVisiableName());
         mBinding.tvId.setText(getString(io.agora.service.R.string.hx_id) + currentUser.getUsername());
     }
 

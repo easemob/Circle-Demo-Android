@@ -271,7 +271,7 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ivServerIcon = itemView.findViewById(R.id.iv_server_icon);
 
             BlurringView bv = itemView.findViewById(R.id.bv);
-            bv.setBlurredView(ivServer);
+//            bv.setBlurredView(ivServer);
         }
     }
 

@@ -161,6 +161,7 @@
     <string name="home_channel_name_hint">必填项</string>
     <string name="home_channel_desc_hint">60字以内</string>
     <string name="circle_private_channel">私密频道</string>
+    <string name="circle_whether_public_channel">是否公开频道</string>
     <string name="circle_create">创建</string>
     <string name="create_channel_success">创建channel成功</string>
     <string name="home_channel_name_is_null">频道名称是必填项</string>

@@ -61,13 +61,13 @@ public class CircleServerReposity extends ServiceReposity {
                 int limit = 20;
                 String cursor = null;
                 ArrayList<CircleServer> servers = new ArrayList<>();
-                doGetServerListByKey(searchType,key,limit, cursor, servers, callBack);
+                doGetServerListByKey(searchType, key, limit, cursor, servers, callBack);
             }
         }.asLiveData();
     }
 
     private void doGetServerListByKey(EMCircleServerSearchType searchType, String key, int limit, String cursor, ArrayList<CircleServer> servers, ResultCallBack<LiveData<List<CircleServer>>> callBack) {
-        EMClient.getInstance().chatCircleManager().fetchServers(searchType,key,limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleServer>>() {
+        EMClient.getInstance().chatCircleManager().fetchServers(searchType, key, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleServer>>() {
             @Override
             public void onSuccess(EMCursorResult<EMCircleServer> value) {
                 List<CircleServer> circleServers = CircleServer.converToCirlceServerList(value.getData());
@@ -75,7 +75,7 @@ public class CircleServerReposity extends ServiceReposity {
                     servers.addAll(circleServers);
                 }
                 if (!TextUtils.isEmpty(value.getCursor())) {
-                    doGetServerListByKey(searchType,key,limit, value.getCursor(), servers, callBack);
+                    doGetServerListByKey(searchType, key, limit, value.getCursor(), servers, callBack);
                 } else {
                     callBack.onSuccess(new MutableLiveData<>(servers));
                 }
@@ -213,9 +213,10 @@ public class CircleServerReposity extends ServiceReposity {
                     @Override
                     public void onSuccess(EMCircleServer value) {
                         CircleServer circleServer = new CircleServer(value);
-                        callBack.onSuccess(createLiveData(circleServer));
+                        circleServer.isJoined = true;
                         DatabaseManager.getInstance().getServerDao().insert(circleServer);
-                        LiveEventBus.get(Constants.SERVER_CHANGED).post(circleServer);
+                        LiveEventBus.get(Constants.SERVER_CREATED).postDelay(circleServer,1000);
+                        callBack.onSuccess(createLiveData(circleServer));
                     }
 
                     @Override
@@ -354,6 +355,7 @@ public class CircleServerReposity extends ServiceReposity {
             }
         }.asLiveData();
     }
+
     public LiveData<Resource<CircleServer>> updateServerBg(String serverID, String serverBgPath) {
         return new NetworkOnlyResource<CircleServer>() {
 
@@ -739,7 +741,7 @@ public class CircleServerReposity extends ServiceReposity {
 
     public LiveData<Resource<List<CircleCategory>>> getServerCategories(String serverId) {
 
-        return new NetworkBoundResource<List<CircleCategory>,List<CircleCategory>>(){
+        return new NetworkBoundResource<List<CircleCategory>, List<CircleCategory>>() {
             @Override
             protected boolean shouldFetch(List<CircleCategory> data) {
                 return true;
@@ -794,22 +796,23 @@ public class CircleServerReposity extends ServiceReposity {
             }
         });
     }
-    public LiveData<Resource<Map<String,List<String>>>> fetchJoinedChannelIdsInServer(String serverId) {
-       return new NetworkOnlyResource<Map<String,List<String>>>(){
 
-           @Override
-           protected void createCall(@NonNull ResultCallBack<LiveData<Map<String,List<String>>>> callBack) {
-               int limit = 50;
-               Map<String,List<String>> map=new HashMap();
-               List<String> channelIds = new ArrayList<>();
-               map.put(serverId,channelIds);
-               doFetchJoinedChannelIdsInServer(serverId, limit, map, null, callBack);
-           }
-       }.asLiveData();
+    public LiveData<Resource<Map<String, List<String>>>> fetchJoinedChannelIdsInServer(String serverId) {
+        return new NetworkOnlyResource<Map<String, List<String>>>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<Map<String, List<String>>>> callBack) {
+                int limit = 50;
+                Map<String, List<String>> map = new HashMap();
+                List<String> channelIds = new ArrayList<>();
+                map.put(serverId, channelIds);
+                doFetchJoinedChannelIdsInServer(serverId, limit, map, null, callBack);
+            }
+        }.asLiveData();
 
     }
 
-    private void doFetchJoinedChannelIdsInServer(String serverId, int limit, Map<String,List<String>> map, String cursor, ResultCallBack<LiveData<Map<String,List<String>>>> callBack) {
+    private void doFetchJoinedChannelIdsInServer(String serverId, int limit, Map<String, List<String>> map, String cursor, ResultCallBack<LiveData<Map<String, List<String>>>> callBack) {
         getCircleManager().fetchJoinedChannelIdsInServer(serverId, limit, cursor, new EMValueCallBack<EMCursorResult<String>>() {
             @Override
             public void onSuccess(EMCursorResult<String> value) {

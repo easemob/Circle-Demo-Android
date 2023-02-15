@@ -167,7 +167,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/edt_channel_name"
             app:switchItemShowDivider="false"
-            app:switchItemTitle="@string/circle_private_channel"
+            app:switchItemTitle="@string/circle_whether_public_channel"
             app:switchItemTitleColor="@color/white" />
 
         <View

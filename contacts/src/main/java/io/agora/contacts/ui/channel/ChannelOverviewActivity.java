@@ -2,6 +2,7 @@ package io.agora.contacts.ui.channel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -157,13 +158,23 @@ public class ChannelOverviewActivity extends BaseInitActivity<ActivityChannelOve
     }
 
     @Override
+    protected void initView(Bundle savedInstanceState) {
+        super.initView(savedInstanceState);
+        channel = (CircleChannel) getIntent().getSerializableExtra(Constants.CHANNEL);
+        if(channel.channelMode==1) {
+            mBinding.groupDesc.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
     protected void initData() {
         super.initData();
-        channel = (CircleChannel) getIntent().getSerializableExtra(Constants.CHANNEL);
+
         if (channel != null) {
             mViewModel.channelName.set(channel.name);
             mBinding.edtChannelDesc.setText(channel.desc);
         }
+
     }
 
     @Override

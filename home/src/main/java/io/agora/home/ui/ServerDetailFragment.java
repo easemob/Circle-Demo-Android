@@ -66,6 +66,7 @@ import io.agora.service.bean.ThreadData;
 import io.agora.service.bean.channel.ChannelEventNotifyBean;
 import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
 import io.agora.service.bean.channel.ChannelUpdateNotifyBean;
+import io.agora.service.callbacks.CircleVoiceChannelStateListener;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.DatabaseManager;
@@ -81,7 +82,7 @@ import io.agora.service.model.ChannelViewModel;
 import io.agora.service.repo.ServiceReposity;
 
 public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailBinding> implements View.OnClickListener,
-        BaseAdapter.ItemClickListener, OnRefreshListener, BaseAdapter.ItemLongClickListener {
+        BaseAdapter.ItemClickListener, OnRefreshListener, BaseAdapter.ItemLongClickListener, CircleVoiceChannelStateListener {
 
     private ServerDetailViewModel mServerViewModel;
     private ChannelViewModel mChannelViewModel;
@@ -340,7 +341,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                             String key = iterator.next();
                             ConcurrentHashMap<String, CircleUser> oldMap = channelUsers.get(key);
                             List<CircleUser> newUsers = data.get(key);
-                            if(oldMap!=null) {
+                            if (oldMap != null) {
                                 Collection<CircleUser> oldUsers = oldMap.values();
                                 if ((oldUsers == null || oldUsers.size() == 0) && (newUsers == null || newUsers.size() == 0)) {
                                     break;
@@ -350,8 +351,17 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                             ConcurrentHashMap<String, CircleUser> temp = new ConcurrentHashMap<>();
                             for (int i = 0; i < newUsers.size(); i++) {
                                 temp.put(newUsers.get(i).getUsername(), newUsers.get(i));
+                                if(newUsers.get(i).getUsername().equals(AppUserInfoManager.getInstance().getCurrentUserName())&&TextUtils.isEmpty(CircleRTCManager.getInstance().getChannelId())) {
+                                    //检测到自己在语聊房里且端上处于不在rtc场景，就自动加入一下当前语聊房
+                                    try {
+                                        CircleRTCManager.getInstance().joinChannel(key);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
                             channelUsers.put(key, temp);
+
                         }
                         if (dataChanged) {
                             buildDatasAndRefreshList();
@@ -393,19 +403,22 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 }
                 //自己走应该把当前语聊房里所有成员数据都清空，因为出来了就收不到成员进出的通知了，避免不刷新成员列表
                 //移除自己
-                channelUsers.get(circleChannel.channelId).clear();
+                ConcurrentHashMap<String, CircleUser> map = channelUsers.get(circleChannel.channelId);
+                if (map != null) {
+                    map.clear();
+                }
                 buildDatasAndRefreshList();
             }
         });
-        LiveEventBus.get(Constants.CHANNEL_JOIN, ChannelUpdateNotifyBean.class).observe(this,bean->{
+        LiveEventBus.get(Constants.CHANNEL_JOIN, ChannelUpdateNotifyBean.class).observe(this, bean -> {
             //自己加入某个语聊频道
-            if(bean!=null) {
+            if (bean != null) {
                 CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
-                if(circleChannel.channelMode==1) {
+                if (circleChannel.channelMode == 1) {
                     ConcurrentHashMap<String, CircleUser> users = channelUsers.get(bean.getChannelId());
-                    if(users!=null&&users.size()>0){
+                    if (users != null && users.size() > 0) {
                         //重新拉取语聊房成员列表
-                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(),bean.getChannelId());
+                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(), bean.getChannelId());
                     }
                 }
             }
@@ -469,7 +482,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
                 //移除自己
                 channelUsers.get(bean.getChannelId()).remove(bean.getUserId());
-                if(circleChannel.channelMode==1) {
+                if (circleChannel.channelMode == 1) {
                     buildDatasAndRefreshList();
                 }
             }
@@ -478,11 +491,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             if (bean != null) {
                 //添加user到语聊成员列表中
                 CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
-                if(circleChannel.channelMode==1) {//语聊房
+                if (circleChannel.channelMode == 1) {//语聊房
                     ConcurrentHashMap<String, CircleUser> users = channelUsers.get(bean.getChannelId());
-                    if(users!=null&&users.size()>0){
+                    if (users != null && users.size() > 0) {
                         //重新拉取语聊房成员列表
-                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(),bean.getChannelId());
+                        mChannelViewModel.getVoiceChannelMembers(bean.getServerId(), bean.getChannelId());
                     }
                 }
             }
@@ -798,11 +811,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     allNodes.add(getVoiceChannelMemberHeadNode(channel));
                     //插入语聊房成员数据
                     ConcurrentHashMap<String, CircleUser> channelUsersMap = this.channelUsers.get(channel.channelId);
-                    if (channelUsersMap != null&&channelUsersMap.size()>0) {
+                    if (channelUsersMap != null && channelUsersMap.size() > 0) {
                         Iterator<CircleUser> iterator = channelUsersMap.values().iterator();
-                        while (iterator.hasNext()){
+                        while (iterator.hasNext()) {
                             CircleUser circleUser = iterator.next();
-                            allNodes.add(getVoiceChannelMemberItemNode(channel,circleUser));
+                            allNodes.add(getVoiceChannelMemberItemNode(channel, circleUser));
                         }
                     }
                 }
@@ -852,7 +865,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
     private Node getVoiceChannelMemberHeadNode(CircleChannel channel) {
         Node node = new Node(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + channel.channelId, channel.channelId, getString(R.string.circle_voice_channel_member));
-        node.setIcon(R.drawable.tree_ec);
+        node.setIcon(io.agora.service.R.drawable.circle_arrow_up);
         return node;
     }
 
@@ -1135,10 +1148,45 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onSelfMicOffAndSpeaking(String rtcChannelName) {
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSelfMicOnAndSpeaking(String rtcChannelName) {
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSelfMicOffAndNoSpeaking(String rtcChannelName) {
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSelfMicOnAndNoSpeaking(String rtcChannelName) {
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        CircleRTCManager.getInstance().registerVoiceChannelStateListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
         if (eventHandler != null) {
             CircleRTCManager.getInstance().unRegisterRTCEventListener(eventHandler);
         }
+        CircleRTCManager.getInstance().unRegisterVoiceChannelStateListener(this);
     }
 }

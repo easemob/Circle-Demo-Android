@@ -4,6 +4,7 @@ import static com.hyphenate.chat.EMCircleChannelMode.EMCircleChannelModeChat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -39,7 +40,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
     private EMCircleChannelStyle style = EMCircleChannelStyle.EMChannelStylePublic;
     private EMCircleChannelMode mode = EMCircleChannelModeChat;
 
-    public static void actionStart(Context context, String serverId,String categoryId) {
+    public static void actionStart(Context context, String serverId, String categoryId) {
         Intent intent = new Intent(context, CreateChannelActivity.class);
         intent.putExtra(Constants.SERVER_ID, serverId);
         intent.putExtra(Constants.CATEGORY_ID, categoryId);
@@ -49,6 +50,12 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
     @Override
     protected int getResLayoutId() {
         return R.layout.activity_create_channel;
+    }
+
+    @Override
+    protected void initView(Bundle savedInstanceState) {
+        super.initView(savedInstanceState);
+        mBinding.swiPrivate.getSwitch().setChecked(true);
     }
 
     @Override
@@ -149,7 +156,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
 
     @Override
     public void onCheckedChanged(SwitchItemView buttonView, boolean isChecked) {
-        if (isChecked) {
+        if (!isChecked) {
             style = EMCircleChannelStyle.EMChannelStylePrivate;
         } else {
             style = EMCircleChannelStyle.EMChannelStylePublic;
@@ -168,10 +175,11 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
             EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
             attribute.setName(name);
             attribute.setDesc(desc);
-            attribute.setMaxUsers(mode==EMCircleChannelModeChat?Constants.CHANNEL_MAX_USERS_2000:Constants.CHANNEL_MAX_USERS_20);
+            attribute.setMaxUsers(mode == EMCircleChannelModeChat ? Constants.CHANNEL_MAX_USERS_2000 : Constants.CHANNEL_MAX_USERS_20);
             attribute.setType(style);
             mViewModel.createChannel(mode, serverId, categoryId, attribute, style);
         } else if (v.getId() == R.id.iv_back) {
+            hideKeyboard();
             finish();
         }
     }

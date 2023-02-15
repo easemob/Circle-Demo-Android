@@ -50,7 +50,7 @@ public class EditCategoryNameActivity extends BaseInitActivity<ActivityEditCateg
     protected void initConfig() {
         super.initConfig();
         mViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
-        mViewModel.updateCategoryLiveData.observe(this,response->{
+        mViewModel.updateCategoryLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<Boolean>() {
                 @Override
                 public void onSuccess(@Nullable Boolean data) {
@@ -112,6 +112,7 @@ public class EditCategoryNameActivity extends BaseInitActivity<ActivityEditCateg
 
         mBinding.tvSave.setOnClickListener(this);
         mBinding.ivBack.setOnClickListener(this);
+        mBinding.cslRoot.setOnClickListener(this);
     }
 
     private void checkCreateChannelButtonStatus() {
@@ -147,10 +148,12 @@ public class EditCategoryNameActivity extends BaseInitActivity<ActivityEditCateg
             }
             showLoading(null);
             if (category != null) {
-                mViewModel.updateCategory(category.serverId, category.categoryId,name);
+                mViewModel.updateCategory(category.serverId, category.categoryId, name);
             }
         } else if (v.getId() == R.id.iv_back) {
             finish();
+        } else if (v.getId() == R.id.csl_root) {
+            hideKeyboard();
         }
     }
 }

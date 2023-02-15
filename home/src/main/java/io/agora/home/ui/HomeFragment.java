@@ -28,13 +28,16 @@ import io.agora.service.adapter.HomeMenuAdapter;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.bean.ChannelInviteData;
 import io.agora.service.bean.server.ServerMembersNotifyBean;
+import io.agora.service.callbacks.CircleVoiceChannelStateListener;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 
-public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implements HomeMenuAdapter.OnMenuClickListener<CircleServer> {
+public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implements HomeMenuAdapter.OnMenuClickListener<CircleServer>
+, CircleVoiceChannelStateListener {
     private HomeViewModel mViewModel;
     private HomeMenuAdapter mAdapter;
     private ServerDetailFragment mServerDetailFragment = ServerDetailFragment.newInstance();
@@ -42,6 +45,7 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
     private int mCheckPos;
     private ShowMode showMode = ShowMode.NORMAL;
     private Map<String, CircleServer> joinedServers = new HashMap<>();
+    private CircleServer pendingToShowServer;
 
     public void showServerPreview(CircleServer server) {
         if (server != null) {
@@ -86,6 +90,10 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                         }
                     }
                     mAdapter.setData(joinedServers.values());
+                    if(pendingToShowServer!=null) {
+                        mAdapter.setCheckedServer(pendingToShowServer);
+                        pendingToShowServer=null;
+                    }
                 }
             });
         });
@@ -105,6 +113,13 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
             });
         });
 
+        LiveEventBus.get(Constants.SERVER_CREATED,CircleServer.class).observe(getViewLifecycleOwner(), server -> {
+            if (showMode == ShowMode.NORMAL) {
+                pendingToShowServer=server;
+                //切换到目标server，显示详情
+                mAdapter.setCheckedServer(server);
+            }
+        });
         LiveEventBus.get(Constants.SERVER_CHANGED).observe(getViewLifecycleOwner(), obj -> {
             if (showMode == ShowMode.NORMAL) {
                 mViewModel.getJoinedServerList();
@@ -138,6 +153,12 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                 }
             }
         });
+        LiveEventBus.get(Constants.SHOW_TARGET_SERVER, CircleServer.class).observe(getViewLifecycleOwner(), server -> {
+            if (server != null) {
+                //切换到目标server，显示详情
+                mAdapter.setCheckedServer(server);
+            }
+        });
         LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
             if (bean != null && showMode == ShowMode.NORMAL) {
                 List<String> ids = bean.getIds();
@@ -168,6 +189,7 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
         LiveEventBus.get(Constants.MESSAGE_NOT_SEND, Boolean.class).observe(getViewLifecycleOwner(), bool -> {
             getSingleChatConversationUreadData(null);
         });
+        CircleRTCManager.getInstance().registerVoiceChannelStateListener(this);
     }
 
     public void getSingleChatConversationUreadData(EaseEvent change) {
@@ -243,5 +265,21 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
         ARouter.getInstance()
                 .build("/home/CreateServerActivity")
                 .navigation();
+    }
+
+    @Override
+    public void onVoiceChannelStart(String rtcChannelName) {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onVoiceChannelLeave() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        CircleRTCManager.getInstance().unRegisterVoiceChannelStateListener(this);
     }
 }

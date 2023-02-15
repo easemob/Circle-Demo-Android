@@ -2,6 +2,7 @@ package io.agora.service.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import io.agora.service.R;
+import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.repo.ServiceReposity;
 
 public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -64,14 +68,16 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void setCheckedServer(CircleServer server) {
-        int index = mList.size() - 1;
-        for (int i = 0; i < mList.size(); i++) {
-            CircleServer circleServer = mList.get(i);
-            if (circleServer.serverId.equals(server.serverId)) {
-                index = i;
+        if(server!=null) {
+            int index = mList.size() - 1;
+            for (int i = 0; i < mList.size(); i++) {
+                CircleServer circleServer = mList.get(i);
+                if (circleServer.serverId.equals(server.serverId)) {
+                    index = i;
+                }
             }
+            this.mCheckedPos = index + 1;
         }
-        this.mCheckedPos = index + 1;
         notifyDataSetChanged();
     }
 
@@ -123,10 +129,17 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mOnMenuClickListener.onStartClick();
                 }
             } else {
-
                 CircleServer server = mList.get(pos - 1);
                 int randomServerIcon = ServiceReposity.getRandomServerIcon(server.serverId);
                 Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvIcon);
+
+                String channelId = CircleRTCManager.getInstance().getChannelId();
+                CircleChannel voiceChannel = DatabaseManager.getInstance().getChannelDao().getChannelByChannelID(channelId);
+                if(voiceChannel!=null&& TextUtils.equals(server.serverId,voiceChannel.serverId)) {
+                    Glide.with(mContext).load(R.drawable.circle_micing).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
+                }else{
+                    Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
+                }
 
                 Integer count = mUnreadMap.get(server.serverId);
                 if (count != null && count.intValue() != 0) {
@@ -204,12 +217,14 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private class CanCheckHolder extends RecyclerView.ViewHolder {
         protected ImageView mIvBg;
         protected ImageView mIvIcon;
+        protected ImageView mIvVoiceIcon;
         protected TextView mTvUnRead;
 
         public CanCheckHolder(@NonNull View itemView) {
             super(itemView);
             mIvBg = itemView.findViewById(R.id.iv_bg);
             mIvIcon = itemView.findViewById(R.id.iv_icon);
+            mIvVoiceIcon = itemView.findViewById(R.id.iv_voice_icon);
             mTvUnRead = itemView.findViewById(R.id.tv_unread);
         }
     }

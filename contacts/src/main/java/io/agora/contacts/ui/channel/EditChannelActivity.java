@@ -14,8 +14,10 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.io.Serializable;
 
+import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.R;
 import io.agora.contacts.databinding.ActivityEditChannelBinding;
+import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.CircleVoiceChannelStateListener;
 import io.agora.service.callbacks.OnResourceParseCallback;
@@ -23,6 +25,7 @@ import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.global.Constants;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.model.ChannelViewModel;
 
 @Route(path = "/contacts/EditChannelActivity")
@@ -32,6 +35,16 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
     private CircleChannel channel;
     private ChannelViewModel mChannelViewModel;
     private CircleVoiceChannelStateListener circleVoiceChannelStateListener;
+    private AlertDialog dialog;
+    private IRtcEngineEventHandler eventHandler = new IRtcEngineEventHandler() {
+        @Override
+        public void onLeaveChannel(RtcStats stats) {
+            //退出声网后再退聊天室
+            if (channel != null) {
+                mChannelViewModel.deleteChannel(channel);
+            }
+        }
+    };
 
     public static void actionStart(Context context, CircleChannel channel) {
         Intent intent = new Intent(context, EditChannelActivity.class);
@@ -53,7 +66,11 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
             parseResource(response, new OnResourceParseCallback<CircleChannel>() {
                 @Override
                 public void onSuccess(@Nullable CircleChannel circleChannel) {
-                    ToastUtils.showShort(getString(R.string.delete_channel_success));
+                    if(circleChannel.channelMode==1) {
+                        ToastUtils.showShort(getString(R.string.delete_voice_channel_success));
+                    }else{
+                        ToastUtils.showShort(getString(R.string.delete_channel_success));
+                    }
                     //发出通知
                     //注意语聊频道还要所有人退出channel
                     LiveEventBus.get(Constants.CHANNEL_DELETE).post(circleChannel);
@@ -70,9 +87,12 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
             });
         });
         if (channel != null) {
-            CircleCategory category = DatabaseManager.getInstance().getCagegoryDao().getCategoryByCagegoryID(channel.channelId);
+            CircleCategory category = DatabaseManager.getInstance().getCagegoryDao().getCategoryByCagegoryID(channel.categoryId);
             if (category != null) {
-                mBinding.tvCategoryName.setText(category.categoryName);
+                mBinding.tvCategoryName.setText(category.categoryName.equals(Constants.DEFAULT_CATEGORY_NAME) ? getString(io.agora.service.R.string.circle_default_category) : category.categoryName);
+            }
+            if (channel.isDefault) {
+                mBinding.cslDeleteChannel.setVisibility(View.GONE);
             }
         }
         mBinding.ivBack.setOnClickListener(this);
@@ -86,6 +106,37 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
                 channel = channelUpdated;
             }
         });
+
+        if(channel.channelMode==1) {//语聊房频道
+            CircleRTCManager.getInstance().registerRTCEventListener(eventHandler);
+        }
+    }
+
+    private void showDeleteChannelDialog() {
+
+        dialog = new AlertDialog.Builder(this)
+                .setContentView(R.layout.dialog_delete_channel)
+                .setText(R.id.tv_content, getString(R.string.circle_delete_channel_message, channel != null ? channel.name : ""))
+                .setOnClickListener(R.id.tv_confirm, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if ((!TextUtils.isEmpty(channel.channelId)) && TextUtils.equals(channel.channelId, CircleRTCManager.getInstance().getChannelId())) {
+                            //退出语聊房，先退声网，再退聊天室
+                            CircleRTCManager.getInstance().leaveChannel();
+                        }else{
+                            mChannelViewModel.deleteChannel(channel);
+                        }
+                        dialog.dismiss();
+                    }
+                })
+                .setOnClickListener(R.id.tv_cancel, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(true)
+                .show();
     }
 
     @Override
@@ -97,9 +148,17 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
         } else if (v.getId() == R.id.csl_move_channel) {
             MoveChannelActivity.actionStart(this, channel);
         } else if (v.getId() == R.id.csl_delete_channel) {
-            mChannelViewModel.deleteChannel(channel);
+            showDeleteChannelDialog();
         } else if (v.getId() == R.id.csl_channel_setting) {
             ChannelSettingActivity.actionStart(this, channel);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(channel.channelMode==1) {
+            CircleRTCManager.getInstance().unRegisterRTCEventListener(eventHandler);
         }
     }
 }

@@ -10,7 +10,7 @@ public class Constants {
     public static final String USERINFO_CHANGE = "userinfo_change";
     public static final String PRESENCES_CHANGED = "presences_changed";
     public static final String SERVER_CHANGED = "server_changed";
-    public static final String SERVER_ADDED = "server_added";
+    public static final String SERVER_CREATED = "server_added";
     public static final String SERVER_UPDATED = "server_updated";
     public static final String LEAVE_OR_DELETE_SERVER = "leave_or_delete_server";
     public static final String CHANNEL_CHANGED = "channel_changed";
@@ -168,4 +168,5 @@ public class Constants {
     public static final String DEFAULT_CATEGORY_NAME ="Default Channel Category" ;
     public static final int CHANNEL_MAX_USERS_2000 = 2000;
     public static final int CHANNEL_MAX_USERS_20 = 20;
+    public static final String SHOW_TARGET_SERVER = "show_target_server";
 }

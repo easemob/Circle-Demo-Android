@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/iv_float_voice_channel"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/csl_float_voice_channel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_marginRight="24dp"
     android:layout_marginBottom="94dp"
-    android:src="@drawable/circle_in_voice_channel_mic_on_speaking"
-    android:visibility="gone" />
+    android:visibility="visible">
+
+    <com.hyphenate.easeui.widget.EaseImageView
+        android:id="@+id/iv_float_voice_channel_bg"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:ease_shape_type="round"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.hyphenate.easeui.widget.EaseImageView
+        android:id="@+id/iv_float_voice_channel_src"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:ease_shape_type="round"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,8 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_141414"
-       >
+        android:background="@color/black_141414">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cls_titlebar"
@@ -139,11 +138,11 @@
             android:id="@+id/edt_channel_desc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@drawable/shape_edittext_bg"
             android:gravity="top"
             android:hint="@string/home_channel_desc_hint"
             android:minHeight="80dp"
-            android:layout_marginTop="8dp"
             android:paddingTop="5dp"
             android:textColor="@color/white"
             android:textColorHint="@color/color_gray_a7a9ac"
@@ -151,6 +150,12 @@
             app:layout_constraintLeft_toLeftOf="@id/tv_desc"
             app:layout_constraintRight_toRightOf="@id/tv_desc_count"
             app:layout_constraintTop_toBottomOf="@id/tv_desc" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="edt_channel_desc,tv_desc,tv_desc_count" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

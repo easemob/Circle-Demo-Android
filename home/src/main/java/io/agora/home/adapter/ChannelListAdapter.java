@@ -77,40 +77,53 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
     }
 
     private void processChannelSubItem(ViewHolder holder, Node node, int position) {
-        if(node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
+        if (node.getPId().startsWith(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID)) {
             //语聊房成员item
             EaseImageView ivUser = holder.getView(R.id.iv_user_avatar);
             TextView tvName = holder.getView(R.id.tv_nick_name);
             ImageView ivMicOff = holder.getView(R.id.iv_mic_off);
             Glide.with(mContext).load(node.getExt()).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(ivUser);
-            tvName.setText(node.getName()+"");
+            tvName.setText(node.getName() + "");
             String channelId = node.getPId().substring(Constants.VOICE_CHANNEL_MEMBER_HEAD_ID.length());
 
             //设置是否在说话，静音状态等，仅仅针对当前语聊房的成员有效
-            if(TextUtils.equals(channelId,CircleRTCManager.getInstance().getChannelId())) {
+            if (TextUtils.equals(channelId, CircleRTCManager.getInstance().getChannelId())) {
                 ConcurrentHashMap<String, Boolean> uidsMuted = CircleRTCManager.getInstance().getUidsMuted();
                 ConcurrentHashMap<String, String> hxIdUids = CircleRTCManager.getInstance().getHxIdUids();
                 String uid = hxIdUids.get(node.getId());
-                if(uid!=null) {
-                    if(Boolean.TRUE.equals(uidsMuted.get(uid))) {
+                if (uid != null) {
+                    if (Boolean.TRUE.equals(uidsMuted.get(uid))) {
                         ivMicOff.setVisibility(View.VISIBLE);
-                    }else{
+                    } else {
                         ivMicOff.setVisibility(View.GONE);
                     }
-                }else{
+                } else {
                     ivMicOff.setVisibility(View.GONE);
                 }
-                ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
-                if(uidsSpeak.get(node.getId())!=null) {
+
+                ConcurrentHashMap<String,IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
+                IRtcEngineEventHandler.AudioVolumeInfo audioVolumeInfo = uidsSpeak.get(node.getId());
+                if(audioVolumeInfo!=null&&audioVolumeInfo.volume>3) {
                     ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
                 }else{
                     ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
                 }
-            }else{
+
+
+//                ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
+//                if (uidsSpeak.get(node.getId()) != null) {
+//                    ivUser.setBorderWidth(ConvertUtils.dp2px(2));
+//                    ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
+//                } else {
+//                    ivUser.setBorderWidth(0);
+//                    ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
+//                }
+            } else {
                 ivMicOff.setVisibility(View.GONE);
+                ivUser.setBorderWidth(0);
                 ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
             }
-        }else{
+        } else {
             TextView tvThreadName = holder.getView(R.id.tv_thread_name);
             if (node != null) {
                 tvThreadName.setText(node.getName());
@@ -124,10 +137,10 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         ImageView ivThreadHeadIcon = holder.getView(R.id.iv_thread_head_icon);
         TextView tvHeadName = holder.getView(R.id.tv_head_name);
         if (node != null) {
-            if(TextUtils.equals(node.getId(), Constants.VOICE_CHANNEL_MEMBER_HEAD_ID+node.getPId())) {
+            if (TextUtils.equals(node.getId(), Constants.VOICE_CHANNEL_MEMBER_HEAD_ID + node.getPId())) {
                 //语聊房成员item
                 tvHeadName.setText(mContext.getString(R.string.circle_voice_channel_member));
-            }else{
+            } else {
                 tvHeadName.setText(mContext.getString(R.string.circle_thread));
             }
             ivThreadHeadIcon.setImageResource(node.getIcon());
@@ -159,7 +172,17 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
 
         if (node.getChannelMode() == 1) {
             tvSeatCount.setVisibility(View.VISIBLE);
-            tvSeatCount.setText(node.getSeatCount()+"");
+
+            String channelId = node.getId();
+            if (!TextUtils.isEmpty(channelId) && TextUtils.equals(channelId, CircleRTCManager.getInstance().getChannelId())) {
+                //说明当前的item是自己正在加入的语聊房
+                List<String> uidsInChannel = CircleRTCManager.getInstance().getUidsInChannel();
+                tvSeatCount.setText(uidsInChannel.size()+"/"+node.getSeatCount());
+                tvSeatCount.setSelected(true);
+            }else{
+                tvSeatCount.setSelected(false);
+                tvSeatCount.setText(node.getSeatCount() + "");
+            }
         } else {
             tvSeatCount.setVisibility(View.GONE);
         }

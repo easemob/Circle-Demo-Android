@@ -191,7 +191,7 @@ public class TreeHelper {
             if (node.getChildren().size() > 0 && node.isExpand() && node.getPId() != null) {
                 node.setIcon(R.drawable.tree_ex);
             } else if (node.getChildren().size() > 0 && !node.isExpand() && node.getPId() != null) {
-                node.setIcon(R.drawable.tree_ec);
+                node.setIcon(io.agora.service.R.drawable.circle_arrow_up);
             }
         }
     }

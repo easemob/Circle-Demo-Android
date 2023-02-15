@@ -21,7 +21,6 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.hyphenate.easeui.utils.EaseCompat;
 import com.hyphenate.easeui.widget.EaseTitleBar;
-import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.agora.home.R;
@@ -29,7 +28,6 @@ import io.agora.home.databinding.ActivityCreateServerBinding;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
-import io.agora.service.global.Constants;
 import io.agora.service.model.ServerViewModel;
 import io.agora.service.utils.UriFormatUtils;
 
@@ -76,8 +74,6 @@ public class CreateServerActivity extends BaseInitActivity<ActivityCreateServerB
                     dismissLoading();
                     ToastUtils.showShort(getString(io.agora.service.R.string.home_create_server_success));
                     finish();
-                    //发出通知
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(data);
                 }
 
                 @Override

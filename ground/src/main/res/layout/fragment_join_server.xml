@@ -12,7 +12,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/csl_introduction"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="0dp"
+            android:paddingBottom="48dp">
 
             <LinearLayout
                 android:id="@+id/ll_fold"
@@ -47,7 +48,7 @@
                 android:layout_width="68dp"
                 android:layout_height="68dp"
                 android:layout_marginLeft="32dp"
-                app:ease_border_color="@color/black"
+                app:ease_border_color="@color/black_141414"
                 app:ease_border_width="6dp"
                 app:ease_shape_type="round"
                 app:layout_constraintBottom_toBottomOf="@id/iv_server"
@@ -57,12 +58,14 @@
 
             <TextView
                 android:id="@+id/tv_server_name"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="12dp"
                 android:layout_marginTop="6dp"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:textStyle="bold"
+                app:layout_constraintRight_toRightOf="@id/iv_server"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 app:layout_constraintLeft_toRightOf="@id/iv_server_icon"
@@ -77,6 +80,7 @@
                 android:layout_marginRight="30dp"
                 android:textColor="@color/white"
                 android:textSize="13sp"
+                android:layout_marginTop="12dp"
                 app:layout_constraintTop_toBottomOf="@id/iv_server_icon"
                 tools:text="栖守道德者，寂寞一时；依阿权势者，凄凉万古。达人观物外之物，思身后之身，守受一时之寂寞，毋取万古之凄凉。涉世浅，点染亦浅；历事深，机械亦深。故君子与其练达，不若朴鲁；与其曲谨，不若疏狂。君子之心事，天青日白；不可使人不知；君子之才华，玉韫。" />
 
@@ -84,7 +88,7 @@
                 android:id="@+id/fl_tag"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="24dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginRight="30dp"
                 android:layout_marginBottom="16dp"
@@ -96,13 +100,11 @@
                 android:layout_height="48dp"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
-                android:layout_marginBottom="48dp"
                 android:background="@drawable/shape_green_27ae60_radius48"
                 android:text="@string/circle_join_server"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                />
+                app:layout_constraintBottom_toBottomOf="parent" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

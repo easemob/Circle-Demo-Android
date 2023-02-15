@@ -9,7 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_141414"
+        android:background="@drawable/shape_black_top_half_radius12"
         android:orientation="vertical">
         <LinearLayout
             android:id="@+id/ll_fold"

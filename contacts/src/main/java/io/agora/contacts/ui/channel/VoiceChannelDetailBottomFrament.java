@@ -254,6 +254,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         mBinding.ibMicOff.setOnClickListener(this);
         mBinding.ibExit.setOnClickListener(this);
         mBinding.btnJoinVoiceChannel.setOnClickListener(this);
+        mBinding.tvServerName.setOnClickListener(this);
 
         CircleRTCManager.getInstance().registerRTCEventListener(eventHandler);
 
@@ -336,6 +337,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             });
         }
         adapter = new VoiceChannelListAdapter(mContext, R.layout.item_voice_channel_member);
+        adapter.setEmptyLayoutId(R.layout.circle_voice_channel_no_members);
         mBinding.recycleview.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
     }
@@ -387,6 +389,12 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             //踢出频道
             if (selectedUser != null) {
                 channelViewModel.removeUserFromChannel(channel.serverId, channel.channelId, selectedUser.getUsername());
+            }
+        }else if(v.getId()==R.id.tv_server_name) {
+            //通知首页回到当前社区
+            CircleServer server = DatabaseManager.getInstance().getServerDao().getServerById(channel.serverId);
+            if(server!=null) {
+                LiveEventBus.get(Constants.SHOW_TARGET_SERVER, CircleServer.class).post(server);
             }
         }
     }

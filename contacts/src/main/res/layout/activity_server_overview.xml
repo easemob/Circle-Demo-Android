@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black_141414"
+        android:paddingBottom="40dp"
         tools:context=".ui.server.ServerOverviewActivity">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -51,6 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="false"
+                android:padding="2dp"
                 android:text="@string/circle_save"
                 android:textColor="@drawable/selector_green_gray979797_color"
                 android:textSize="14sp"
@@ -178,6 +180,7 @@
             app:layout_constraintRight_toRightOf="parent" />
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/nsl_tags"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
@@ -201,13 +204,14 @@
             android:layout_height="1dp"
             android:layout_marginTop="24dp"
             android:background="@color/color_light_gray_47464b"
-            app:layout_constraintTop_toBottomOf="@id/ll_container_tags" />
+            app:layout_constraintTop_toBottomOf="@id/nsl_tags" />
 
         <ImageView
             android:id="@+id/iv_add_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:padding="2dp"
             android:src="@drawable/circle_add_tags"
             app:layout_constraintRight_toRightOf="@id/tv_tags_count"
             app:layout_constraintTop_toBottomOf="@id/tv_tags_count" />

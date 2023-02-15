@@ -78,7 +78,7 @@ public class CircleRTCManager {
                     eventHandler.onJoinChannelSuccess(channel, uid, elapsed);
                 }
                 for (CircleVoiceChannelStateListener voiceChannelStateListener : voiceChannelStateListeners) {
-                    voiceChannelStateListener.onVoiceChannelStart();
+                    voiceChannelStateListener.onVoiceChannelStart(channel);
                 }
             });
         }
@@ -134,7 +134,7 @@ public class CircleRTCManager {
 
         @Override
         public void onAudioPublishStateChanged(String channel, int oldState, int newState, int elapseSinceLastState) {
-            EMLog.e("mRtcEventHandler", "onAudioPublishStateChanged channel=" + channel + ",oldState=" + oldState + ",newState=" + newState + ",elapseSinceLastState=" + elapseSinceLastState);
+//            EMLog.e("mRtcEventHandler", "onAudioPublishStateChanged channel=" + channel + ",oldState=" + oldState + ",newState=" + newState + ",elapseSinceLastState=" + elapseSinceLastState);
             if (currentUid != null) {
                 if (newState == PUB_STATE_NO_PUBLISHED) {//静音
                     uidsMuted.put(currentUid, true);
@@ -187,15 +187,15 @@ public class CircleRTCManager {
                     if (currentUid != null) {
                         if (maxVolume > 3) {
                             if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
-                                stateListener.onSelfMicOffAndSpeaking();
+                                stateListener.onSelfMicOffAndSpeaking(channelId);
                             } else {
-                                stateListener.onSelfMicOnAndSpeaking();
+                                stateListener.onSelfMicOnAndSpeaking(channelId);
                             }
                         } else {
                             if (Boolean.TRUE.equals(uidsMuted.get(currentUid))) {
-                                stateListener.onSelfMicOffAndNoSpeaking();
+                                stateListener.onSelfMicOffAndNoSpeaking(channelId);
                             } else {
-                                stateListener.onSelfMicOnAndNoSpeaking();
+                                stateListener.onSelfMicOnAndNoSpeaking(channelId);
                             }
                         }
                     }
@@ -292,7 +292,6 @@ public class CircleRTCManager {
         } catch (Exception e) {
             throw new RuntimeException("Check the error.");
         }
-
         options = new ChannelMediaOptions();
         // 设置频道场景为 BROADCASTING。
         options.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;

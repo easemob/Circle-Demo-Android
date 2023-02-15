@@ -29,6 +29,20 @@
         app:layout_constraintRight_toRightOf="@+id/iv_bg"
         app:layout_constraintTop_toTopOf="@+id/iv_bg" />
 
+    <com.hyphenate.easeui.widget.EaseImageView
+        android:id="@+id/iv_voice_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/cover02"
+        app:ease_shape_type="round"
+        app:layout_constraintRight_toRightOf="@+id/iv_bg"
+        app:layout_constraintTop_toTopOf="@+id/iv_bg" />
+
     <TextView
         android:id="@+id/tv_unread"
         android:layout_width="wrap_content"

@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -276,8 +277,14 @@ public class ServerOverviewActivity extends BaseInitActivity<ActivityServerOverv
                         }
                     })
                     .show();
+
             edtTag = alertDialog.getViewById(R.id.edt_tag);
             TextView tvCount = alertDialog.getViewById(R.id.tv_tag_count);
+
+            edtTag.setFocusable(true);
+            edtTag.setFocusableInTouchMode(true);
+            edtTag.requestFocus();
+            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
             edtTag.addTextChangedListener(new TextWatcher() {
                 //记录输入的字数

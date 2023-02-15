@@ -367,8 +367,10 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onServerCreated(EMCircleServer server) {
-            DatabaseManager.getInstance().getServerDao().insert(new CircleServer(server));
-             LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
+            CircleServer circleServer = new CircleServer(server);
+            circleServer.isJoined = true;
+            DatabaseManager.getInstance().getServerDao().insert(circleServer);
+            LiveEventBus.get(Constants.SERVER_CREATED).post(circleServer);
         }
 
         @Override
