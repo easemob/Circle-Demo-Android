@@ -541,7 +541,7 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
                 .withString(CONVERSATION_ID, threadId)
                 .withString(PARENT_MSG_ID, messageId)
                 .withSerializable(PARENT_ID, parentId)
-                .withString(Constants.CHANNEL_NAME, channel.name)
+                .withSerializable(Constants.CHANNEL, channel)
                 .navigation();
     }
 

@@ -978,6 +978,11 @@ public class EaseChatFragment extends EaseBaseFragment implements OnChatLayoutLi
             return this;
         }
 
+        public Builder setIsChannel(boolean isChannel){
+            bundle.putBoolean(EaseConstant.IS_CHANNEL, isChannel);
+            return this;
+        }
+
         /**
          * Set chat input menu style, including voice input, text input,
          * emoji input and extended function input

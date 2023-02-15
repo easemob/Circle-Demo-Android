@@ -1046,6 +1046,11 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 }
                 break;
             case 3:
+                //先判断是语聊频道还是文字频道
+                CircleChannel threadChannel = getChannelsContainer(currrentServer.serverId).get(node.getParent().getPId());
+                if (threadChannel == null) {
+                    break;
+                }
                 EMChatThread chatThread = getThreadsContainer(node.getParent().getPId()).get(node.getId());
                 if (chatThread != null) {
                     ARouter.getInstance().build("/app/ChatThreadActivity")
@@ -1054,7 +1059,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                             .withString(PARENT_MSG_ID, chatThread.getMessageId())
                             .withSerializable(PARENT_ID, chatThread.getParentId())
                             .withString(Constants.THREAD_NAME, chatThread.getChatThreadName())
-                            .withString(Constants.CHANNEL_NAME, node.getParent().getParent().getName())
+                            .withSerializable(Constants.CHANNEL, threadChannel)
                             .navigation();
                 }
                 break;
