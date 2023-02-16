@@ -250,5 +250,6 @@
     <string name="circle_join_server">加入社区</string>
     <string name="circle_join_voice_channel">加入语聊房频道</string>
     <string name="circle_channel_member_max">人数上限</string>
+    <string name="circle_no_permission_for_private_channel">此频道为私有频道，您需要被邀请才能加入</string>
 
 </resources>

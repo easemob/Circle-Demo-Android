@@ -219,7 +219,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (roleMap == null || roleMap.get(server.serverId) == null) {
             mServerViewModel.fetchSelfServerRole(server.serverId);
         } else {
-            initViewByRole(roleMap.get(server.serverId).intValue());
+            adapter.setRoleId(roleMap.get(server.serverId).intValue());
         }
 
         if (!tags.containsKey(server.serverId)) {
@@ -466,7 +466,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                 CircleChannel circleChannel = getChannelsContainer(bean.getServerId()).get(bean.getChannelId());
                 if (circleChannel != null) {
                     if (circleChannel.type == EMChannelStylePrivate.getCode()) {
-                        removeChannel(bean.getServerId(), bean.getChannelId());
+//                        removeChannel(bean.getServerId(), bean.getChannelId());
                     } else {
                         removeChannelThreads(bean.getServerId(), bean.getChannelId());
                     }
@@ -554,21 +554,10 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
         if (serverRoleMap != null) {
             Integer roleId = serverRoleMap.get(currrentServer.serverId);
             if (roleId != null) {
-                //暂时先不用刷新
-//                initViewByRole(roleId.intValue());
-//                initDataByRole(roleId.intValue());
+                //根据角色刷新view
+                adapter.setRoleId(roleId.intValue());
             }
         }
-    }
-
-    private void initViewByRole(int roleId) {
-//        if (roleId == EMCircleUserRole.USER.getRoleId()) {//普通成员
-//            mBinding.ivAddChannel.setVisibility(View.GONE);
-//        } else if (roleId == EMCircleUserRole.MODERATOR.getRoleId()) {//管理员
-//            mBinding.ivAddChannel.setVisibility(View.GONE);
-//        } else {//拥有者owner
-//            mBinding.ivAddChannel.setVisibility(View.VISIBLE);
-//        }
     }
 
     private void initDataByRole(final int roleId) {
@@ -725,6 +714,9 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
 
                             @Override
                             public void onError(int error, String errorMsg) {
+                                if(error==303) {
+                                    errorMsg=getString(io.agora.service.R.string.circle_no_permission_for_private_channel);
+                                }
                                 if (!TextUtils.isEmpty(errorMsg)) {
                                     ToastUtils.showShort(errorMsg);
                                 }

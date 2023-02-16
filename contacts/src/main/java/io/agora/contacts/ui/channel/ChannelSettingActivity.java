@@ -3,6 +3,7 @@ package io.agora.contacts.ui.channel;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.SeekBar;
 
@@ -32,6 +33,7 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
     private EMCircleChannelStyle channelStyle = EMCircleChannelStyle.EMChannelStylePublic;
     private ChannelViewModel mViewModel;
     private CircleChannel channel;
+    private int progress=1;
 
     public static void actionStart(Context context, CircleChannel channel) {
         Intent intent = new Intent(context, ChannelSettingActivity.class);
@@ -47,6 +49,7 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             mBinding.swiPrivate.getSwitch().setChecked(channel.type == 0);
             mBinding.groupCount.setVisibility(channel.channelMode == 1 ? View.VISIBLE : View.GONE);
             mBinding.seekbar.setProgress(channel.seatCount);
+            progress=channel.seatCount;
             mBinding.tvCount.setText(String.valueOf(channel.seatCount));
         }
     }
@@ -70,9 +73,6 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             parseResource(response, new OnResourceParseCallback<CircleChannel>() {
                 @Override
                 public void onSuccess(@Nullable CircleChannel channel) {
-                    if(channel!=null) {
-                        mBinding.tvCount.setText(String.valueOf(channel.seatCount));
-                    }
                     ToastUtils.showShort(getString(io.agora.service.R.string.update_channel_success));
                 }
 
@@ -92,9 +92,8 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser&&channel != null) {
-                    EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
-                    attribute.setMaxUsers(progress);
-                    mViewModel.updateChannel(channel, attribute);
+                    ChannelSettingActivity.this.progress=progress;
+                    mBinding.tvCount.setText(String.valueOf(progress));
                 }
             }
 
@@ -117,17 +116,28 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
         } else {
             channelStyle = EMCircleChannelStyle.EMChannelStylePublic;
         }
-        if (channel != null) {
-            EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
-            attribute.setType(channelStyle);
-            mViewModel.updateChannel(channel, attribute);
-        }
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.iv_back) {
+            updateChannel();
             finish();
         }
+    }
+
+    private void updateChannel() {
+        EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
+        attribute.setMaxUsers(progress);
+        attribute.setType(channelStyle);
+        mViewModel.updateChannel(channel, attribute);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+           updateChannel();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

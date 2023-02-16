@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.easeui.widget.EaseImageView;
@@ -23,6 +24,12 @@ import io.agora.service.global.Constants;
 import io.agora.service.managers.CircleRTCManager;
 
 public class ChannelListAdapter extends BaseAdapter<Node> {
+    private int roleId=EMCircleUserRole.USER.getRoleId();
+
+    public void setRoleId(int roleId){
+        this.roleId=roleId;
+        notifyDataSetChanged();
+    }
 
 
     public ChannelListAdapter(Context context, List<Node> datas, MuitiTypeSupport muitiTypeSupport) {
@@ -55,6 +62,15 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         TextView tvCategoryName = holder.getView(R.id.tv_category_name);
         ImageView ivArrow = holder.getView(R.id.iv_category_list);
         ImageView ivAddChannel = holder.getView(R.id.iv_add_channel);
+
+        if (roleId == EMCircleUserRole.USER.getRoleId()) {//普通成员
+            ivAddChannel.setVisibility(View.GONE);
+        } else if (roleId == EMCircleUserRole.MODERATOR.getRoleId()) {//管理员
+            ivAddChannel.setVisibility(View.GONE);
+        } else {//拥有者owner
+            ivAddChannel.setVisibility(View.VISIBLE);
+        }
+
         if (node != null) {
             tvCategoryName.setText(node.getName());
         } else {

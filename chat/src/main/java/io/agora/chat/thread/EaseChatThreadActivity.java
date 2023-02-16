@@ -13,6 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMChatThread;
+import com.hyphenate.chat.EMClient;
 import com.hyphenate.easeui.modules.chat.EaseChatFragment;
 import com.hyphenate.easeui.modules.chat.interfaces.OnChatInputChangeListener;
 import com.hyphenate.easeui.ui.base.EaseBaseActivity;
@@ -138,7 +141,18 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
         if(channel!=null) {
             binding.tvChannelName.setText(channel.name);
         }
-        binding.tvThreadName.setText(threadName);
+        EMClient.getInstance().chatThreadManager().getChatThreadFromServer(conversationId, new EMValueCallBack<EMChatThread>() {
+            @Override
+            public void onSuccess(EMChatThread value) {
+                binding.tvThreadName.setText(value.getChatThreadName());
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+
+            }
+        });
+
     }
 
     public void setChildFragmentBuilder(EaseChatFragment.Builder builder) {

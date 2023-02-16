@@ -13,6 +13,8 @@
  */
 package com.hyphenate.easeui.utils;
 
+import static com.hyphenate.easeui.constants.EaseConstant.EM_IGNORE_NOTIFICATION;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
@@ -251,7 +253,7 @@ public class EaseCommonUtils {
      * @return
      */
     public static boolean isSilentMessage(EMMessage message){
-        return message.getBooleanAttribute("em_ignore_notification", false);
+        return message.getBooleanAttribute(EM_IGNORE_NOTIFICATION, false);
     }
 
     /**

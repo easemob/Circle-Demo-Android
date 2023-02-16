@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -120,6 +121,8 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
         mAdapter.setOnItemClickListener(this);
         mRvResult.setAdapter(mAdapter);
         mAdapter.setData(servers);
+        mBinding.etSearch.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     private void getServerListByKey(String key, EMCircleServerSearchType searchType) {
@@ -151,6 +154,7 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
     }
 
     public void onCancel(View v) {
+        hideKeyboard();
         finish();
     }
 

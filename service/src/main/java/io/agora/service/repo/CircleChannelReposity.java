@@ -325,11 +325,6 @@ public class CircleChannelReposity extends ServiceReposity {
                     getCircleManager().muteUserInChannel(serverId, channelId, username, muteDuration, new EMCallBack() {
                         @Override
                         public void onSuccess() {
-                            CircleUser circleUser = getUserDao().loadUserByUserId(username);
-                            if (circleUser != null) {
-                                circleUser.isMuted = true;
-                            }
-                            getUserDao().insert(circleUser);
                             callBack.onSuccess(createLiveData(mute));
                         }
 

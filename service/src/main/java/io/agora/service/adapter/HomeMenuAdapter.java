@@ -25,6 +25,7 @@ import java.util.Map;
 
 import io.agora.service.R;
 import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.dao.CircleChannelDao;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.managers.CircleRTCManager;
@@ -134,13 +135,15 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvIcon);
 
                 String channelId = CircleRTCManager.getInstance().getChannelId();
-                CircleChannel voiceChannel = DatabaseManager.getInstance().getChannelDao().getChannelByChannelID(channelId);
-                if(voiceChannel!=null&& TextUtils.equals(server.serverId,voiceChannel.serverId)) {
-                    Glide.with(mContext).load(R.drawable.circle_micing).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
-                }else{
-                    Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
+                CircleChannelDao channelDao = DatabaseManager.getInstance().getChannelDao();
+                if(channelDao!=null) {
+                    CircleChannel voiceChannel =channelDao.getChannelByChannelID(channelId);
+                    if(voiceChannel!=null&& TextUtils.equals(server.serverId,voiceChannel.serverId)) {
+                        Glide.with(mContext).load(R.drawable.circle_micing).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
+                    }else{
+                        Glide.with(mContext).load(server.icon).placeholder(randomServerIcon).into(canCheckHolder.mIvVoiceIcon);
+                    }
                 }
-
                 Integer count = mUnreadMap.get(server.serverId);
                 if (count != null && count.intValue() != 0) {
                     canCheckHolder.mTvUnRead.setVisibility(View.VISIBLE);

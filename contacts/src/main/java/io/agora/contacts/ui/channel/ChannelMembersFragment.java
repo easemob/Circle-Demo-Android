@@ -33,6 +33,8 @@ import io.agora.contacts.adapter.ContactListAdapter;
 import io.agora.contacts.databinding.DialogUserinfoBottomBinding;
 import io.agora.contacts.ui.ContactListFragment;
 import io.agora.service.bean.channel.ChannelEventNotifyBean;
+import io.agora.service.bean.channel.ChannelMuteNotifyBean;
+import io.agora.service.bean.server.ServerRoleChangeNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleUser;
@@ -205,6 +207,27 @@ public class ChannelMembersFragment extends ContactListFragment implements View.
         LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), channelEventNotifyBean -> {
             if (channelEventNotifyBean != null && TextUtils.equals(channelEventNotifyBean.getChannelId(), channel.channelId)) {
                 mChannelViewModel.getChannelMembers(channel.serverId, channel.channelId);
+            }
+        });
+        LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY, ChannelMuteNotifyBean.class).observe(getViewLifecycleOwner(),bean->{
+            if (bean != null && TextUtils.equals(bean.getChannelId(), channel.channelId)) {
+                List<String> muteMembers = bean.getMuteMembers();
+                if(muteMembers!=null&&muteMembers.size()>0) {
+                    String user = muteMembers.get(0);
+                    if(TextUtils.equals(user,selectedUser.getUsername())) {
+                        selectedUser.isMuted = bean.isMuted();
+                        refreshDialogView();
+                    }
+                }
+            }
+        });
+        LiveEventBus.get(Constants.SERVER_ROLE_ASSIGNED_NOTIFY, ServerRoleChangeNotifyBean.class).observe(getViewLifecycleOwner(), bean->{
+            if (bean != null && channel!=null&&TextUtils.equals(bean.getServerId(), channel.serverId)) {
+                mChannelViewModel.getChannelMembers(channel.serverId, channel.channelId);
+                if(TextUtils.equals(bean.getMember(),selectedUser.getUsername())) {
+                    selectedUser.setRoleID(bean.getRole().getRoleId());
+                    refreshDialogView();
+                }
             }
         });
     }

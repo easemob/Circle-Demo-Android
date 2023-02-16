@@ -421,19 +421,20 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onMemberJoinedServer(String serverId, String member) {
-            CircleServer server = getServerDao().getServerById(serverId);
-//            if (server != null) {
-//                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_server_notification, member, server.name));
-//            }
+            if(TextUtils.equals(member,EMClient.getInstance().getCurrentUser())) {
+                //自己在其他设备上加入社区
+                LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
+            }
             LiveEventBus.get(Constants.SERVER_MEMBER_JOINED_NOTIFY).post(new ServerMemberNotifyBean(serverId, member));
         }
 
         @Override
         public void onMemberLeftServer(String serverId, String member) {
-            CircleServer server = getServerDao().getServerById(serverId);
-//            if (server != null) {
-//                ToastUtils.showShort(applicationContext.getString(R.string.circle_leave_server, member, server.name));
-//            }
+            if(TextUtils.equals(member,EMClient.getInstance().getCurrentUser())) {
+                //自己的多设备退出server
+                //删除server
+                getServerDao().deleteByServerId(serverId);
+            }
             LiveEventBus.get(Constants.SERVER_MEMBER_LEFT_NOTIFY).post(new ServerMemberNotifyBean(serverId, member));
         }
 
@@ -452,15 +453,17 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                         Log.e(TAG, "onReceive server Invitation ,but event is null");
                         return;
                     }
-                    Activity currentActivity = ((BaseApplication) BaseApplication.getContext()).getLifecycleCallbacks().current();
-                    CustomInfo info = new CustomInfo();
-                    info.setServerId(event.getId());
-                    info.setServerDesc(event.getDesc());
-                    info.setServerIcon(event.getIcon());
-                    info.setServerName(event.getName());
-                    info.setInviter(event.getFrom());
-                    CircleUtils.showServerInviteDialog(currentActivity, info);
-
+                    if(!TextUtils.equals(inviter,EMClient.getInstance().getCurrentUser())) {
+                        //邀请人不是自己，表明不是多设备事件
+                        Activity currentActivity = ((BaseApplication) BaseApplication.getContext()).getLifecycleCallbacks().current();
+                        CustomInfo info = new CustomInfo();
+                        info.setServerId(event.getId());
+                        info.setServerDesc(event.getDesc());
+                        info.setServerIcon(event.getIcon());
+                        info.setServerName(event.getName());
+                        info.setInviter(event.getFrom());
+                        CircleUtils.showServerInviteDialog(currentActivity, info);
+                    }
                     LiveEventBus.get(Constants.SERVER_RECEIVE_INVITATION_NOTIFY).post(new ServerInvitationNotifyBean(event, inviter));
                 }
             };
@@ -1071,9 +1074,11 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
                 case CIRCLE_CHANNEL_MEMBER_ADD_MUTE:
                     // 当前用户在其他设备上禁言频道成员。
+                    LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY).post(new ChannelMuteNotifyBean(channelId, true, usernames));
                     break;
                 case CIRCLE_CHANNEL_MEMBER_REMOVE_MUTE:
                     // 当前用户在其他设备上解除对频道成员的禁言。
+                    LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY).post(new ChannelMuteNotifyBean( channelId, false, usernames));
                     break;
             }
         }

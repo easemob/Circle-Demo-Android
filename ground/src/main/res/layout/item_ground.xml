@@ -30,7 +30,7 @@
         app:bottom_left_radius="8dp"
         app:bottom_right_radius="8dp"
         app:downsampleFactor="6"
-        android:background="@color/black_292929"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/iv_server"
         app:layout_constraintLeft_toLeftOf="@id/ll_bg"
         app:layout_constraintRight_toRightOf="@id/ll_bg"
@@ -42,6 +42,7 @@
         android:layout_width="0dp"
         android:layout_height="140dp"
         android:orientation="vertical"
+        android:background="@drawable/shape_gray_292929_half_bottom_radius8"
         app:layout_constraintBottom_toBottomOf="@id/iv_server"
         app:layout_constraintLeft_toLeftOf="@id/iv_server"
         app:layout_constraintRight_toRightOf="@id/iv_server">
