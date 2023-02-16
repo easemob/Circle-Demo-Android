@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleUserRole;
-import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.contacts.R;
@@ -19,8 +18,8 @@ import io.agora.contacts.databinding.FragmentServerSettingBinding;
 import io.agora.contacts.ui.InviteUserToServerBottomFragment;
 import io.agora.contacts.ui.category.CreateCategoryActivity;
 import io.agora.contacts.ui.channel.CreateChannelActivity;
-import io.agora.service.base.BaseBottomSheetFragment;
 import io.agora.service.base.BaseInitFragment;
+import io.agora.service.base.ContainerBottomSheetFragment;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
@@ -34,14 +33,14 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
     private ChatViewModel mChatViewModel;
     private CircleServer server;
     private EMCircleUserRole selfRole = EMCircleUserRole.USER;
-    private BaseBottomSheetFragment parentContainerFragment;
+    private ContainerBottomSheetFragment parentFragment;
 
     @Override
     protected void initConfig() {
         super.initConfig();
 
         mServerViewModel = new ViewModelProvider(this).get(ServerViewModel.class);
-        mChatViewModel=new ViewModelProvider(this).get(ChatViewModel.class);
+        mChatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         mServerViewModel.leaveServerResultLiveData.observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<Boolean>() {
                 @Override
@@ -63,7 +62,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
                 }
             });
         });
-        mChatViewModel.markServerMessagesAsReadLiveData.observe(getViewLifecycleOwner(),response->{
+        mChatViewModel.markServerMessagesAsReadLiveData.observe(getViewLifecycleOwner(), response -> {
             parseResource(response, new OnResourceParseCallback<Boolean>() {
                 @Override
                 public void onSuccess(@Nullable Boolean data) {
@@ -100,6 +99,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         mBinding.cslCreateCategory.setOnClickListener(this);
         mBinding.cslServerMembers.setOnClickListener(this);
         mBinding.cslExitServer.setOnClickListener(this);
+        mBinding.llFold.setOnClickListener(this);
     }
 
     private void initRoleRelatedViewVisiablity(EMCircleUserRole role) {
@@ -107,6 +107,17 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         mBinding.cslCreateCategory.setVisibility(role == EMCircleUserRole.OWNER ? View.VISIBLE : View.GONE);
         mBinding.tvEditServer.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
         mBinding.cslExitServer.setVisibility(role == EMCircleUserRole.OWNER ? View.GONE : View.VISIBLE);
+        mBinding.getRoot().post(new Runnable() {
+            @Override
+            public void run() {
+                if (parentFragment != null) {
+                    int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec((1 << 30) - 1, View.MeasureSpec.AT_MOST);
+                    int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec((1 << 30) - 1, View.MeasureSpec.AT_MOST);
+                    mBinding.getRoot().measure(widthMeasureSpec, heightMeasureSpec);
+                    parentFragment.setLayoutHeight(mBinding.getRoot().getMeasuredHeight());
+                }
+            }
+        });
     }
 
     @Override
@@ -116,28 +127,24 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         server = (CircleServer) arguments.get(Constants.SERVER);
     }
 
+
+    @Override
+    protected void initData() {
+        super.initData();
+        if (server != null) {
+            mBinding.tvServerName.setText(server.name);
+        }
+
+    }
+
     @Override
     protected int getResLayoutId() {
         return R.layout.fragment_server_setting;
     }
 
     @Override
-    public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
-        if (server != null) {
-            titlebar.setTitle(server.name);
-        }
-        titlebar.setLeftLayoutVisibility(View.GONE);
-        titlebar.getRightImage().setVisibility(View.GONE);
-    }
-
-    @Override
-    public void showllFold(View llfold) {
-        llfold.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void setParentContainerFragment(BaseBottomSheetFragment parentContainerFragment) {
-        this.parentContainerFragment = parentContainerFragment;
+    public void setParentContainerFragment(ContainerBottomSheetFragment parentContainerFragment) {
+        this.parentFragment = parentContainerFragment;
     }
 
     @Override
@@ -164,7 +171,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         } else if (v.getId() == R.id.csl_create_channel) {
             //创建频道
             //去创建频道页面
-            CreateChannelActivity.actionStart(mContext, server.serverId,null);
+            CreateChannelActivity.actionStart(mContext, server.serverId, null);
             hide();
         } else if (v.getId() == R.id.csl_create_category) {
             //创建频道分组
@@ -176,6 +183,8 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         } else if (v.getId() == R.id.csl_exit_server) {
             //退出社区
             mServerViewModel.leaveServer(server.serverId);
+        }else if(v.getId()==R.id.ll_fold) {
+            hide();
         }
     }
 }

@@ -12,7 +12,6 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
-import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import io.agora.contacts.R;
@@ -20,6 +19,7 @@ import io.agora.contacts.databinding.FragmentChannelSettingBinding;
 import io.agora.contacts.ui.InviteUserToChannelBottomFragment;
 import io.agora.contacts.ui.ThreadListActivity;
 import io.agora.service.base.BaseInitFragment;
+import io.agora.service.base.ContainerBottomSheetFragment;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
@@ -32,6 +32,7 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     private ChannelViewModel mChannelViewModel;
     private ServerViewModel mServerViewModel;
     private CircleChannel channel;
+    private ContainerBottomSheetFragment parentFragment;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -45,7 +46,19 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     private void initRoleRelatedViewVisiablity(EMCircleUserRole role) {
         mBinding.tvEditChannel.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
         mBinding.cslMoveChannel.setVisibility(role == EMCircleUserRole.USER ? View.GONE : View.VISIBLE);
-//        mBinding.cslLeaveChannel.setVisibility(role == EMCircleUserRole.USER ? View.VISIBLE : View.GONE);
+
+        //对荣耀等部分系统的ui适配，不可做通用代码
+        mBinding.getRoot().post(new Runnable() {
+            @Override
+            public void run() {
+                if (parentFragment != null) {
+                    int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec((1<<30)-1, View.MeasureSpec.AT_MOST);
+                    int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec((1<<30)-1, View.MeasureSpec.AT_MOST);
+                    mBinding.getRoot().measure(widthMeasureSpec,heightMeasureSpec);
+                    parentFragment.setLayoutHeight( mBinding.getRoot().getMeasuredHeight());
+                }
+            }
+        });
     }
 
     @Override
@@ -92,11 +105,12 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
 
         mBinding.tvInvite.setOnClickListener(this);
         mBinding.tvThreadList.setOnClickListener(this);
-        mBinding.tvEditChannel.setOnClickListener(this);
+//        mBinding.tvEditChannel.setOnClickListener(this);
         mBinding.tvNotificationSetting.setOnClickListener(this);
         mBinding.cslMarkRead.setOnClickListener(this);
         mBinding.cslMoveChannel.setOnClickListener(this);
         mBinding.cslChannelMembers.setOnClickListener(this);
+        mBinding.llFold.setOnClickListener(this);
     }
 
     private void onFetchSelfRoleSuccess(EMCircleUserRole role) {
@@ -110,6 +124,9 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     @Override
     protected void initData() {
         mServerViewModel.fetchSelfServerRole(channel.serverId);
+        if(channel!=null) {
+            mBinding.tvChannelName.setText(channel.name);
+        }
     }
 
     @Override
@@ -118,15 +135,8 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     }
 
     @Override
-    public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
-        titlebar.setTitle(getString(R.string.circle_channel_setting));
-        titlebar.setLeftLayoutVisibility(View.GONE);
-        titlebar.setRightLayoutVisibility(View.GONE);
-    }
-
-    @Override
-    public void showllFold(View llfold) {
-        llfold.setVisibility(View.VISIBLE);
+    public void setParentContainerFragment(ContainerBottomSheetFragment fragment) {
+        this.parentFragment = fragment;
     }
 
     @Override
@@ -161,9 +171,12 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
         } else if (v.getId() == R.id.csl_channel_members) {
             //查看频道成员
             ChannelMembersActivity.actionStart(mContext, channel);
-        } else if (v.getId() == R.id.csl_leave_channel) {
-            //离开频道
-            mChannelViewModel.leaveChannel(channel);
+        }else if(v.getId()==R.id.ll_fold) {
+            hide();
         }
+//        else if (v.getId() == R.id.csl_leave_channel) {
+//            //离开频道
+//            mChannelViewModel.leaveChannel(channel);
+//        }
     }
 }

@@ -204,7 +204,7 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("server", server);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(1));
+                fragment.show(getSupportFragmentManager());
             }
         });
         LiveEventBus.get(Constants.SHOW_SERVER_INTRODUCTION_FRAGMENT, CircleServer.class).observe(this, new Observer<CircleServer>() {
@@ -248,7 +248,7 @@ public class MainActivity extends BaseInitActivity<ActivityMainBinding> implemen
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(CHANNEL, channel);
                 fragment.setArguments(bundle);
-                fragment.show(getSupportFragmentManager(), ScreenUtils.getScreenHeight()-ConvertUtils.dp2px(1));
+                fragment.show(getSupportFragmentManager());
             }
         });
         LiveEventBus.get(Constants.SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT, CircleChannel.class).observe(this, new Observer<CircleChannel>() {

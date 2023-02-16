@@ -96,6 +96,12 @@ public abstract class ContainerBottomSheetFragment extends BaseBottomSheetFragme
         }
     }
 
+    public void setLayoutHeight(int height){
+        ViewGroup.LayoutParams layoutParams = requireView().getLayoutParams();
+        layoutParams.height = height+baseBinding.llFold.getMeasuredHeight()+baseBinding.titlebar.getMeasuredHeight();
+        requireView().setLayoutParams(layoutParams);
+    }
+
     @Override
     protected void initView() {
         super.initView();

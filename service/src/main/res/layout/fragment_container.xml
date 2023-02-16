@@ -33,6 +33,7 @@
             android:layout_height="@dimen/ease_common_title_bar_height"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:titleBarDisplayHomeAsUpEnabled="true"
             app:titleBarLeftImage="@drawable/back_arrow_white"

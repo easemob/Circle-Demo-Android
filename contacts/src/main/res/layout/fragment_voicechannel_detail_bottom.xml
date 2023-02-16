@@ -5,7 +5,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_141414">
+        android:background="@drawable/shape_black_top_half_radius12">
 
         <LinearLayout
             android:id="@+id/ll_fold"

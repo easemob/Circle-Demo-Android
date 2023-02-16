@@ -3,17 +3,45 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/csl_server_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/app_left_padding"
-        android:paddingTop="26dp"
         android:paddingRight="@dimen/app_right_padding"
         android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:id="@+id/ll_fold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/circle_line_fold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_server_name"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="频道名"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_fold" />
 
         <TextView
             android:id="@+id/tv_invite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
             android:drawableTop="@drawable/circle_invite_friends"
             android:drawablePadding="15dp"
             android:text="@string/contacts_invite_friend"
@@ -22,7 +50,7 @@
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/tv_notification_setting"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/tv_server_name" />
 
         <TextView
             android:id="@+id/tv_notification_setting"

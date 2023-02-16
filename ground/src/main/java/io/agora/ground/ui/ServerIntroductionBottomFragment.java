@@ -26,8 +26,8 @@ import java.util.Map;
 import io.agora.ground.R;
 import io.agora.ground.databinding.FragmentJoinServerBinding;
 import io.agora.ground.model.GroundViewModel;
-import io.agora.service.base.BaseBottomSheetFragment;
 import io.agora.service.base.BaseInitFragment;
+import io.agora.service.base.ContainerBottomSheetFragment;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
@@ -43,7 +43,7 @@ public class ServerIntroductionBottomFragment extends BaseInitFragment<FragmentJ
 
     private CircleServer server;
     private GroundViewModel mViewModel;
-    private BaseBottomSheetFragment parentFragment;
+    private ContainerBottomSheetFragment parentFragment;
 
     @Override
     public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
@@ -117,7 +117,7 @@ public class ServerIntroductionBottomFragment extends BaseInitFragment<FragmentJ
     }
 
     @Override
-    public void setParentContainerFragment(BaseBottomSheetFragment fragment) {
+    public void setParentContainerFragment(ContainerBottomSheetFragment fragment) {
         this.parentFragment = fragment;
     }
 

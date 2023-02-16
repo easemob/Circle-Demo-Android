@@ -50,6 +50,7 @@ import io.agora.service.db.dao.CircleUserDao;
 import io.agora.service.global.Constants;
 import io.agora.service.global.URLHelper;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.managers.PreferenceManager;
 import io.agora.service.net.ErrorCode;
 import io.agora.service.net.NetworkOnlyResource;
@@ -270,6 +271,7 @@ public class ServiceReposity {
                     @Override
                     public void onSuccess() {
                         AppUserInfoManager.getInstance().clear();
+                        CircleRTCManager.getInstance().leaveChannel();
                         PreferenceManager.getInstance().setAutoLogin(false);
                         closeDB();
                         //reset();

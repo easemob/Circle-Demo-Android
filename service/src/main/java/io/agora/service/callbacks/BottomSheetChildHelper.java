@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentManager;
 
 import com.hyphenate.easeui.widget.EaseTitleBar;
 
-import io.agora.service.base.BaseBottomSheetFragment;
 import io.agora.service.base.ContainerBottomSheetFragment;
 
 
@@ -44,6 +43,7 @@ public interface BottomSheetChildHelper {
         Fragment instance= (Fragment) this;
         MyContainerBottomSheetFragment bottomSheetFragment = new MyContainerBottomSheetFragment(instance);
         bottomSheetFragment.show(supportFragmentManager, instance.getClass().getSimpleName());
+        setParentContainerFragment(bottomSheetFragment);
     }
 
     default  void show(FragmentManager supportFragmentManager,int topOffset) {
@@ -53,7 +53,7 @@ public interface BottomSheetChildHelper {
         setParentContainerFragment(bottomSheetFragment);
     }
 
-    default void setParentContainerFragment(BaseBottomSheetFragment fragment){}
+    default void setParentContainerFragment(ContainerBottomSheetFragment fragment){}
 
 
 
