@@ -175,7 +175,7 @@ public class CreateChannelActivity extends BaseInitActivity<ActivityCreateChanne
             EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
             attribute.setName(name);
             attribute.setDesc(desc);
-            attribute.setMaxUsers(mode == EMCircleChannelModeChat ? Constants.CHANNEL_MAX_USERS_2000 : Constants.CHANNEL_MAX_USERS_20);
+            attribute.setMaxUsers(mode == EMCircleChannelModeChat ? Constants.CHANNEL_MAX_USERS_2000 : Constants.CHANNEL_MAX_USERS_8);
             attribute.setType(style);
             mViewModel.createChannel(mode, serverId, categoryId, attribute, style);
         } else if (v.getId() == R.id.iv_back) {

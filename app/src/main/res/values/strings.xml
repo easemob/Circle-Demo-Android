@@ -6,5 +6,7 @@
     <string name="main_title_mine">Mine</string>
     <string name="circle_delete_conversation_content">确认删除后，将清空聊天记录。</string>
     <string name="circle_exit_hint">再次点击退出</string>
+    <string name="circle_be_moved_from_channel">您已被移出此频道</string>
+    <string name="circle_be_moved_from_server">您已被移出此社区</string>
 
 </resources>

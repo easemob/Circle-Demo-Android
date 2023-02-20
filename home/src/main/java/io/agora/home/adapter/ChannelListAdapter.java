@@ -179,7 +179,7 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
         if (conversation != null) {
             unreadMsgCount = conversation.getUnreadMsgCount();
         }
-        if (unreadMsgCount > 0) {
+        if (node.getChannelMode()==0&&unreadMsgCount > 0) {
             tvUnread.setText(unreadMsgCount + "");
             tvUnread.setVisibility(View.VISIBLE);
         } else {

@@ -279,6 +279,11 @@ public class CircleServerReposity extends ServiceReposity {
                 getCircleManager().destroyServer(serverId, new EMCallBack() {
                     @Override
                     public void onSuccess() {
+                        //移除自己在这个社区的角色
+                        Map<String, Integer> roleMap = AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().getValue();
+                        if (roleMap != null && roleMap.get(serverId) != null) {
+                            roleMap.remove(serverId);
+                        }
                         AppUserInfoManager.getInstance().getUserJoinedSevers().remove(serverId);
                         getServerDao().deleteByServerId(serverId);
                         callBack.onSuccess(createLiveData(true));
@@ -301,6 +306,11 @@ public class CircleServerReposity extends ServiceReposity {
                 getCircleManager().leaveServer(serverId, new EMCallBack() {
                     @Override
                     public void onSuccess() {
+                        //移除自己在这个社区的角色
+                        Map<String, Integer> roleMap = AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().getValue();
+                        if (roleMap != null && roleMap.get(serverId) != null) {
+                            roleMap.remove(serverId);
+                        }
                         AppUserInfoManager.getInstance().getUserJoinedSevers().remove(serverId);
                         getServerDao().deleteByServerId(serverId);
                         callBack.onSuccess(createLiveData(true));

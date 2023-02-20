@@ -6,7 +6,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_141414"
+        android:background="@drawable/shape_black_top_half_radius12"
         android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,6 +19,8 @@
                 android:id="@+id/ll_fold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
                 android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -64,11 +66,11 @@
                 android:layout_marginTop="6dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textStyle="bold"
-                app:layout_constraintRight_toRightOf="@id/iv_server"
                 android:textColor="@color/white"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 app:layout_constraintLeft_toRightOf="@id/iv_server_icon"
+                app:layout_constraintRight_toRightOf="@id/iv_server"
                 app:layout_constraintTop_toBottomOf="@id/iv_server"
                 tools:text="@string/circle_server_name" />
 
@@ -77,10 +79,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginRight="30dp"
                 android:textColor="@color/white"
                 android:textSize="13sp"
-                android:layout_marginTop="12dp"
                 app:layout_constraintTop_toBottomOf="@id/iv_server_icon"
                 tools:text="栖守道德者，寂寞一时；依阿权势者，凄凉万古。达人观物外之物，思身后之身，守受一时之寂寞，毋取万古之凄凉。涉世浅，点染亦浅；历事深，机械亦深。故君子与其练达，不若朴鲁；与其曲谨，不若疏狂。君子之心事，天青日白；不可使人不知；君子之才华，玉韫。" />
 

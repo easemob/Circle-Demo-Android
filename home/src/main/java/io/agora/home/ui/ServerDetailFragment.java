@@ -397,7 +397,7 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             if (circleChannel != null) {
                 if (circleChannel.type == EMChannelStylePrivate.getCode()) {
                     //私有频道离开，应该从首页列表里移除不展示，公开频道离开不用理会
-                    removeChannel(circleChannel.serverId, circleChannel.channelId);
+//                    removeChannel(circleChannel.serverId, circleChannel.channelId);
                 } else {
                     removeChannelThreads(circleChannel.serverId, circleChannel.channelId);
                 }
@@ -655,6 +655,12 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
             categories.remove(serverModified.serverId);
             channels.remove(serverModified.serverId);
             tags.remove(serverModified.serverId);
+
+            //移除自己在这个社区的角色
+            Map<String, Integer> roleMap = AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().getValue();
+            if (roleMap != null && roleMap.get(serverModified.serverId) != null) {
+                roleMap.remove(serverModified.serverId);
+            }
 
             if (android.text.TextUtils.equals(serverModified.serverId, currrentServer.serverId)) {
                 setServer(serverModified, showMode);

@@ -41,6 +41,7 @@ import io.agora.common.dialog.AlertDialog;
 import io.agora.contacts.ui.channel.ChannelSettingBottomFragment;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.bean.ThreadData;
+import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
 import io.agora.service.bean.server.ServerMembersNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
@@ -300,6 +301,15 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
                 }
             }
         });
+
+        LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelMemberRemovedNotifyBean.class).observe(this, bean -> {
+            if (bean != null) {
+                if (TextUtils.equals(conversationId, bean.getChannelId())) {
+                    ToastUtils.showShort(getString(R.string.circle_be_moved_from_channel));
+                    finish();
+                }
+            }
+        });
         LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(this, bean -> {
             if (bean != null) {
                 List<String> ids = bean.getIds();
@@ -308,6 +318,7 @@ public class ChatActivity extends BaseInitActivity<ActivityChatBinding> implemen
                         if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName()) &&
                                 channel != null &&
                                 TextUtils.equals(bean.getServerId(), channel.serverId)) {
+                            ToastUtils.showShort(getString(R.string.circle_be_moved_from_server));
                             finish();
                             break;
                         }

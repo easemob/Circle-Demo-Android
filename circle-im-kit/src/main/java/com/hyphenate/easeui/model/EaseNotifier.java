@@ -305,6 +305,9 @@ public class EaseNotifier {
                 return;
             }
         }
+        if(message.isChatThreadMessage()) {//thread消息不震动
+            return;
+        }
 
         final EaseSettingsProvider settingsProvider = EaseIM.getInstance().getSettingsProvider();
         if (!settingsProvider.isMsgNotifyAllowed(null)) {

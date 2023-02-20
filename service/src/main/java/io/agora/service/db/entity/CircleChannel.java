@@ -87,7 +87,7 @@ public class CircleChannel implements Serializable, Parcelable {
             EMCircleVoiceChannel emCircleVoiceChannel = null;
             try {
                 emCircleVoiceChannel = new EMCircleVoiceChannel(emCircleChannel);
-                this.rtcName=emCircleVoiceChannel.getRtcName();
+                this.rtcName=emCircleVoiceChannel.getRtcChannelId();
                 this.seatCount =emCircleVoiceChannel.getMaxUsers();
             } catch (Exception e) {
                 e.printStackTrace();

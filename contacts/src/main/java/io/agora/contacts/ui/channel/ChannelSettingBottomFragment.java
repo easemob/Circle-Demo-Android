@@ -105,7 +105,7 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
 
         mBinding.tvInvite.setOnClickListener(this);
         mBinding.tvThreadList.setOnClickListener(this);
-//        mBinding.tvEditChannel.setOnClickListener(this);
+        mBinding.tvEditChannel.setOnClickListener(this);
         mBinding.tvNotificationSetting.setOnClickListener(this);
         mBinding.cslMarkRead.setOnClickListener(this);
         mBinding.cslMoveChannel.setOnClickListener(this);

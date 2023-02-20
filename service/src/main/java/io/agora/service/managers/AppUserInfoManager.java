@@ -157,6 +157,9 @@ public class AppUserInfoManager {
     public void clear() {
         joinedServers.clear();
         selfServerRoleMapLiveData.postValue(null);
+        channelIds.clear();
+        circleUsers.clear();
+        mPresences.clear();
     }
 
     public Map<String, CircleUser> getCircleUsers() {

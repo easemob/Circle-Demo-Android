@@ -1,8 +1,6 @@
 package io.agora.chat.thread;
 
 
-import static com.hyphenate.easeui.constants.EaseConstant.EM_IGNORE_NOTIFICATION;
-
 import android.text.TextUtils;
 import android.view.View;
 
@@ -61,6 +59,6 @@ public class ChatThreadFragment extends EaseChatThreadFragment {
 
     @Override
     public void addMsgAttrsBeforeSend(EMMessage message) {
-        message.setAttribute(EM_IGNORE_NOTIFICATION,true);
+//        message.setAttribute(EM_IGNORE_NOTIFICATION,true);
     }
 }

@@ -29,6 +29,7 @@ import io.agora.contacts.adapter.ContactListAdapter;
 import io.agora.contacts.databinding.DialogUserinfoBottomBinding;
 import io.agora.contacts.ui.ContactListFragment;
 import io.agora.service.bean.server.ServerMemberNotifyBean;
+import io.agora.service.bean.server.ServerMembersNotifyBean;
 import io.agora.service.bean.server.ServerRoleChangeNotifyBean;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
@@ -162,6 +163,21 @@ public class ServerMembersFragment extends ContactListFragment implements  View.
         });
         AppUserInfoManager.getInstance().getCurrentUserLiveData().observe(getViewLifecycleOwner(), circleUser -> {
             this.currentUser = circleUser;
+        });
+
+        LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (bean != null &&server!=null) {
+                List<String> ids = bean.getIds();
+                if (ids != null) {
+                    for (int i = 0; i < ids.size(); i++) {
+                        if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName())&&
+                                TextUtils.equals(bean.getServerId(),server.serverId)) {
+                            getActivity().finish();
+                        }
+                        break;
+                    }
+                }
+            }
         });
         AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
             if (serverRoleMap != null) {//在首页已经请求过了，所以这里必定有数据

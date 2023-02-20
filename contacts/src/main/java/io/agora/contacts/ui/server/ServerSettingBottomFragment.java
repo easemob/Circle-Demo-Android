@@ -13,6 +13,8 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
+import java.util.List;
+
 import io.agora.contacts.R;
 import io.agora.contacts.databinding.FragmentServerSettingBinding;
 import io.agora.contacts.ui.InviteUserToServerBottomFragment;
@@ -20,6 +22,7 @@ import io.agora.contacts.ui.category.CreateCategoryActivity;
 import io.agora.contacts.ui.channel.CreateChannelActivity;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.base.ContainerBottomSheetFragment;
+import io.agora.service.bean.server.ServerMembersNotifyBean;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleServer;
@@ -89,6 +92,26 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         LiveEventBus.get(Constants.SERVER_UPDATED, CircleServer.class).observe(this, serverUpdated -> {
             if (serverUpdated != null && server != null && android.text.TextUtils.equals(server.serverId, serverUpdated.serverId)) {
                 server = serverUpdated;
+            }
+        });
+
+        LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (bean != null&&server!=null) {
+                List<String> ids = bean.getIds();
+                if (ids != null) {
+                    for (int i = 0; i < ids.size(); i++) {
+                        if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName())&&
+                                TextUtils.equals(bean.getServerId(),server.serverId)) {
+                            mBinding.getRoot().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    hide();
+                                }
+                            },300);
+                        }
+                        break;
+                    }
+                }
             }
         });
         mBinding.tvInvite.setOnClickListener(this);
@@ -183,7 +206,7 @@ public class ServerSettingBottomFragment extends BaseInitFragment<FragmentServer
         } else if (v.getId() == R.id.csl_exit_server) {
             //退出社区
             mServerViewModel.leaveServer(server.serverId);
-        }else if(v.getId()==R.id.ll_fold) {
+        } else if (v.getId() == R.id.ll_fold) {
             hide();
         }
     }

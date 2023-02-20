@@ -40,7 +40,7 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
 , CircleVoiceChannelStateListener {
     private HomeViewModel mViewModel;
     private HomeMenuAdapter mAdapter;
-    private ServerDetailFragment mServerDetailFragment = ServerDetailFragment.newInstance();
+    private ServerDetailFragment mServerDetailFragment;
     private ConversationListFragment mConversationListFragment;
     private int mCheckPos;
     private ShowMode showMode = ShowMode.NORMAL;
@@ -165,7 +165,13 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                 if (ids != null) {
                     for (int i = 0; i < ids.size(); i++) {
                         if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName())) {
+                            //移除自己在这个社区的角色
+                            Map<String, Integer> roleMap = AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().getValue();
+                            if (roleMap != null && roleMap.get(bean.getServerId()) != null) {
+                                roleMap.remove(bean.getServerId());
+                            }
                             DatabaseManager.getInstance().getServerDao().deleteByServerId(bean.getServerId());
+
                         }
                         break;
                     }
@@ -219,7 +225,14 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
-        mConversationListFragment = ConversationListFragment.newInstance();
+        mServerDetailFragment= (ServerDetailFragment) getChildFragmentManager().findFragmentByTag("server_detail");
+        if(mServerDetailFragment==null) {
+            mServerDetailFragment = ServerDetailFragment.newInstance();
+        }
+        mConversationListFragment= (ConversationListFragment) getChildFragmentManager().findFragmentByTag("conversation");
+        if(mConversationListFragment==null) {
+            mConversationListFragment = ConversationListFragment.newInstance();
+        }
         replace(mConversationListFragment, R.id.fcv_fragment, "conversation");
     }
 
