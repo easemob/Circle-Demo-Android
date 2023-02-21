@@ -396,6 +396,8 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             if(server!=null) {
                 LiveEventBus.get(Constants.SHOW_TARGET_SERVER, CircleServer.class).post(server);
             }
+            //抽屉关起来
+            hide();
         }
     }
 

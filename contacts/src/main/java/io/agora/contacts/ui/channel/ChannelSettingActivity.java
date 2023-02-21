@@ -1,5 +1,8 @@
 package io.agora.contacts.ui.channel;
 
+import static com.hyphenate.chat.EMCircleChannelStyle.EMChannelStylePrivate;
+import static com.hyphenate.chat.EMCircleChannelStyle.EMChannelStylePublic;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -49,6 +52,7 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
             mBinding.swiPrivate.getSwitch().setChecked(channel.type == 0);
             mBinding.groupCount.setVisibility(channel.channelMode == 1 ? View.VISIBLE : View.GONE);
             mBinding.seekbar.setProgress(channel.seatCount);
+            channelStyle=channel.type==0?EMChannelStylePublic:EMChannelStylePrivate;
             progress=channel.seatCount;
             mBinding.tvCount.setText(String.valueOf(channel.seatCount));
         }
@@ -112,9 +116,9 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
     @Override
     public void onCheckedChanged(SwitchItemView buttonView, boolean isChecked) {
         if (!isChecked) {
-            channelStyle = EMCircleChannelStyle.EMChannelStylePrivate;
+            channelStyle = EMChannelStylePrivate;
         } else {
-            channelStyle = EMCircleChannelStyle.EMChannelStylePublic;
+            channelStyle = EMChannelStylePublic;
         }
     }
 
@@ -127,10 +131,12 @@ public class ChannelSettingActivity extends BaseInitActivity<ActivityChannelSett
     }
 
     private void updateChannel() {
-        EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
-        attribute.setMaxUsers(progress);
-        attribute.setType(channelStyle);
-        mViewModel.updateChannel(channel, attribute);
+        if(progress!=channel.seatCount||channelStyle.getCode()!=channel.type) {
+            EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
+            attribute.setMaxUsers(progress);
+            attribute.setType(channelStyle);
+            mViewModel.updateChannel(channel, attribute);
+        }
     }
 
     @Override

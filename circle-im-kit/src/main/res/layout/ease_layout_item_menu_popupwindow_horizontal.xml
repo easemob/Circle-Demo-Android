@@ -15,6 +15,7 @@
         android:background="@drawable/shape_gray_2e2e2e_radius12"
         android:visibility="visible"
         android:padding="10dp"
+        app:tint="#cbcbcb"
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@drawable/ease_menu_copy" />
 

@@ -179,30 +179,33 @@
             app:layout_constraintBottom_toBottomOf="@id/tv_tags"
             app:layout_constraintRight_toRightOf="parent" />
 
-        <androidx.core.widget.NestedScrollView
+        <HorizontalScrollView
             android:id="@+id/nsl_tags"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="14dp"
             android:orientation="vertical"
-            android:paddingLeft="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:paddingRight="8dp"
+            app:layout_constraintBottom_toTopOf="@id/line_tags"
             app:layout_constraintLeft_toLeftOf="@id/tv_tags"
+            app:layout_constraintRight_toLeftOf="@id/iv_add_tag"
             app:layout_constraintTop_toBottomOf="@id/tv_tags">
 
             <LinearLayout
                 android:id="@+id/ll_container_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical"
-                android:paddingBottom="16dp" />
-        </androidx.core.widget.NestedScrollView>
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
         <View
             android:id="@+id/line_tags"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="14dp"
+            app:layout_constraintRight_toRightOf="@id/iv_add_tag"
+            app:layout_constraintLeft_toLeftOf="@id/tv_tags"
             android:background="@color/color_light_gray_47464b"
             app:layout_constraintTop_toBottomOf="@id/nsl_tags" />
 
@@ -210,11 +213,12 @@
             android:id="@+id/iv_add_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:padding="2dp"
             android:src="@drawable/circle_add_tags"
+            app:layout_constraintBottom_toBottomOf="@id/nsl_tags"
             app:layout_constraintRight_toRightOf="@id/tv_tags_count"
-            app:layout_constraintTop_toBottomOf="@id/tv_tags_count" />
+            app:layout_constraintTop_toBottomOf="@id/tv_tags_count"
+            app:layout_constraintTop_toTopOf="@id/nsl_tags" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

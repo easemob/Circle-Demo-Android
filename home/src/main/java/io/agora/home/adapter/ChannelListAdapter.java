@@ -7,11 +7,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ConvertUtils;
 import com.bumptech.glide.Glide;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.easeui.widget.EaseImageView;
+import com.hyphenate.util.EMLog;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,21 +121,20 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
 
                 ConcurrentHashMap<String,IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
                 IRtcEngineEventHandler.AudioVolumeInfo audioVolumeInfo = uidsSpeak.get(node.getId());
+                if(audioVolumeInfo!=null) {
+                    EMLog.d("ChannelListAdapter","node.getId()="+ node.getId()+",audioVolumeInfo.volum="+audioVolumeInfo.volume);
+                }else{
+                    EMLog.d("ChannelListAdapter","node.getId()="+ node.getId()+",audioVolumeInfo=null");
+                }
+
                 if(audioVolumeInfo!=null&&audioVolumeInfo.volume>3) {
+                    ivUser.setBorderWidth(ConvertUtils.dp2px(2));
                     ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
                 }else{
+                    ivUser.setBorderWidth(0);
                     ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
                 }
 
-
-//                ConcurrentHashMap<String, IRtcEngineEventHandler.AudioVolumeInfo> uidsSpeak = CircleRTCManager.getInstance().getUidsSpeak();
-//                if (uidsSpeak.get(node.getId()) != null) {
-//                    ivUser.setBorderWidth(ConvertUtils.dp2px(2));
-//                    ivUser.setBorderColor(mContext.getResources().getColor(io.agora.service.R.color.deep_green_27ae60));
-//                } else {
-//                    ivUser.setBorderWidth(0);
-//                    ivUser.setBorderColor(mContext.getResources().getColor(com.hyphenate.easeui.R.color.transparent));
-//                }
             } else {
                 ivMicOff.setVisibility(View.GONE);
                 ivUser.setBorderWidth(0);

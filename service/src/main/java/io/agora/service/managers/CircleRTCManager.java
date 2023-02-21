@@ -173,15 +173,12 @@ public class CircleRTCManager {
                         if (speaker.uid != 0) {//非本地用户
                             hxUserId = uidHxIds.get(String.valueOf(speaker.uid));
                         }
-                        EMLog.d("uidsSpeak=", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
                         if (hxUserId != null) {
                             uidsSpeak.put(hxUserId, speaker);
-                            EMLog.d("uidsSpeak=", "speakers.hxUserId=" + hxUserId);
+                            EMLog.d("uidsSpeak=", " hxuserid=" + hxUserId + " speakers.uid=" + speaker.uid + " speakers.volume=" + speaker.volume);
                         }
                         maxVolume = Math.max(maxVolume, speaker.volume);
                     }
-                    EMLog.d("uidsSpeak=", "speakers.size()=" + speakers.length);
-                    EMLog.d("uidsSpeak=", "uidsSpeak.size()=" + uidsSpeak.size());
                 }
                 for (CircleVoiceChannelStateListener stateListener : voiceChannelStateListeners) {
                     if (currentUid != null) {

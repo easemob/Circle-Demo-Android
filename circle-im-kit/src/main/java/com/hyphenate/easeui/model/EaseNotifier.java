@@ -304,10 +304,11 @@ public class EaseNotifier {
             if (EaseCommonUtils.isSilentMessage(message)) {
                 return;
             }
+            if(message.isChatThreadMessage()) {//thread消息不震动
+                return;
+            }
         }
-        if(message.isChatThreadMessage()) {//thread消息不震动
-            return;
-        }
+
 
         final EaseSettingsProvider settingsProvider = EaseIM.getInstance().getSettingsProvider();
         if (!settingsProvider.isMsgNotifyAllowed(null)) {
