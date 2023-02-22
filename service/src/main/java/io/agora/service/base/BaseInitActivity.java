@@ -103,12 +103,14 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
             CircleChannel circleChannel = channeldao.getChannelByChannelID(rtcChannelName);
             if (circleChannel != null) {
                 CircleServer circleServer = serverDao.getServerById(circleChannel.serverId);
-                floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_off_no_speaking);
-                floatViewBg.setShapeType(EaseImageView.ShapeType.ROUND);
-                floatViewBg.setBorderWidth(ConvertUtils.dp2px(2));
-                floatViewBg.setBorderColor(ContextCompat.getColor(this, R.color.ease_color_green_14ff72));
-                int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
-                Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                if(circleServer!=null) {
+                    floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_off_no_speaking);
+                    floatViewBg.setShapeType(EaseImageView.ShapeType.ROUND);
+                    floatViewBg.setBorderWidth(ConvertUtils.dp2px(2));
+                    floatViewBg.setBorderColor(ContextCompat.getColor(this, R.color.ease_color_green_14ff72));
+                    int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
+                    Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                }
             }
         }
     }
@@ -119,12 +121,14 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
             CircleChannel circleChannel = channeldao.getChannelByChannelID(rtcChannelName);
             if (circleChannel != null) {
                 CircleServer circleServer = serverDao.getServerById(circleChannel.serverId);
-                floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_on_no_speaking);
-                floatViewBg.setBorderWidth(ConvertUtils.dp2px(2));
-                floatViewBg.setShapeType(EaseImageView.ShapeType.ROUND);
-                floatViewBg.setBorderColor(ContextCompat.getColor(this, R.color.ease_color_green_14ff72));
-                int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
-                Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                if(circleServer!=null) {
+                    floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_on_no_speaking);
+                    floatViewBg.setBorderWidth(ConvertUtils.dp2px(2));
+                    floatViewBg.setShapeType(EaseImageView.ShapeType.ROUND);
+                    floatViewBg.setBorderColor(ContextCompat.getColor(this, R.color.ease_color_green_14ff72));
+                    int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
+                    Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                }
             }
         }
     }
@@ -135,10 +139,12 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
             CircleChannel circleChannel = channeldao.getChannelByChannelID(rtcChannelName);
             if (circleChannel != null) {
                 CircleServer circleServer = serverDao.getServerById(circleChannel.serverId);
-                floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_off_no_speaking);
-                floatViewBg.setBorderWidth(ConvertUtils.dp2px(0));
-                int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
-                Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                if(circleServer!=null) {
+                    floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_off_no_speaking);
+                    floatViewBg.setBorderWidth(ConvertUtils.dp2px(0));
+                    int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
+                    Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                }
             }
         }
     }
@@ -149,10 +155,12 @@ public abstract class BaseInitActivity<T extends ViewDataBinding> extends BaseAc
             CircleChannel circleChannel = channeldao.getChannelByChannelID(rtcChannelName);
             if (circleChannel != null) {
                 CircleServer circleServer = serverDao.getServerById(circleChannel.serverId);
-                floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_on_no_speaking);
-                floatViewBg.setBorderWidth(ConvertUtils.dp2px(0));
-                int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
-                Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                if(circleServer!=null) {
+                    floatViewSrc.setBackgroundResource(R.drawable.circle_in_voice_channel_mic_on_no_speaking);
+                    floatViewBg.setBorderWidth(ConvertUtils.dp2px(0));
+                    int randomServerIcon = ServiceReposity.getRandomServerIcon(circleServer.serverId);
+                    Glide.with(this).load(circleServer.icon).placeholder(randomServerIcon).into(floatViewBg);
+                }
             }
         }
     }

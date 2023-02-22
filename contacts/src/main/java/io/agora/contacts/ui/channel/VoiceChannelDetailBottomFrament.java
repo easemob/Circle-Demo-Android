@@ -241,10 +241,6 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         });
         LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelMemberRemovedNotifyBean.class).observe(getViewLifecycleOwner(), channelMemberRemovedNotifyBean -> {
             if (channel != null) {
-                if(TextUtils.equals(channelMemberRemovedNotifyBean.getMember(),AppUserInfoManager.getInstance().getCurrentUserName())) {
-                    //被踢的人是自己就退出RTC频道
-                    CircleRTCManager.getInstance().leaveChannel();
-                }
                 //刷新列表
                 channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             }
@@ -319,7 +315,9 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             mBinding.tvChannelName.setText(channel.name);
             CircleServer server = DatabaseManager.getInstance().getServerDao().getServerById(channel.serverId);
-            mBinding.tvServerName.setText(server.name);
+            if(server!=null) {
+                mBinding.tvServerName.setText(server.name);
+            }
             AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
                 if (serverRoleMap != null) {//在首页已经请求过了，所以这里必定有数据
                     Integer roleId = serverRoleMap.get(channel.serverId);
