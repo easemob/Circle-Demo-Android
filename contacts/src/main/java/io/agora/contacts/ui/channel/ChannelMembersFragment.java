@@ -230,6 +230,21 @@ public class ChannelMembersFragment extends ContactListFragment implements View.
                 }
             }
         });
+
+        AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
+            if (serverRoleMap != null) {//在首页已经请求过了，所以这里必定有数据
+                Integer roleId = serverRoleMap.get(channel.serverId);
+                if (roleId != null) {
+                    if (roleId.intValue() == EMCircleUserRole.USER.getRoleId()) {
+                        selfRole = EMCircleUserRole.USER;
+                    } else if (roleId.intValue() == EMCircleUserRole.MODERATOR.getRoleId()) {
+                        selfRole = EMCircleUserRole.MODERATOR;
+                    } else if (roleId.intValue() == EMCircleUserRole.OWNER.getRoleId()) {
+                        selfRole = EMCircleUserRole.OWNER;
+                    }
+                }
+            }
+        });
     }
 
     private void onFetchSelfRoleSuccess(EMCircleUserRole role) {

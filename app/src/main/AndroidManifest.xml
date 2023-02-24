@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Circle.TransparentStatus"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:label,android:icon,theme">
         <activity
             android:name=".ui.SplashActivity"

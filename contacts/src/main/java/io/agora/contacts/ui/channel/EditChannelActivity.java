@@ -71,9 +71,6 @@ public class EditChannelActivity extends BaseInitActivity<ActivityEditChannelBin
                     }else{
                         ToastUtils.showShort(getString(R.string.delete_channel_success));
                     }
-                    //发出通知
-                    //注意语聊频道还要所有人退出channel
-                    LiveEventBus.get(Constants.CHANNEL_DELETE).post(circleChannel);
                     finish();
                 }
 

@@ -5,13 +5,14 @@
     android:layout_height="wrap_content"
     android:background="@drawable/shape_white_radius4"
     android:minWidth="280dp"
+    android:paddingRight="24dp"
+    android:paddingLeft="24dp"
     android:minHeight="156dp">
 
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
         android:text="@string/circlr_delete_channel"
         android:textColor="@color/black"
@@ -23,9 +24,7 @@
         android:id="@+id/tv_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
-        android:layout_marginRight="24dp"
         android:gravity="left"
         android:text="@string/circle_delete_channel_message"
         android:textColor="@color/color_light_gray_87232f34"
@@ -51,7 +50,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:layout_marginRight="24dp"
         android:layout_marginBottom="14dp"
         android:padding="2dp"
         android:text="@string/circle_confirm"

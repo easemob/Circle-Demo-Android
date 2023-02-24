@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
+import com.hyphenate.easeui.utils.EaseCommonUtils;
 import com.hyphenate.easeui.widget.EaseImageView;
 import com.hyphenate.util.EMLog;
 
@@ -181,7 +182,7 @@ public class ChannelListAdapter extends BaseAdapter<Node> {
             unreadMsgCount = conversation.getUnreadMsgCount();
         }
         if (node.getChannelMode()==0&&unreadMsgCount > 0) {
-            tvUnread.setText(unreadMsgCount + "");
+            tvUnread.setText(EaseCommonUtils.handleBigNum(unreadMsgCount));
             tvUnread.setVisibility(View.VISIBLE);
         } else {
             tvUnread.setVisibility(View.GONE);

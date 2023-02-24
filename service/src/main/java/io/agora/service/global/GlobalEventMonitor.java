@@ -390,6 +390,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 //                    ToastUtils.showShort(applicationContext.getString(R.string.circle_delete_server, initiator, serverDeleted.name));
                 }
             }
+            LiveEventBus.get(Constants.SERVER_DESTROYED_NOTIFY).post(serverId);
         }
 
         @Override
@@ -566,6 +567,9 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         @Override
         public void onChannelDestroyed(String serverId, String categoryId, String channelId, String initiator) {
             EMLog.e(TAG, "onChannelDestroyed");
+            if(TextUtils.equals(CircleRTCManager.getInstance().getChannelId(),channelId)) {
+                CircleRTCManager.getInstance().leaveChannel();
+            }
             getChannelDao().deleteByChannelId(channelId);
             LiveEventBus.get(Constants.CHANNEL_DESTORYED_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, initiator));
         }

@@ -472,7 +472,12 @@ public class ServerDetailFragment extends BaseInitFragment<FragmentServerDetailB
                     }
                 }
                 //移除自己
-                channelUsers.get(bean.getChannelId()).remove(bean.getMember());
+                if(channelUsers!=null) {
+                    ConcurrentHashMap<String, CircleUser> map = channelUsers.get(bean.getChannelId());
+                    if(map!=null) {
+                        map.remove(bean.getMember());
+                    }
+                }
                 buildDatasAndRefreshList();
             }
         });

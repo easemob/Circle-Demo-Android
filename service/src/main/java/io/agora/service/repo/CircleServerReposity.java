@@ -287,6 +287,7 @@ public class CircleServerReposity extends ServiceReposity {
                         AppUserInfoManager.getInstance().getUserJoinedSevers().remove(serverId);
                         getServerDao().deleteByServerId(serverId);
                         callBack.onSuccess(createLiveData(true));
+                        LiveEventBus.get(Constants.SERVER_DELETED).post(serverId);
                     }
 
                     @Override

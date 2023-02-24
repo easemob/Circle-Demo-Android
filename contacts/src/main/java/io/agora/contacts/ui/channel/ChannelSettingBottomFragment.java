@@ -20,6 +20,7 @@ import io.agora.contacts.ui.InviteUserToChannelBottomFragment;
 import io.agora.contacts.ui.ThreadListActivity;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.base.ContainerBottomSheetFragment;
+import io.agora.service.bean.channel.ChannelEventNotifyBean;
 import io.agora.service.callbacks.BottomSheetChildHelper;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.entity.CircleChannel;
@@ -52,10 +53,10 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
             @Override
             public void run() {
                 if (parentFragment != null) {
-                    int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec((1<<30)-1, View.MeasureSpec.AT_MOST);
-                    int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec((1<<30)-1, View.MeasureSpec.AT_MOST);
-                    mBinding.getRoot().measure(widthMeasureSpec,heightMeasureSpec);
-                    parentFragment.setLayoutHeight( mBinding.getRoot().getMeasuredHeight());
+                    int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec((1 << 30) - 1, View.MeasureSpec.AT_MOST);
+                    int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec((1 << 30) - 1, View.MeasureSpec.AT_MOST);
+                    mBinding.getRoot().measure(widthMeasureSpec, heightMeasureSpec);
+                    parentFragment.setLayoutHeight(mBinding.getRoot().getMeasuredHeight());
                 }
             }
         });
@@ -103,6 +104,31 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
             }
         });
 
+        LiveEventBus.get(Constants.CHANNEL_LEAVE, CircleChannel.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null && bean != null && TextUtils.equals(channel.channelId, bean.channelId)) {
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.CHANNEL_DESTORYED_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null && bean != null && TextUtils.equals(channel.channelId, bean.getChannelId())) {
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.CHANNEL_DELETE, CircleChannel.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null && bean != null && TextUtils.equals(channel.channelId, bean.channelId)) {
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.SERVER_DESTROYED_NOTIFY,String.class).observe(getViewLifecycleOwner(),serverId->{
+            if(channel!=null&&TextUtils.equals(serverId,channel.serverId)) {
+                hide();
+            }
+        });
+
+
         mBinding.tvInvite.setOnClickListener(this);
         mBinding.tvThreadList.setOnClickListener(this);
         mBinding.tvEditChannel.setOnClickListener(this);
@@ -124,7 +150,7 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
     @Override
     protected void initData() {
         mServerViewModel.fetchSelfServerRole(channel.serverId);
-        if(channel!=null) {
+        if (channel != null) {
             mBinding.tvChannelName.setText(channel.name);
         }
     }
@@ -171,7 +197,7 @@ public class ChannelSettingBottomFragment extends BaseInitFragment<FragmentChann
         } else if (v.getId() == R.id.csl_channel_members) {
             //查看频道成员
             ChannelMembersActivity.actionStart(mContext, channel);
-        }else if(v.getId()==R.id.ll_fold) {
+        } else if (v.getId() == R.id.ll_fold) {
             hide();
         }
 //        else if (v.getId() == R.id.csl_leave_channel) {

@@ -61,7 +61,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
                 public void onSuccess(@Nullable Boolean data) {
                     if (data) {
                         ToastUtils.showShort(getString(R.string.delete_server_success));
-                       finish();
+                        finish();
                     } else {
                         ToastUtils.showShort(getString(R.string.delete_server_failure));
                     }
@@ -95,8 +95,8 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
             });
         });
         LiveEventBus.get(Constants.SERVER_UPDATED, CircleServer.class).observe(this, serverUpdated -> {
-            if (serverUpdated != null&&server!=null&& android.text.TextUtils.equals(server.serverId,serverUpdated.serverId)) {
-                server=serverUpdated;
+            if (serverUpdated != null && server != null && android.text.TextUtils.equals(server.serverId, serverUpdated.serverId)) {
+                server = serverUpdated;
             }
         });
         mBinding.btnEditCover.setOnClickListener(this);
@@ -124,7 +124,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CODE_SERVER_BG) { // send local image
                 onActivityResultForLocalBgPhotos(data);
-            }else if(requestCode == REQUEST_CODE_SERVER_ICON){
+            } else if (requestCode == REQUEST_CODE_SERVER_ICON) {
                 onActivityResultForLocalIconPhotos(data);
             }
         }
@@ -150,6 +150,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
             }
         }
     }
+
     /**
      * 选择本地图片处理结果
      *
@@ -175,7 +176,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
 
         dialog = new AlertDialog.Builder(this)
                 .setContentView(R.layout.dialog_dissolve_server)
-                .setText(R.id.tv_content, getString(R.string.circle_delete_server_message, server!=null?server.name:""))
+                .setText(R.id.tv_content, getString(R.string.circle_delete_server_message, server != null ? server.name : ""))
                 .setOnClickListener(R.id.tv_confirm, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -214,9 +215,9 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
                             EaseCompat.openImage(this, REQUEST_CODE_SERVER_BG);
                         }
                     });
-        }else if(v.getId()==R.id.iv_back) {
+        } else if (v.getId() == R.id.iv_back) {
             finish();
-        }else if(v.getId()==R.id.iv_server_icon) {
+        } else if (v.getId() == R.id.iv_server_icon) {
             //去相册选择
             //申请权限
             rxPermissions

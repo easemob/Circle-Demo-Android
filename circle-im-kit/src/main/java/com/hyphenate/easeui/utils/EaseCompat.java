@@ -46,8 +46,8 @@ public class EaseCompat {
     private static Intent getOpenImageIntent(Context context) {
         Intent intent = null;
         if(VersionUtils.isTargetQ(context)) {
-            intent = new Intent(Intent.ACTION_PICK,null);
-            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         }else {
             if (Build.VERSION.SDK_INT < 19) {
                 intent = new Intent(Intent.ACTION_GET_CONTENT);

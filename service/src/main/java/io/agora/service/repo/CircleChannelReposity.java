@@ -230,6 +230,8 @@ public class CircleChannelReposity extends ServiceReposity {
                         //数据库中也要移除
                         DatabaseManager.getInstance().getChannelDao().deleteByChannelId(channel.channelId);
                         callBack.onSuccess(createLiveData(channel));
+                        //发出通知
+                        LiveEventBus.get(Constants.CHANNEL_DELETE).postDelay(channel,300);
                     }
 
                     @Override

@@ -50,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="@string/circle_save"
+                android:padding="4dp"
                 android:textColor="@drawable/selector_green_gray979797_color"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -90,7 +91,6 @@
             android:hint="@string/home_channel_name_hint"
             android:maxLength="16"
             android:minHeight="40dp"
-            android:onClick="@{(v)->vm.delete(v)}"
             android:text="@={vm.channelName}"
             android:textColor="@color/white"
             android:textColorHint="@color/color_gray_a7a9ac"
@@ -101,6 +101,8 @@
 
         <ImageView
             android:id="@+id/iv_delete"
+            android:padding="2dp"
+            android:onClick="@{(v)->vm.delete(v)}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/login_delete"

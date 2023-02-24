@@ -40,7 +40,6 @@ public class CircleRTCManager {
     private CopyOnWriteArrayList<IRtcEngineEventHandler> eventHandlers = new CopyOnWriteArrayList();
     private CopyOnWriteArrayList<CircleVoiceChannelStateListener> voiceChannelStateListeners = new CopyOnWriteArrayList();
     // 填写项目的 App ID，可在 Agora 控制台中生成。
-//    private String appId = "ba85504621304fb894790708d304794f";
     private String appId = "15cb0d28b87b425ea613fc46f7c9f974";
     private RtcEngine mRtcEngine;
     private ChannelMediaOptions options;
@@ -205,13 +204,7 @@ public class CircleRTCManager {
     };
 
     private void callbackOnLeaveChannel(IRtcEngineEventHandler.RtcStats stats) {
-        uidsInChannel.clear();
-        uidsMuted.clear();
-        uidHxIds.clear();
-        hxIdUids.clear();
-        uidsSpeak.clear();
-        currentUid = null;
-        channelId = null;
+        clearAll();
         ThreadUtils.runOnUiThread(() -> {
             for (IRtcEngineEventHandler eventHandler : eventHandlers) {
                 eventHandler.onLeaveChannel(stats);
@@ -221,6 +214,16 @@ public class CircleRTCManager {
             }
         });
 
+    }
+
+    public void clearAll() {
+        uidsInChannel.clear();
+        uidsMuted.clear();
+        uidHxIds.clear();
+        hxIdUids.clear();
+        uidsSpeak.clear();
+        currentUid = null;
+        channelId = null;
     }
 
     private void setChannelAttribute(String channelName, String key, String value) {
@@ -322,7 +325,7 @@ public class CircleRTCManager {
     public void joinChannel(String channelId) throws Exception {
         //同时只允许进一个频道，进下一个频道前退出上一个频道。
         if (this.channelId != null && !TextUtils.equals(this.channelId, channelId)) {
-            ToastUtils.showShort("you should leave previous voice channel first");
+            ToastUtils.showShort("请先退出现有语聊房");
             return;
         }
         this.channelId = channelId;

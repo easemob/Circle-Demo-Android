@@ -164,13 +164,12 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
 
                 @Override
                 public void onSuccess(@Nullable CircleChannel circleChannel) {
-                    hide();
                 }
 
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    if (!TextUtils.isEmpty(message)&&code!=205) {//205 -> user is not in channel
+                    if (!TextUtils.isEmpty(message) && code != 205) {//205 -> user is not in channel
                         ToastUtils.showShort(message);
                     }
                 }
@@ -229,20 +228,64 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             });
         });
 
+        LiveEventBus.get(Constants.CHANNEL_LEAVE, CircleChannel.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null && bean != null && TextUtils.equals(channel.channelId, bean.channelId)) {
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.CHANNEL_DESTORYED_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel!=null&&bean != null&&TextUtils.equals(channel.channelId,bean.getChannelId())) {
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.SERVER_DESTROYED_NOTIFY,String.class).observe(getViewLifecycleOwner(),serverId->{
+            if(channel!=null&&TextUtils.equals(serverId,channel.serverId)) {
+                CircleRTCManager.getInstance().leaveChannel();
+                hide();
+            }
+        });
+
+        LiveEventBus.get(Constants.CHANNEL_DELETE, CircleChannel.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null && bean != null && TextUtils.equals(channel.channelId, bean.channelId)) {
+                hide();
+            }
+        });
+
         LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), channelEventNotifyBean -> {
             if (channel != null) {
                 channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             }
         });
-        LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), channelEventNotifyBean -> {
-            if (channel != null) {
-                channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
-            }
-        });
-        LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelMemberRemovedNotifyBean.class).observe(getViewLifecycleOwner(), channelMemberRemovedNotifyBean -> {
+        LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY, ChannelEventNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
             if (channel != null) {
                 //刷新列表
-                channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
+                String member = bean.getUserId();
+                for (int i = 0; i < voiceChannelUsers.size(); i++) {
+                    if (TextUtils.equals(voiceChannelUsers.get(i).getUsername(), member)) {
+                        voiceChannelUsers.remove(i);
+                        i--;
+                        break;
+                    }
+                }
+                initInChannelReferenceButton();
+                adapter.notifyDataSetChanged();
+            }
+        });
+        LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY, ChannelMemberRemovedNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
+            if (channel != null) {
+                //刷新列表
+                String member = bean.getMember();
+                for (int i = 0; i < voiceChannelUsers.size(); i++) {
+                    if (TextUtils.equals(voiceChannelUsers.get(i).getUsername(), member)) {
+                        voiceChannelUsers.remove(i);
+                        i--;
+                        break;
+                    }
+                }
+                initInChannelReferenceButton();
+                adapter.notifyDataSetChanged();
             }
         });
         mBinding.ivSetting.setOnClickListener(this);
@@ -251,8 +294,6 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
         mBinding.ibExit.setOnClickListener(this);
         mBinding.btnJoinVoiceChannel.setOnClickListener(this);
         mBinding.tvServerName.setOnClickListener(this);
-
-        CircleRTCManager.getInstance().registerRTCEventListener(eventHandler);
 
     }
 
@@ -315,7 +356,7 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             channelViewModel.getVoiceChannelMembers(channel.serverId, channel.channelId);
             mBinding.tvChannelName.setText(channel.name);
             CircleServer server = DatabaseManager.getInstance().getServerDao().getServerById(channel.serverId);
-            if(server!=null) {
+            if (server != null) {
                 mBinding.tvServerName.setText(server.name);
             }
             AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().observe(getViewLifecycleOwner(), serverRoleMap -> {
@@ -367,8 +408,13 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             CircleRTCManager.getInstance().leaveChannel();
         } else if (v.getId() == R.id.btn_join_voice_channel) {
             //加入语聊房,先加聊天室，再加声网。不同于文字频道在外边就会校验，语聊房当前页面进来时有可能还不是语聊房内部成员。
+            //先检查是否在其他语聊房
             if (channel != null) {
-                channelViewModel.joinChannel(channel, AppUserInfoManager.getInstance().getCurrentUserName());
+                if (TextUtils.isEmpty(CircleRTCManager.getInstance().getChannelId()) || TextUtils.equals(channel.channelId, CircleRTCManager.getInstance().getChannelId())) {
+                    channelViewModel.joinChannel(channel, AppUserInfoManager.getInstance().getCurrentUserName());
+                } else {
+                    ToastUtils.showShort("请先退出现有语聊房");
+                }
             }
         } else if (v.getId() == R.id.ll_fold) {
             hide();
@@ -388,10 +434,10 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
             if (selectedUser != null) {
                 channelViewModel.removeUserFromChannel(channel.serverId, channel.channelId, selectedUser.getUsername());
             }
-        }else if(v.getId()==R.id.tv_server_name) {
+        } else if (v.getId() == R.id.tv_server_name) {
             //通知首页回到当前社区
             CircleServer server = DatabaseManager.getInstance().getServerDao().getServerById(channel.serverId);
-            if(server!=null) {
+            if (server != null) {
                 LiveEventBus.get(Constants.SHOW_TARGET_SERVER, CircleServer.class).post(server);
             }
             //抽屉关起来
@@ -490,10 +536,17 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+        CircleRTCManager.getInstance().registerRTCEventListener(eventHandler);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
         CircleRTCManager.getInstance().unRegisterRTCEventListener(eventHandler);
     }
+
 
     @Override
     public void onClick(View itemView, int position) {
