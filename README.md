@@ -53,7 +53,7 @@ https://docs-im.easemob.com/ccim/config
 
 5、使用RTC相关功能用户设置声网APPID
 
-在工程"local.properties"文件中设置你的appKey。
+在工程"local.properties"文件中设置你的声网APPID。
 示例：
 ```bash
 circle_agora_appid="XXXXXXXXXXXXXXXXXXXXXX"
