@@ -20,4 +20,4 @@ PB_LITE=1
 ENABLE_CALL=0
 USE_SQLCIPHER=1
 #libhyphenate.so
-include $(LOCAL_PATH)/../../../huanxin/publish/circle_base_on_3.9.9/circle-debug/emclient-linux/Android.mk
+include $(LOCAL_PATH)/../../../huanxin/publish/circle-2-base-on-3.9.9/circle-debug/emclient-linux/Android.mk

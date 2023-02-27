@@ -24,6 +24,7 @@ import io.agora.rtc2.Constants;
 import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.rtc2.RtcEngine;
 import io.agora.rtc2.RtcEngineConfig;
+import io.agora.service.BuildConfig;
 import io.agora.service.callbacks.CircleRTCListener;
 import io.agora.service.callbacks.CircleRTCTokenCallback;
 import io.agora.service.callbacks.CircleVoiceChannelStateListener;
@@ -40,7 +41,7 @@ public class CircleRTCManager {
     private CopyOnWriteArrayList<IRtcEngineEventHandler> eventHandlers = new CopyOnWriteArrayList();
     private CopyOnWriteArrayList<CircleVoiceChannelStateListener> voiceChannelStateListeners = new CopyOnWriteArrayList();
     // 填写项目的 App ID，可在 Agora 控制台中生成。
-    private String appId = "15cb0d28b87b425ea613fc46f7c9f974";
+    private String agoraAppID = BuildConfig.CIRCLE_AGORA_APPID;
     private RtcEngine mRtcEngine;
     private ChannelMediaOptions options;
     private String channelId;
@@ -284,7 +285,7 @@ public class CircleRTCManager {
         try {
             RtcEngineConfig config = new RtcEngineConfig();
             config.mContext = context;
-            config.mAppId = appId;
+            config.mAppId = agoraAppID;
             config.mEventHandler = mRtcEventHandler;
             mRtcEngine = RtcEngine.create(config);
             //Enable detection of who is talking(启动谁在说话检测)

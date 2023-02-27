@@ -382,7 +382,18 @@ public class GlobalEventMonitor extends EaseChatPresenter {
             if (userJoinedSevers != null) {
                 userJoinedSevers.remove(serverId);
             }
-            CircleServerDao serverDao = DatabaseManager.getInstance().getServerDao();
+            //检查自己是否在对应社区的语聊房里，是就退出
+            String channelId = CircleRTCManager.getInstance().getChannelId();
+            if (!TextUtils.isEmpty(channelId)&&getChannelDao()!=null) {
+                CircleChannel circleChannel = getChannelDao().getChannelByChannelID(channelId);
+                if (circleChannel != null) {
+                    if (!TextUtils.isEmpty(serverId)&&TextUtils.equals(circleChannel.serverId, serverId)) {
+                        //所在社区删除就退出语聊房
+                        CircleRTCManager.getInstance().leaveChannel();
+                    }
+                }
+            }
+            CircleServerDao serverDao =getServerDao();
             if (serverDao != null) {
                 CircleServer serverDeleted = serverDao.getServerById(serverId);
                 if (serverDeleted != null) {
@@ -450,7 +461,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
             EMLog.e(TAG, "onMemberRemovedFromServer");
 //            //检查自己是否在对应社区的语聊房里，是就退出
             String channelId = CircleRTCManager.getInstance().getChannelId();
-            if (channelId != null) {
+            if (!TextUtils.isEmpty(channelId)&&getChannelDao()!=null) {
                 CircleChannel circleChannel = getChannelDao().getChannelByChannelID(channelId);
                 if (circleChannel != null) {
                     if (!TextUtils.isEmpty(serverId)&&TextUtils.equals(circleChannel.serverId, serverId) && members != null) {

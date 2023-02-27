@@ -10,6 +10,7 @@ android {
 
     defaultConfig{
 
+        buildConfigField ("String", "CIRCLE_AGORA_APPID", properties.getProperty("circle_agora_appid", "******"))
         buildConfigField ("String", "CIRCLE_BUGLY_APPID", properties.getProperty("circle_bugly_appid", "******"))
         manifestPlaceholders = [EASEMOB_APPKEY: properties.getProperty("circle_appkey", "******")]
     }

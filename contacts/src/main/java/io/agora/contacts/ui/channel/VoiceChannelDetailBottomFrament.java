@@ -242,7 +242,6 @@ public class VoiceChannelDetailBottomFrament extends BaseInitFragment<FragmentVo
 
         LiveEventBus.get(Constants.SERVER_DESTROYED_NOTIFY,String.class).observe(getViewLifecycleOwner(),serverId->{
             if(channel!=null&&TextUtils.equals(serverId,channel.serverId)) {
-                CircleRTCManager.getInstance().leaveChannel();
                 hide();
             }
         });

@@ -24,8 +24,12 @@ import io.agora.contacts.R;
 import io.agora.contacts.databinding.ActivityEditServerBinding;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.OnResourceParseCallback;
+import io.agora.service.db.DatabaseManager;
+import io.agora.service.db.dao.CircleChannelDao;
+import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.model.ServerViewModel;
 import io.agora.service.repo.ServiceReposity;
 import io.agora.service.utils.UriFormatUtils;
@@ -61,6 +65,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
                 public void onSuccess(@Nullable Boolean data) {
                     if (data) {
                         ToastUtils.showShort(getString(R.string.delete_server_success));
+                        checkoutRtcChannelState();
                         finish();
                     } else {
                         ToastUtils.showShort(getString(R.string.delete_server_failure));
@@ -105,6 +110,21 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
         mBinding.cslServerDissolve.setOnClickListener(this);
         mBinding.ivBack.setOnClickListener(this);
         mBinding.ivServerIcon.setOnClickListener(this);
+    }
+
+    private void checkoutRtcChannelState() {
+        //检查自己是否在对应社区的语聊房里，是就退出
+        String channelId = CircleRTCManager.getInstance().getChannelId();
+        CircleChannelDao channelDao = DatabaseManager.getInstance().getChannelDao();
+        if (!android.text.TextUtils.isEmpty(channelId)&&channelDao!=null) {
+            CircleChannel circleChannel = channelDao.getChannelByChannelID(channelId);
+            if (circleChannel != null&&server!=null) {
+                if (!android.text.TextUtils.isEmpty(server.serverId)&& android.text.TextUtils.equals(circleChannel.serverId, server.serverId)) {
+                    //所在社区删除就退出语聊房
+                    CircleRTCManager.getInstance().leaveChannel();
+                }
+            }
+        }
     }
 
     @Override
