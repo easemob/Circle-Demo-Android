@@ -291,7 +291,7 @@ public class CircleRTCManager {
             //Enable detection of who is talking(启动谁在说话检测)
             mRtcEngine.enableAudioVolumeIndication(1000, 3, false);
         } catch (Exception e) {
-            throw new RuntimeException("Check the error.");
+            Log.e(TAG, "Check the error.");
         }
         options = new ChannelMediaOptions();
         // 设置频道场景为 BROADCASTING。

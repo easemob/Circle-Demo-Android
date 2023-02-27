@@ -51,7 +51,17 @@ circle_appkey=easemob-demo#xxxx
 开通配置环信即时通讯 IM 服务：
 https://docs-im.easemob.com/ccim/config
 
-5、运行项目
+5、使用RTC相关功能用户设置声网APPID
+
+在工程"local.properties"文件中设置你的appKey。
+示例：
+```bash
+circle_agora_appid="XXXXXXXXXXXXXXXXXXXXXX"
+```
+开通配置声网RTC服务：
+https://console.agora.io/
+
+6、运行项目
 
 直接点击Android Studio 运行按钮
 
