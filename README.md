@@ -34,7 +34,7 @@ adb install circle-release.apk
 
 推荐Android Studio 版本：Android Studio Chipmunk | 2021.2.1 Patch 1 及以上
 
-Java版本：Java8及以上
+Java版本：Java11及以上
 
 gradle版本：distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip
 
@@ -64,7 +64,7 @@ demo下载地址：
 https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/circle-release.apk
 
 sdk下载地址：
-https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/easemob-sdk-3.9.5.2.zip
+https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/easemob-sdk-3.9.9.2.zip
 
 产品概述及开发文档：
 https://docs-im.easemob.com/ccim/circle/overview
