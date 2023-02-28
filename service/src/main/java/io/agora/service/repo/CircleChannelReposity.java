@@ -15,6 +15,7 @@ import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMCircleChannel;
 import com.hyphenate.chat.EMCircleChannelAttribute;
+import com.hyphenate.chat.EMCircleChannelMode;
 import com.hyphenate.chat.EMCircleChannelStyle;
 import com.hyphenate.chat.EMCircleUser;
 import com.hyphenate.chat.EMCursorResult;
@@ -24,9 +25,11 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.service.bean.CustomInfo;
 import io.agora.service.bean.ThreadData;
+import io.agora.service.bean.channel.ChannelUpdateNotifyBean;
 import io.agora.service.callbacks.ResultCallBack;
 import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.dao.CircleChannelDao;
@@ -227,6 +230,8 @@ public class CircleChannelReposity extends ServiceReposity {
                         //数据库中也要移除
                         DatabaseManager.getInstance().getChannelDao().deleteByChannelId(channel.channelId);
                         callBack.onSuccess(createLiveData(channel));
+                        //发出通知
+                        LiveEventBus.get(Constants.CHANNEL_DELETE).postDelay(channel,300);
                     }
 
                     @Override
@@ -287,6 +292,33 @@ public class CircleChannelReposity extends ServiceReposity {
         }.asLiveData();
     }
 
+    public LiveData<Resource<CircleChannel>> createChannel(EMCircleChannelMode mode, String serverId, String categoryId, EMCircleChannelAttribute attribute, EMCircleChannelStyle stype) {
+        return new NetworkOnlyResource<CircleChannel>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<CircleChannel>> callBack) {
+                getCircleManager().createChannel(serverId, categoryId, attribute, mode, new EMValueCallBack<EMCircleChannel>() {
+
+                    @Override
+                    public void onSuccess(EMCircleChannel value) {
+                        callBack.onSuccess(createLiveData(new CircleChannel(value)));
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        callBack.onError(code, error);
+                    }
+                });
+            }
+
+            @Override
+            protected void saveCallResult(CircleChannel item) {
+                super.saveCallResult(item);
+                getChannelDao().insert(item);
+            }
+        }.asLiveData();
+    }
+
     public LiveData<Resource<Boolean>> muteUserInChannel(String serverId, String channelId, long muteDuration, String username, boolean mute) {
         if (mute) {
             return new NetworkOnlyResource<Boolean>() {
@@ -295,11 +327,6 @@ public class CircleChannelReposity extends ServiceReposity {
                     getCircleManager().muteUserInChannel(serverId, channelId, username, muteDuration, new EMCallBack() {
                         @Override
                         public void onSuccess() {
-                            CircleUser circleUser = getUserDao().loadUserByUserId(username);
-                            if (circleUser != null) {
-                                circleUser.isMuted = true;
-                            }
-                            getUserDao().insert(circleUser);
                             callBack.onSuccess(createLiveData(mute));
                         }
 
@@ -661,4 +688,73 @@ public class CircleChannelReposity extends ServiceReposity {
             }
         }.asLiveData();
     }
+
+    public LiveData<Resource<String>> joinChannel(CircleChannel channel, String userId) {
+        return new NetworkOnlyResource<String>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<String>> callBack) {
+                getCircleManager().joinChannel(channel.serverId, channel.channelId, new EMValueCallBack<EMCircleChannel>() {
+                    @Override
+                    public void onSuccess(EMCircleChannel value) {
+                        ChannelUpdateNotifyBean updateNotifyBean = new ChannelUpdateNotifyBean(channel.serverId, channel.channelId, userId, channel.name, channel.desc);
+                        LiveEventBus.get(Constants.CHANNEL_JOIN).post(updateNotifyBean);
+                        callBack.onSuccess(createLiveData(userId));
+                    }
+
+                    @Override
+                    public void onError(int error, String errorMsg) {
+                        callBack.onError(error, errorMsg);
+                    }
+                });
+            }
+        }.asLiveData();
+
+    }
+
+    public LiveData<Resource<ConcurrentHashMap<String, List<CircleUser>>>> getVoiceChannelMembers(String serverId, String channelId) {
+        return new NetworkOnlyResource<ConcurrentHashMap<String, List<CircleUser>>>() {
+
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<ConcurrentHashMap<String, List<CircleUser>>>> callBack) {
+                int limit = 20;
+                List<CircleUser> users = new ArrayList<>();
+                doFetchVoiceChannelMembers(serverId, channelId, limit, users, null, callBack);
+            }
+        }.asLiveData();
+    }
+
+    private void doFetchVoiceChannelMembers(String serverID, String channelID, int limit, List<CircleUser> users, String cursor, ResultCallBack<LiveData<ConcurrentHashMap<String, List<CircleUser>>>> callBack) {
+        getCircleManager().fetchChannelMembers(serverID, channelID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleUser>>() {
+            @Override
+            public void onSuccess(EMCursorResult<EMCircleUser> value) {
+
+                if (!CollectionUtils.isEmpty(value.getData())) {
+                    for (EMCircleUser emCircleUser : value.getData()) {
+                        CircleUser circleUser = getUserDao().loadUserByUserId(emCircleUser.getUserId());
+                        if (circleUser == null) {
+                            circleUser = new CircleUser(emCircleUser.getUserId());
+                            circleUser.setContact(3);//没有从数据中找到说明不是好友
+                        }
+                        circleUser.roleID = emCircleUser.getRole().getRoleId();
+                        users.add(circleUser);
+                    }
+                }
+                if (!TextUtils.isEmpty(value.getCursor())) {
+                    doFetchVoiceChannelMembers(serverID, channelID, limit, users, value.getCursor(), callBack);
+                } else {
+                    ConcurrentHashMap<String, List<CircleUser>> usersHP = new ConcurrentHashMap<>();
+                    usersHP.put(channelID, users);
+                    callBack.onSuccess(createLiveData(usersHP));
+                }
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+                callBack.onError(error, errorMsg);
+            }
+        });
+
+    }
+
 }

@@ -27,7 +27,7 @@ public class LoginViewModel extends ServiceViewModel {
     public ObservableField<String> obAccount = new ObservableField<>();
     public ObservableField<String> obPwd = new ObservableField<>();
     public ObservableInt mode = new ObservableInt(1);
-    public ObservableBoolean agreement = new ObservableBoolean(true);
+    public ObservableBoolean agreement = new ObservableBoolean(false);
 
     private ServiceReposity reposity=new ServiceReposity();
     public SingleSourceLiveData<Resource<String>> loginLiveData=new SingleSourceLiveData();

@@ -345,6 +345,7 @@ public class EaseImageView extends AppCompatImageView {
      */
     public void setBorderWidth(int borderWidth) {
         this.borderWidth = borderWidth;
+        invalidate();
     }
 
     /**

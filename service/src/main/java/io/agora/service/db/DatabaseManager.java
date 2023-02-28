@@ -3,14 +3,19 @@ package io.agora.service.db;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.room.Room;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.hyphenate.util.EMLog;
 
 import io.agora.common.utils.MD5;
+import io.agora.service.db.dao.CircleCategoryDao;
 import io.agora.service.db.dao.CircleChannelDao;
+import io.agora.service.db.dao.CircleMuteDao;
 import io.agora.service.db.dao.CircleServerDao;
 import io.agora.service.db.dao.CircleUserDao;
 
@@ -61,6 +66,8 @@ public class DatabaseManager {
         EMLog.i(TAG, "db name = "+dbName);
         mDatabase = Room.databaseBuilder(mContext, AppDatabase.class, dbName)
                         .allowMainThreadQueries()
+                        .addMigrations(migration1_2)
+                        .fallbackToDestructiveMigrationOnDowngrade()
                         .fallbackToDestructiveMigration()
                         .build();
         mIsDatabaseCreated.postValue(true);
@@ -93,15 +100,46 @@ public class DatabaseManager {
         if(mDatabase != null) {
             return mDatabase.serverDao();
         }
-        EMLog.i(TAG, "get getServerDao failed, should init db first");
+        EMLog.i(TAG, "get ServerDao failed, should init db first");
         return null;
     }
     public CircleChannelDao getChannelDao() {
         if(mDatabase != null) {
             return mDatabase.channelDao();
         }
-        EMLog.i(TAG, "get getChannelDao failed, should init db first");
+        EMLog.i(TAG, "get ChannelDao failed, should init db first");
+        return null;
+    }
+    public CircleCategoryDao getCagegoryDao() {
+        if(mDatabase != null) {
+            return mDatabase.categoryDao();
+        }
+        EMLog.i(TAG, "get CagegoryDao failed, should init db first");
+        return null;
+    }
+    public CircleMuteDao getCircleMuteDao() {
+        if(mDatabase != null) {
+            return mDatabase.muteDao();
+        }
+        EMLog.i(TAG, "get CircleMuteDao failed, should init db first");
         return null;
     }
 
+    private Migration migration1_2=new Migration(1,2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            //插入categoryId列
+            database.execSQL("ALTER TABLE circle_channel ADD COLUMN categoryId TEXT DEFAULT NULL");
+            //插入channelMode列
+            database.execSQL("ALTER TABLE circle_channel ADD COLUMN channelMode INTEGER DEFAULT 0");
+            //插入seatcount列
+            database.execSQL("ALTER TABLE circle_channel ADD COLUMN seatCount INTEGER DEFAULT 0");
+            //插入rtcName列
+            database.execSQL("ALTER TABLE circle_channel ADD COLUMN rtcName TEXT DEFAULT NULL");
+            //插入type列
+            database.execSQL("ALTER TABLE circle_server ADD COLUMN type INTEGER DEFAULT 0");
+            //插入background列
+            database.execSQL("ALTER TABLE circle_server ADD COLUMN background TEXT DEFAULT NULL");
+        }
+    };
 }

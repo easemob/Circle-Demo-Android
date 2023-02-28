@@ -19,17 +19,26 @@ import com.blankj.utilcode.util.LogUtils;
  * As a basic activity, place some public methods
  */
 public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatActivity {
-    protected String TAG=getClass().getSimpleName();
+    protected String TAG = getClass().getSimpleName();
     protected T mBinding;
     protected Context mContext;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding=bindView(getResLayoutId());
-        mContext =getApplicationContext();
-        if(mBinding!=null) {
+        mBinding = bindView(getResLayoutId());
+        mContext = getApplicationContext();
+        if (mBinding != null) {
             mBinding.setLifecycleOwner(this);
+        }
+        //点击空白区域收起键盘
+        if (mBinding != null && mBinding.getRoot() != null) {
+            mBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideKeyboard();
+                }
+            });
         }
         initView(savedInstanceState);
         initConfig();
@@ -38,34 +47,36 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
 
     /**
      * 必要的view初始化
+     *
      * @param savedInstanceState
      */
-    protected void  initView(Bundle savedInstanceState) {
-        LogUtils.d(TAG+" 初始化 initView");
+    protected void initView(Bundle savedInstanceState) {
+        LogUtils.d(TAG + " 初始化 initView");
     }
 
     /**
      * view初始化后的必要配置
      */
-    protected void  initConfig() {
-        LogUtils.d(TAG+" 初始化 initConfig");
+    protected void initConfig() {
+        LogUtils.d(TAG + " 初始化 initConfig");
     }
 
     /**
      * view初始化后的必要数据
      */
-    protected void  initData() {
-        LogUtils.d(TAG+" 初始化 initData");
+    protected void initData() {
+        LogUtils.d(TAG + " 初始化 initData");
     }
 
-    protected abstract @LayoutRes int getResLayoutId();
+    protected abstract @LayoutRes
+    int getResLayoutId();
 
-    protected T bindView(@LayoutRes int layout){
-        return DataBindingUtil.setContentView(this,layout);
+    protected T bindView(@LayoutRes int layout) {
+        return DataBindingUtil.setContentView(this, layout);
     }
-    
-    protected T bindView(View view){
-       return DataBindingUtil.bind(view);
+
+    protected T bindView(View view) {
+        return DataBindingUtil.bind(view);
     }
 
     /**
@@ -79,10 +90,11 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
             }
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mBinding!=null) {
+        if (mBinding != null) {
             mBinding.unbind();
         }
     }

@@ -128,6 +128,7 @@ public class EaseChatThreadCreateFragment extends EaseBaseFragment implements Ch
             binding.ivBack.setOnClickListener(this);
             if (channel != null) {
                 binding.tvChannelName.setText("#" + channel.name);
+                presenter.setIsChannel(true);
             }
             String threadMention = bundle.getString(Constant.KEY_THREAD_MENTION, "");
             if (!TextUtils.isEmpty(threadMention)) {

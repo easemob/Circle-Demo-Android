@@ -332,5 +332,4 @@ public class PreferenceManager {
 	public boolean isEnableTokenLogin() {
 		return mSharedPreferences.getBoolean(SHARED_KEY_ENABLE_TOKEN_LOGIN, false);
 	}
-
 }

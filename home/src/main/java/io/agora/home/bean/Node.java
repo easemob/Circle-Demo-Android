@@ -3,11 +3,14 @@ package io.agora.home.bean;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.agora.home.utils.TreeNodeChannelMode;
 import io.agora.home.utils.TreeNodeDefault;
+import io.agora.home.utils.TreeNodeExt;
 import io.agora.home.utils.TreeNodeIcon;
 import io.agora.home.utils.TreeNodeId;
 import io.agora.home.utils.TreeNodeName;
 import io.agora.home.utils.TreeNodePid;
+import io.agora.home.utils.TreeNodeSeatCount;
 
 public class Node {
 
@@ -33,9 +36,19 @@ public class Node {
 
     @TreeNodeIcon
     private int icon;
+
     //自定义属性，是否默认频道
     @TreeNodeDefault
     private boolean isDefault = false;
+
+    @TreeNodeChannelMode
+    private int channelMode;
+
+    @TreeNodeSeatCount
+    private int seatCount;
+
+    @TreeNodeExt
+    private String ext;
 
     /**
      * 下一级的子Node
@@ -74,11 +87,11 @@ public class Node {
         this.id = id;
     }
 
-    public String getpId() {
+    public String getPId() {
         return pId;
     }
 
-    public void setpId(String pId) {
+    public void setPId(String pId) {
         this.pId = pId;
     }
 
@@ -161,16 +174,36 @@ public class Node {
     /**
      * 设置展开
      *
-     * @param isexpand
+     * @param isExpand
      */
     public void setExpand(boolean isExpand) {
         this.isExpand = isExpand;
-        if (!isExpand) {
-
-            for (Node node : children) {
-                node.setExpand(isExpand);
-            }
+        for (Node node : children) {
+            node.setExpand(isExpand);
         }
     }
 
+    public int getChannelMode() {
+        return channelMode;
+    }
+
+    public void setChannelMode(int channelMode) {
+        this.channelMode = channelMode;
+    }
+
+    public int getSeatCount() {
+        return seatCount;
+    }
+
+    public void setSeatCount(int seatCount) {
+        this.seatCount = seatCount;
+    }
+
+    public String getExt() {
+        return ext;
+    }
+
+    public void setExt(String ext) {
+        this.ext = ext;
+    }
 }

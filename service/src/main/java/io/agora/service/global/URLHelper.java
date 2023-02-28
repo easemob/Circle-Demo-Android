@@ -12,6 +12,9 @@ public class URLHelper {
     public final static String UPLOAD_IMAGE_URL = getBaseUrl()+"/chatfiles";
 
     public static String getBaseUrl() {
-        return EMHttpClient.getInstance().chatConfig().a(true, false);
+        return EMHttpClient.getInstance().chatConfig().a(true, true);
+    }
+    public static String getRtcURL(String channelName,String agoraUid,String username){
+        return "http://a1.easemob.com/inside/token/rtc/channel/"+channelName;
     }
 }

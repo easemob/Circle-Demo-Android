@@ -13,10 +13,10 @@ import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.hyphenate.easeui.R;
 import com.hyphenate.util.EMLog;
-
-import androidx.core.content.ContextCompat;
 
 
 
@@ -197,6 +197,9 @@ public class EaseEditTextUtils {
      * @return
      */
     private static int getTakeUpCount(Paint paint, String reverse, int takeUpCount, float requestWidth) {
+        if(takeUpCount>reverse.length()) {
+            return takeUpCount-1;
+        }
         float measureWidth = paint.measureText(reverse.substring(0, takeUpCount));
         if(measureWidth <= requestWidth) {
             return getTakeUpCount(paint, reverse, takeUpCount + 1, requestWidth);

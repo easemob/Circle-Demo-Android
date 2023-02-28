@@ -657,10 +657,6 @@ public class EaseChatFragment extends EaseBaseFragment implements OnChatLayoutLi
     }
 
     @Override
-    public void onCircleServerEvent(int event, String serverId, List<String> usernames) {
-    }
-
-    @Override
     public void onCircleChannelEvent(int event, String channelId, List<String> usernames) {
     }
 
@@ -979,6 +975,11 @@ public class EaseChatFragment extends EaseBaseFragment implements OnChatLayoutLi
          */
         public Builder setChatBackground(@DrawableRes int bgDrawable) {
             this.bundle.putInt(Constant.KEY_CHAT_BACKGROUND, bgDrawable);
+            return this;
+        }
+
+        public Builder setIsChannel(boolean isChannel){
+            bundle.putBoolean(EaseConstant.IS_CHANNEL, isChannel);
             return this;
         }
 

@@ -165,6 +165,7 @@ public class EaseChatThreadCreatePresenterImpl extends EaseChatThreadCreatePrese
         }else if(chatType == EaseChatType.CHATROOM){
             message.setChatType(EMMessage.ChatType.ChatRoom);
         }
+        message.setIsChannelMessage(isChannel);
         // Add thread label for message
         message.setIsChatThreadMessage(true);
         message.setMessageStatusCallback(new EMCallBack() {

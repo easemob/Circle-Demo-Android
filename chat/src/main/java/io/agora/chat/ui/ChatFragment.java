@@ -506,6 +506,7 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
         }
         EMMessage.Type type = message.getType();
         helper.findItemVisible(R.id.action_chat_forward, false);
+        helper.findItemVisible(com.hyphenate.easeui.R.id.action_chat_delete, true);
         if (chatType == CHATTYPE_SINGLE) {
             helper.findItemVisible(com.hyphenate.easeui.R.id.action_chat_thread, false);
         }
@@ -515,7 +516,7 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
     public boolean onMenuItemClick(MenuItemBean item, EMMessage message) {
         if (item.getItemId() == R.id.action_chat_delete) {
             showDeleteDialog(message);
-            return true;
+            return false;
         } else if (item.getItemId() == R.id.action_chat_recall) {
             showProgressBar();
             chatLayout.recallMessage(message);
@@ -541,7 +542,7 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
                 .withString(CONVERSATION_ID, threadId)
                 .withString(PARENT_MSG_ID, messageId)
                 .withSerializable(PARENT_ID, parentId)
-                .withString(Constants.CHANNEL_NAME, channel.name)
+                .withSerializable(Constants.CHANNEL, channel)
                 .navigation();
     }
 

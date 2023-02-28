@@ -16,6 +16,11 @@ public class ChannelMuteNotifyBean {
         this.isMuted = isMuted;
         this.muteMembers = muteMembers;
     }
+    public ChannelMuteNotifyBean( String channelId, boolean isMuted, List<String> muteMembers) {
+        this.channelId = channelId;
+        this.isMuted = isMuted;
+        this.muteMembers = muteMembers;
+    }
 
     public String getServerId() {
         return serverId;

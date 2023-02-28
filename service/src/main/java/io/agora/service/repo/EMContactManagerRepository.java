@@ -6,7 +6,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 
 import com.blankj.utilcode.util.ThreadUtils;
 import com.hyphenate.EMCallBack;
@@ -61,7 +60,7 @@ public class EMContactManagerRepository extends ServiceReposity {
                     callBack.onError(ErrorCode.FRIEND_ERROR);
                     return;
                 }
-                getContactManager().aysncAddContact(username, reason, new EMCallBack() {
+                getContactManager().asyncAddContact(username, reason, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         callBack.onSuccess(new MutableLiveData<>(true));
@@ -87,7 +86,7 @@ public class EMContactManagerRepository extends ServiceReposity {
         return new NetworkOnlyResource<Boolean>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
-                getContactManager().aysncDeleteContact(username, new EMCallBack() {
+                getContactManager().asyncDeleteContact(username, new EMCallBack() {
                     @Override
                     public void onSuccess() {
                         getUserDao().deleteUser(username);
@@ -218,12 +217,15 @@ public class EMContactManagerRepository extends ServiceReposity {
 
             @Override
             protected LiveData<List<CircleUser>> loadFromDb() {
-                return Transformations.map(getUserDao().loadUsers(), result -> {
-                    if (result != null) {
-                        sortData(result);
-                    }
-                    return result;
-                });
+//                return Transformations.map(getUserDao().loadUsers(), result -> {
+//                    if (result != null) {
+//                        sortData(result);
+//                    }
+//                    return result;
+//                });
+                List<CircleUser> circleUsers= getUserDao().loadContacts();
+                sortData(circleUsers);
+                return createLiveData(circleUsers);
             }
 
             @Override

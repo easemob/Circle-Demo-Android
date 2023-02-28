@@ -142,12 +142,12 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             GroundViewHolder holder = (GroundViewHolder) viewHolder;
             int realPosition = mShowTop ? position - 1 : position;
             ViewGroup.LayoutParams itemViewLayoutParams = holder.itemView.getLayoutParams();
-            if(itemViewLayoutParams instanceof GridLayoutManager.LayoutParams) {
+            if (itemViewLayoutParams instanceof GridLayoutManager.LayoutParams) {
                 GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) itemViewLayoutParams;
-                if(realPosition%2==1) {
-                    layoutParams.setMargins(0,0,ConvertUtils.dp2px(6),0);
-                }else{
-                    layoutParams.setMargins(ConvertUtils.dp2px(6),0,0,0);
+                if (realPosition % 2 == 1) {
+                    layoutParams.setMargins(0, 0, ConvertUtils.dp2px(6), 0);
+                } else {
+                    layoutParams.setMargins(ConvertUtils.dp2px(6), 0, 0, 0);
                 }
                 holder.itemView.setLayoutParams(layoutParams);
             }
@@ -155,24 +155,29 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             setText(holder.serverName, bean.name);
             setText(holder.tvDesc, bean.desc);
             Glide.with(holder.ivServer)
-                    .load(ServiceReposity.getRandomServerIcon(bean.serverId))
-                    .placeholder(ServiceReposity.getRandomServerIcon(bean.serverId))
+                    .load(bean.background)
+                    .placeholder(ServiceReposity.getRandomServerBg(bean.serverId))
                     .into(holder.ivServer);
             Glide.with(holder.ivServerIcon)
                     .load(bean.icon)
                     .placeholder(ServiceReposity.getRandomServerIcon(bean.serverId))
                     .into(holder.ivServerIcon);
+            holder.llTags.removeAllViews();
             for (CircleServer.Tag tag : bean.tags) {
-                if (mContext != null && !TextUtils.isEmpty(tag.name)) {
+                if (mContext != null && !TextUtils.isEmpty(tag.tag_name)) {
                     TextView textView = new TextView(mContext);
                     Drawable drawableLeft = mContext.getResources().getDrawable(io.agora.service.R.drawable.circle_bookmark);
                     textView.setCompoundDrawablesWithIntrinsicBounds(drawableLeft,
                             null, null, null);
                     textView.setCompoundDrawablePadding(4);
-                    textView.setText(tag.name);
+                    textView.setText(tag.tag_name);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 8);
                     textView.setTextColor(Color.WHITE);
-                    textView.setPadding(0, 0, ConvertUtils.dp2px(6), 0);
+                    textView.setBackground(mContext.getDrawable(io.agora.service.R.drawable.shape_white26fff_radius4));
+                    textView.setPadding(ConvertUtils.dp2px(3), ConvertUtils.dp2px(3), ConvertUtils.dp2px(3), ConvertUtils.dp2px(3));
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(0, ConvertUtils.dp2px(4), ConvertUtils.dp2px(4), ConvertUtils.dp2px(4));
+                    textView.setLayoutParams(layoutParams);
                     holder.llTags.addView(textView);
                 }
             }
@@ -266,7 +271,7 @@ public class GroundAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ivServerIcon = itemView.findViewById(R.id.iv_server_icon);
 
             BlurringView bv = itemView.findViewById(R.id.bv);
-            bv.setBlurredView(ivServer);
+//            bv.setBlurredView(ivServer);
         }
     }
 

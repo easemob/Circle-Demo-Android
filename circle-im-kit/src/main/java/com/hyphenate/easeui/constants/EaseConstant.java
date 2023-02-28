@@ -82,4 +82,8 @@ public interface EaseConstant {
      String PARENT_MSG_ID ="parent_msg_id" ;
      String PARENT_ID = "parent_id";
      String SERVER_ID = "server_id";
+
+     String EM_IGNORE_NOTIFICATION = "em_ignore_notification";
+
+
 }

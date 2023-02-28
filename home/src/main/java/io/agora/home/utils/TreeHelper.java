@@ -69,45 +69,63 @@ public class TreeHelper {
         if (datas == null) {
             return null;
         }
-        for (T t : datas) {
+        for (T obj : datas) {
             String id = "-1";
             String pId = "-1";
-            String label = null;
+            String name = null;
+            String ext = null;
             boolean isDefault = false;
+            int channelMode=0;
+            int seatCount=8;
             int icon = 0;
-            if (t == null) {
+            if (obj == null) {
                 continue;
             }
-            Class<? extends Object> clazz = t.getClass();
+            Class<? extends Object> clazz = obj.getClass();
             Field[] declaredFields = clazz.getDeclaredFields();
-            for (Field f : declaredFields) {
-                if (f.getAnnotation(TreeNodeId.class) != null) {
-                    f.setAccessible(true);
-                    id = (String) f.get(t);
+            for (Field field : declaredFields) {
+                if (field.getAnnotation(TreeNodeId.class) != null) {
+                    field.setAccessible(true);
+                    id = (String) field.get(obj);
                 }
-                if (f.getAnnotation(TreeNodePid.class) != null) {
-                    f.setAccessible(true);
-                    pId = (String) f.get(t);
+                if (field.getAnnotation(TreeNodePid.class) != null) {
+                    field.setAccessible(true);
+                    pId = (String) field.get(obj);
                 }
-                if (f.getAnnotation(TreeNodeName.class) != null) {
-                    f.setAccessible(true);
-                    label = (String) f.get(t);
+                if (field.getAnnotation(TreeNodeName.class) != null) {
+                    field.setAccessible(true);
+                    name = (String) field.get(obj);
                 }
-                if (f.getAnnotation(TreeNodeDefault.class) != null) {
-                    f.setAccessible(true);
-                    isDefault = (boolean) f.get(t);
+                if (field.getAnnotation(TreeNodeExt.class) != null) {
+                    field.setAccessible(true);
+                    ext = (String) field.get(obj);
                 }
-                if (f.getAnnotation(TreeNodeIcon.class) != null) {
-                    f.setAccessible(true);
-                    icon = (int) f.get(t);
+                if (field.getAnnotation(TreeNodeDefault.class) != null) {
+                    field.setAccessible(true);
+                    isDefault = (boolean) field.get(obj);
                 }
-                if ((!"-1".equals(id)) && (!"-1".equals(pId)) && label != null) {
+                if (field.getAnnotation(TreeNodeChannelMode.class) != null) {
+                    field.setAccessible(true);
+                    channelMode = (int) field.get(obj);
+                }
+                if (field.getAnnotation(TreeNodeSeatCount.class) != null) {
+                    field.setAccessible(true);
+                    seatCount = (int) field.get(obj);
+                }
+                if (field.getAnnotation(TreeNodeIcon.class) != null) {
+                    field.setAccessible(true);
+                    icon = (int) field.get(obj);
+                }
+                if ((!"-1".equals(id)) && (!"-1".equals(pId)) && name == null) {
                     break;
                 }
             }
-            node = new Node(id, pId, label);
+            node = new Node(id, pId, name);
             node.setDefault(isDefault);
             node.setIcon(icon);
+            node.setChannelMode(channelMode);
+            node.setSeatCount(seatCount);
+            node.setExt(ext);
             nodes.add(node);
         }
 
@@ -118,10 +136,10 @@ public class TreeHelper {
             Node n = nodes.get(i);
             for (int j = i + 1; j < nodes.size(); j++) {
                 Node m = nodes.get(j);
-                if (TextUtils.equals(m.getpId(), n.getId())) {
+                if (TextUtils.equals(m.getPId(), n.getId())) {
                     n.getChildren().add(m);
                     m.setParent(n);
-                } else if (TextUtils.equals(m.getId(), n.getpId())) {
+                } else if (TextUtils.equals(m.getId(), n.getPId())) {
                     m.getChildren().add(n);
                     n.setParent(m);
                 }
@@ -169,10 +187,12 @@ public class TreeHelper {
      * @param node
      */
     private static void setNodeIcon(Node node) {
-        if (node.getChildren().size() > 0 && node.isExpand() && node.getpId() != null) {
-            node.setIcon(R.drawable.tree_ex);
-        } else if (node.getChildren().size() > 0 && !node.isExpand() && node.getpId() != null) {
-            node.setIcon(R.drawable.tree_ec);
+        if(node.getLevel()!=1) {
+            if (node.getChildren().size() > 0 && node.isExpand() && node.getPId() != null) {
+                node.setIcon(R.drawable.tree_ex);
+            } else if (node.getChildren().size() > 0 && !node.isExpand() && node.getPId() != null) {
+                node.setIcon(io.agora.service.R.drawable.circle_arrow_up);
+            }
         }
     }
 }

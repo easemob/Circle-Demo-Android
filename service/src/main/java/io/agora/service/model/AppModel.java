@@ -279,10 +279,6 @@ public class AppModel {
     }
 
 
-
-
-
-
     enum Key{
         VibrateAndPlayToneOn,
         VibrateOn,

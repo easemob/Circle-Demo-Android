@@ -14,7 +14,21 @@ public class MobileUtil {
     * 大陆号码或香港号码均可
     */
    public static boolean isPhoneLegal(String str)throws PatternSyntaxException {
-      return isChinaPhoneLegal(str) || isHKPhoneLegal(str);
+//      return isChinaPhoneLegal(str) || isHKPhoneLegal(str);
+      return customLegal(str);
+   }
+
+   /**
+    * 1开头 11位数字
+    * @param str
+    * @return
+    * @throws PatternSyntaxException
+    */
+   public static boolean customLegal(String str) throws PatternSyntaxException {
+      String regExp = "1[\\d]{10}";
+      Pattern p = Pattern.compile(regExp);
+      Matcher m = p.matcher(str);
+      return m.matches();
    }
 
    /**

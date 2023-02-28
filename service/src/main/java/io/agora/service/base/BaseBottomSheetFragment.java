@@ -24,7 +24,8 @@ import io.agora.service.net.Resource;
  * 底部弹框的基类，提取一些公共方法和管理隐藏显示逻辑
  */
 public class BaseBottomSheetFragment extends BottomSheetDialogFragment {
-    private int topOffset;
+    // Set default top offset
+    private int topOffset =ConvertUtils.dp2px(56);
     private BottomSheetBehavior mBehavior;
     public Context mContext;
 
@@ -102,8 +103,7 @@ public class BaseBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     protected void initView() {
-        // Set default top offset
-        topOffset= ConvertUtils.dp2px(56);
+
     }
 
     protected boolean getCanceledOnTouchOutside() {

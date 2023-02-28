@@ -10,8 +10,11 @@ import com.blankj.utilcode.util.ThreadUtils;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
+import com.hyphenate.chat.EMSilentModeParam;
+import com.hyphenate.chat.EMSilentModeResult;
 import com.hyphenate.easeui.modules.conversation.model.EaseConversationInfo;
 import com.hyphenate.exceptions.HyphenateException;
+import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.agora.service.callbacks.ResultCallBack;
+import io.agora.service.global.Constants;
+import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.net.ErrorCode;
 import io.agora.service.net.NetworkOnlyResource;
 import io.agora.service.net.Resource;
@@ -27,10 +32,7 @@ import io.agora.service.net.Resource;
 /**
  * 处理与chat相关的逻辑
  */
-public class EMChatManagerRepository extends ServiceReposity{
-
-
-
+public class EMChatManagerRepository extends ServiceReposity {
 
 
     /**
@@ -61,9 +63,9 @@ public class EMChatManagerRepository extends ServiceReposity{
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<String>> callBack) {
                 boolean isDelete = getChatManager().deleteConversation(conversationId, true);
-                if(isDelete) {
+                if (isDelete) {
                     callBack.onSuccess(new MutableLiveData<>(conversationId));
-                }else {
+                } else {
                     callBack.onError(ErrorCode.DELETE_CONVERSATION_ERROR);
                 }
             }
@@ -73,6 +75,7 @@ public class EMChatManagerRepository extends ServiceReposity{
 
     /**
      * 将会话置为已读
+     *
      * @param conversationId
      * @return
      */
@@ -81,9 +84,9 @@ public class EMChatManagerRepository extends ServiceReposity{
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
                 EMConversation conversation = getChatManager().getConversation(conversationId);
-                if(conversation == null) {
+                if (conversation == null) {
                     callBack.onError(ErrorCode.DELETE_CONVERSATION_ERROR);
-                }else {
+                } else {
                     conversation.markAllMessagesAsRead();
                     callBack.onSuccess(createLiveData(true));
                 }
@@ -93,6 +96,7 @@ public class EMChatManagerRepository extends ServiceReposity{
 
     /**
      * 获取会话列表
+     *
      * @return
      */
     public LiveData<Resource<List<EaseConversationInfo>>> fetchConversationsFromServer() {
@@ -105,9 +109,9 @@ public class EMChatManagerRepository extends ServiceReposity{
                     public void onSuccess(Map<String, EMConversation> value) {
                         List<EMConversation> conversations = new ArrayList<EMConversation>(value.values());
                         List<EaseConversationInfo> infoList = new ArrayList<>();
-                        if(!conversations.isEmpty()) {
+                        if (!conversations.isEmpty()) {
                             EaseConversationInfo info = null;
-                            for(EMConversation conversation : conversations) {
+                            for (EMConversation conversation : conversations) {
                                 info = new EaseConversationInfo();
                                 info.setInfo(conversation);
                                 info.setTimestamp(conversation.getLastMessage().getMsgTime());
@@ -130,6 +134,7 @@ public class EMChatManagerRepository extends ServiceReposity{
 
     /**
      * 调用api请求将会话置为已读
+     *
      * @param conversationId
      * @return
      */
@@ -137,7 +142,7 @@ public class EMChatManagerRepository extends ServiceReposity{
         return new NetworkOnlyResource<Boolean>() {
             @Override
             protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
-                ThreadUtils.getCachedPool().execute(()-> {
+                ThreadUtils.getCachedPool().execute(() -> {
                     try {
                         getChatManager().ackConversationRead(conversationId);
                         callBack.onSuccess(createLiveData(true));
@@ -200,4 +205,46 @@ public class EMChatManagerRepository extends ServiceReposity{
         }.asLiveData();
     }
 
+    public LiveData<Resource<EMSilentModeResult>> setSilentModeForConversation(String conversationId, EMConversation.EMConversationType type, EMSilentModeParam param) {
+        return new NetworkOnlyResource<EMSilentModeResult>() {
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<EMSilentModeResult>> callBack) {
+                ThreadUtils.getCachedPool().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        getPushManager().setSilentModeForConversation(conversationId, type, param, new EMValueCallBack<EMSilentModeResult>() {
+                            @Override
+                            public void onSuccess(EMSilentModeResult value) {
+                                callBack.onSuccess(createLiveData(value));
+                            }
+
+                            @Override
+                            public void onError(int error, String errorMsg) {
+                                callBack.onError(error, errorMsg);
+                            }
+                        });
+                    }
+                });
+
+            }
+        }.asLiveData();
+    }
+
+    public LiveData<Resource<Boolean>> markServerMessagesAsRead(String serverId) {
+
+        return new NetworkOnlyResource<Boolean>() {
+            @Override
+            protected void createCall(@NonNull ResultCallBack<LiveData<Boolean>> callBack) {
+                List<String> ids = AppUserInfoManager.getInstance().getChannelIds().get(serverId);
+                for (int i = 0; i < ids.size(); i++) {
+                    EMConversation conversation = getChatManager().getConversation(ids.get(i));
+                    if (conversation != null) {
+                        conversation.markAllMessagesAsRead();
+                    }
+                }
+                callBack.onSuccess(createLiveData(true));
+                LiveEventBus.get(Constants.NOTIFY_CHANGE).post(null);
+            }
+        }.asLiveData();
+    }
 }

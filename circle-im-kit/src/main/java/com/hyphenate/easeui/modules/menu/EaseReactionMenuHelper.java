@@ -21,7 +21,6 @@ import com.hyphenate.easeui.domain.EaseEmojicon;
 import com.hyphenate.easeui.interfaces.OnItemClickListener;
 import com.hyphenate.easeui.model.EaseMessageMenuData;
 import com.hyphenate.easeui.model.styles.EaseReactionOptions;
-import com.hyphenate.easeui.utils.EaseCommonUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ public class EaseReactionMenuHelper {
                 }
             }
         });
-        mReactionListView.addItemDecoration(new ReactionSpacesItemDecoration((int) EaseCommonUtils.dip2px(mContext, 5)));
+//        mReactionListView.addItemDecoration(new ReactionSpacesItemDecoration((int) EaseCommonUtils.dip2px(mContext, 5)));
     }
 
     public void show() {

@@ -13,6 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMChatThread;
+import com.hyphenate.chat.EMClient;
 import com.hyphenate.easeui.modules.chat.EaseChatFragment;
 import com.hyphenate.easeui.modules.chat.interfaces.OnChatInputChangeListener;
 import com.hyphenate.easeui.ui.base.EaseBaseActivity;
@@ -26,6 +29,7 @@ import io.agora.chat.thread.interfaces.OnChatThreadRoleResultCallback;
 import io.agora.chat.thread.interfaces.OnJoinChatThreadResultListener;
 import io.agora.service.bean.ThreadData;
 import io.agora.service.callbacks.OnResourceParseCallback;
+import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.global.Constants;
 import io.agora.service.net.Resource;
 import io.agora.service.net.Status;
@@ -40,7 +44,7 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
     protected EaseChatThreadRole threadRole = EaseChatThreadRole.UNKNOWN;
     // Usually is group id
     private String parentId;
-    private String channelName;
+    private CircleChannel channel;
     private String threadName;
 
     @Override
@@ -60,7 +64,7 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
         conversationId = intent.getStringExtra(CONVERSATION_ID);
         serverId = intent.getStringExtra(SERVER_ID);
         parentId = intent.getStringExtra(PARENT_ID);
-        channelName = intent.getStringExtra(Constants.CHANNEL_NAME);
+        channel = (CircleChannel) getIntent().getSerializableExtra(Constants.CHANNEL);
         threadName = intent.getStringExtra(Constants.THREAD_NAME);
     }
 
@@ -101,6 +105,7 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
                         }
                     })
                     .setChatBackground(io.agora.service.R.color.black_141414)
+                    .setIsChannel(channel!=null)
                     .hideSenderAvatar(true);
             setChildFragmentBuilder(builder);
             fragment = builder.build();
@@ -133,8 +138,21 @@ public class EaseChatThreadActivity extends EaseBaseActivity {
     }
 
     public void initData() {
-        binding.tvChannelName.setText(channelName);
-        binding.tvThreadName.setText(threadName);
+        if(channel!=null) {
+            binding.tvChannelName.setText(channel.name);
+        }
+        EMClient.getInstance().chatThreadManager().getChatThreadFromServer(conversationId, new EMValueCallBack<EMChatThread>() {
+            @Override
+            public void onSuccess(EMChatThread value) {
+                binding.tvThreadName.setText(value.getChatThreadName());
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+
+            }
+        });
+
     }
 
     public void setChildFragmentBuilder(EaseChatFragment.Builder builder) {

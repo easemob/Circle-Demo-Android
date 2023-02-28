@@ -1,5 +1,7 @@
 package io.agora.service.callbacks;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -12,6 +14,7 @@ import io.agora.service.base.ContainerBottomSheetFragment;
 public interface BottomSheetChildHelper {
 
     default void onContainerTitleBarInitialize(EaseTitleBar titlebar){}
+    default void showllFold(View llfold){}
 
     Fragment getParentFragment();
 
@@ -40,7 +43,17 @@ public interface BottomSheetChildHelper {
         Fragment instance= (Fragment) this;
         MyContainerBottomSheetFragment bottomSheetFragment = new MyContainerBottomSheetFragment(instance);
         bottomSheetFragment.show(supportFragmentManager, instance.getClass().getSimpleName());
+        setParentContainerFragment(bottomSheetFragment);
     }
+
+    default  void show(FragmentManager supportFragmentManager,int topOffset) {
+        Fragment instance= (Fragment) this;
+        MyContainerBottomSheetFragment bottomSheetFragment = new MyContainerBottomSheetFragment(instance,topOffset);
+        bottomSheetFragment.show(supportFragmentManager, instance.getClass().getSimpleName());
+        setParentContainerFragment(bottomSheetFragment);
+    }
+
+    default void setParentContainerFragment(ContainerBottomSheetFragment fragment){}
 
 
 
@@ -50,7 +63,11 @@ public interface BottomSheetChildHelper {
 
          public MyContainerBottomSheetFragment(Fragment fragment) {
             this.fragment=fragment;
-        }
+         }
+         public MyContainerBottomSheetFragment(Fragment fragment,int topOffset) {
+            this.fragment=fragment;
+            setTopOffset(topOffset);
+         }
 
         @NonNull
         @Override

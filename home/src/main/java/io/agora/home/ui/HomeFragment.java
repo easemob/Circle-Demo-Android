@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.blankj.utilcode.util.MapUtils;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.easeui.model.EaseEvent;
 import com.hyphenate.easeui.utils.ShowMode;
@@ -16,6 +17,7 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,20 +28,24 @@ import io.agora.service.adapter.HomeMenuAdapter;
 import io.agora.service.base.BaseInitFragment;
 import io.agora.service.bean.ChannelInviteData;
 import io.agora.service.bean.server.ServerMembersNotifyBean;
+import io.agora.service.callbacks.CircleVoiceChannelStateListener;
 import io.agora.service.callbacks.OnResourceParseCallback;
 import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 
-public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implements HomeMenuAdapter.OnMenuClickListener<CircleServer> {
+public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implements HomeMenuAdapter.OnMenuClickListener<CircleServer>
+, CircleVoiceChannelStateListener {
     private HomeViewModel mViewModel;
     private HomeMenuAdapter mAdapter;
-    private ServerDetailFragment mServerDetailFragment = ServerDetailFragment.newInstance();
+    private ServerDetailFragment mServerDetailFragment;
     private ConversationListFragment mConversationListFragment;
     private int mCheckPos;
     private ShowMode showMode = ShowMode.NORMAL;
     private Map<String, CircleServer> joinedServers = new HashMap<>();
+    private CircleServer pendingToShowServer;
 
     public void showServerPreview(CircleServer server) {
         if (server != null) {
@@ -79,13 +85,41 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                             joinedServers.put(circleServer.serverId, circleServer);
                             //缓存到内存中
                             joinedServersCache.put(circleServer.serverId, circleServer);
+                            //拉取每个server跟channelId的映射关系
+                            mViewModel.getJoinedChannelIdsInServer(circleServer.serverId);
                         }
                     }
                     mAdapter.setData(joinedServers.values());
+                    if(pendingToShowServer!=null) {
+                        mAdapter.setCheckedServer(pendingToShowServer);
+                        pendingToShowServer=null;
+                    }
                 }
             });
         });
 
+        mViewModel.getJoinedChannelIdsInServerLiveData.observe(getViewLifecycleOwner(), obj -> {
+            parseResource(obj, new OnResourceParseCallback<Map<String, List<String>>>() {
+                @Override
+                public void onSuccess(@Nullable Map<String, List<String>> channelIds) {
+                    if (!MapUtils.isEmpty(channelIds)) {
+                        //更新目标server的未读数
+                        Iterator<String> iterator = channelIds.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            getServerUnreadCount(iterator.next());
+                        }
+                    }
+                }
+            });
+        });
+
+        LiveEventBus.get(Constants.SERVER_CREATED,CircleServer.class).observe(getViewLifecycleOwner(), server -> {
+            if (showMode == ShowMode.NORMAL) {
+                pendingToShowServer=server;
+                //切换到目标server，显示详情
+                mAdapter.setCheckedServer(server);
+            }
+        });
         LiveEventBus.get(Constants.SERVER_CHANGED).observe(getViewLifecycleOwner(), obj -> {
             if (showMode == ShowMode.NORMAL) {
                 mViewModel.getJoinedServerList();
@@ -119,13 +153,25 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
                 }
             }
         });
+        LiveEventBus.get(Constants.SHOW_TARGET_SERVER, CircleServer.class).observe(getViewLifecycleOwner(), server -> {
+            if (server != null) {
+                //切换到目标server，显示详情
+                mAdapter.setCheckedServer(server);
+            }
+        });
         LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY, ServerMembersNotifyBean.class).observe(getViewLifecycleOwner(), bean -> {
             if (bean != null && showMode == ShowMode.NORMAL) {
                 List<String> ids = bean.getIds();
                 if (ids != null) {
                     for (int i = 0; i < ids.size(); i++) {
                         if (TextUtils.equals(ids.get(i), AppUserInfoManager.getInstance().getCurrentUserName())) {
+                            //移除自己在这个社区的角色
+                            Map<String, Integer> roleMap = AppUserInfoManager.getInstance().getSelfServerRoleMapLiveData().getValue();
+                            if (roleMap != null && roleMap.get(bean.getServerId()) != null) {
+                                roleMap.remove(bean.getServerId());
+                            }
                             DatabaseManager.getInstance().getServerDao().deleteByServerId(bean.getServerId());
+
                         }
                         break;
                     }
@@ -133,37 +179,60 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
             }
         });
         //监听未读数
-        LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CHAT_ROOM_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONVERSATION_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONVERSATION_READ, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_ADD, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
-        LiveEventBus.get(Constants.CONTACT_UPDATE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getConversationData);
+        LiveEventBus.get(Constants.NOTIFY_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.MESSAGE_CHANGE_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.GROUP_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CHAT_ROOM_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONVERSATION_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONVERSATION_READ, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_CHANGE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_ADD, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_DELETE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
+        LiveEventBus.get(Constants.CONTACT_UPDATE, EaseEvent.class).observe(getViewLifecycleOwner(), this::getSingleChatConversationUreadData);
         LiveEventBus.get(Constants.MESSAGE_CALL_SAVE, Boolean.class).observe(getViewLifecycleOwner(), bool -> {
-            getConversationData(null);
+            getSingleChatConversationUreadData(null);
         });
         LiveEventBus.get(Constants.MESSAGE_NOT_SEND, Boolean.class).observe(getViewLifecycleOwner(), bool -> {
-            getConversationData(null);
+            getSingleChatConversationUreadData(null);
         });
+        CircleRTCManager.getInstance().registerVoiceChannelStateListener(this);
     }
 
-    public void getConversationData(EaseEvent change) {
+    public void getSingleChatConversationUreadData(EaseEvent change) {
         int unreadMsgCount = 0;
-        List<EMConversation> conversations = mViewModel.getConversationsWithType(EMConversation.EMConversationType.Chat);
-        for (EMConversation conversation : conversations) {
+        List<EMConversation> singleChatConversations = mViewModel.getConversationsWithType(EMConversation.EMConversationType.Chat);
+        for (EMConversation conversation : singleChatConversations) {
             unreadMsgCount += conversation.getUnreadMsgCount();
         }
         mAdapter.setUnreadMap("-1", unreadMsgCount, 0);
+
+        Iterator<String> iterator = joinedServers.keySet().iterator();
+        while (iterator.hasNext()) {
+            String serverId = iterator.next();
+            getServerUnreadCount(serverId);
+        }
+    }
+
+    public void getServerUnreadCount(String serverId) {
+        List<EMConversation> conversations = mViewModel.getConversationsByServerId(serverId);
+        int unreadMsgCount = 0;
+        for (int i = 0; i < conversations.size(); i++) {
+            unreadMsgCount += conversations.get(i).getUnreadMsgCount();
+            mAdapter.setUnreadMap(serverId, unreadMsgCount);
+        }
     }
 
     @Override
     protected void initView(Bundle savedInstanceState) {
         super.initView(savedInstanceState);
-        mConversationListFragment = ConversationListFragment.newInstance();
+        mServerDetailFragment= (ServerDetailFragment) getChildFragmentManager().findFragmentByTag("server_detail");
+        if(mServerDetailFragment==null) {
+            mServerDetailFragment = ServerDetailFragment.newInstance();
+        }
+        mConversationListFragment= (ConversationListFragment) getChildFragmentManager().findFragmentByTag("conversation");
+        if(mConversationListFragment==null) {
+            mConversationListFragment = ConversationListFragment.newInstance();
+        }
         replace(mConversationListFragment, R.id.fcv_fragment, "conversation");
     }
 
@@ -180,6 +249,7 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
 
         //获取server列表
         mViewModel.getJoinedServerList();
+
     }
 
     @Override
@@ -208,5 +278,21 @@ public class HomeFragment extends BaseInitFragment<FragmentHomeBinding> implemen
         ARouter.getInstance()
                 .build("/home/CreateServerActivity")
                 .navigation();
+    }
+
+    @Override
+    public void onVoiceChannelStart(String rtcChannelName) {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onVoiceChannelLeave() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        CircleRTCManager.getInstance().unRegisterVoiceChannelStateListener(this);
     }
 }

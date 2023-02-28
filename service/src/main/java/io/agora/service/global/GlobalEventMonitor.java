@@ -11,8 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.StringRes;
 
-import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.EMChatThreadChangeListener;
+import com.hyphenate.EMCircleCategoryListener;
 import com.hyphenate.EMCircleChannelListener;
 import com.hyphenate.EMCircleServerListener;
 import com.hyphenate.EMConnectionListener;
@@ -23,9 +23,12 @@ import com.hyphenate.EMMultiDeviceListener;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatThread;
 import com.hyphenate.chat.EMChatThreadEvent;
+import com.hyphenate.chat.EMCircleCategory;
 import com.hyphenate.chat.EMCircleChannel;
 import com.hyphenate.chat.EMCircleChannelInviteInfo;
+import com.hyphenate.chat.EMCircleServer;
 import com.hyphenate.chat.EMCircleServerEvent;
+import com.hyphenate.chat.EMCircleUser;
 import com.hyphenate.chat.EMCircleUserRole;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
@@ -54,7 +57,6 @@ import io.agora.service.bean.channel.ChannelEventNotifyBean;
 import io.agora.service.bean.channel.ChannelInvitationNotifyBean;
 import io.agora.service.bean.channel.ChannelMemberRemovedNotifyBean;
 import io.agora.service.bean.channel.ChannelMuteNotifyBean;
-import io.agora.service.bean.channel.ChannelUpdateNotifyBean;
 import io.agora.service.bean.server.ServerInvitationNotifyBean;
 import io.agora.service.bean.server.ServerMemberNotifyBean;
 import io.agora.service.bean.server.ServerMembersNotifyBean;
@@ -63,10 +65,13 @@ import io.agora.service.db.DatabaseManager;
 import io.agora.service.db.dao.CircleChannelDao;
 import io.agora.service.db.dao.CircleServerDao;
 import io.agora.service.db.dao.CircleUserDao;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleChannel;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
+import io.agora.service.event.CategoryEvent;
 import io.agora.service.managers.AppUserInfoManager;
+import io.agora.service.managers.CircleRTCManager;
 import io.agora.service.repo.EMContactManagerRepository;
 import io.agora.service.repo.EMPushManagerRepository;
 import io.agora.service.utils.CircleUtils;
@@ -87,6 +92,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
     private final ChatContactListener chatContactListener;
     private final ChatConversationListener chatConversationListener;
     private final ChatServerListener chatServerListener;
+    private final ChatCategoryListener chatCategoryListener;
     private final ChatChannelListener chatChannelListener;
     private final ChatThreadListener chatThreadListener;
     private boolean isGroupsSyncedWithServer = false;
@@ -105,6 +111,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         chatContactListener = new ChatContactListener();
         chatConversationListener = new ChatConversationListener();
         chatServerListener = new ChatServerListener();
+        chatCategoryListener = new ChatCategoryListener();
         chatChannelListener = new ChatChannelListener();
         chatThreadListener = new ChatThreadListener();
         initListener();
@@ -141,6 +148,8 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         EMClient.getInstance().chatManager().addConversationListener(chatConversationListener);
         //添加对社区的监听
         EMClient.getInstance().chatCircleManager().addServerListener(chatServerListener);
+        //添加对分组的监听
+        EMClient.getInstance().chatCircleManager().addCategoryListener(chatCategoryListener);
         //添加对频道的监听
         EMClient.getInstance().chatCircleManager().addChannelListener(chatChannelListener);
         //添加对子区的监听
@@ -284,8 +293,9 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
     private class ChatConversationListener implements EMConversationListener {
 
+
         @Override
-        public void onCoversationUpdate() {
+        public void onConversationUpdate() {
 
         }
 
@@ -357,23 +367,46 @@ public class GlobalEventMonitor extends EaseChatPresenter {
     private class ChatServerListener implements EMCircleServerListener {
 
         @Override
+        public void onServerCreated(EMCircleServer server) {
+            EMLog.e(TAG, "onServerCreated");
+            CircleServer circleServer = new CircleServer(server);
+            circleServer.isJoined = true;
+            DatabaseManager.getInstance().getServerDao().insert(circleServer);
+            LiveEventBus.get(Constants.SERVER_CREATED).post(circleServer);
+        }
+
+        @Override
         public void onServerDestroyed(String serverId, String initiator) {
+            EMLog.e(TAG, "onServerDestroyed");
             Map<String, CircleServer> userJoinedSevers = AppUserInfoManager.getInstance().getUserJoinedSevers();
             if (userJoinedSevers != null) {
                 userJoinedSevers.remove(serverId);
             }
-            CircleServerDao serverDao = DatabaseManager.getInstance().getServerDao();
+            //检查自己是否在对应社区的语聊房里，是就退出
+            String channelId = CircleRTCManager.getInstance().getChannelId();
+            if (!TextUtils.isEmpty(channelId)&&getChannelDao()!=null) {
+                CircleChannel circleChannel = getChannelDao().getChannelByChannelID(channelId);
+                if (circleChannel != null) {
+                    if (!TextUtils.isEmpty(serverId)&&TextUtils.equals(circleChannel.serverId, serverId)) {
+                        //所在社区删除就退出语聊房
+                        CircleRTCManager.getInstance().leaveChannel();
+                    }
+                }
+            }
+            CircleServerDao serverDao =getServerDao();
             if (serverDao != null) {
                 CircleServer serverDeleted = serverDao.getServerById(serverId);
                 if (serverDeleted != null) {
                     serverDao.deleteByServerId(serverId);//room会自动通过livedata帮助管理UI刷新
-                    ToastUtils.showShort(applicationContext.getString(R.string.circle_delete_server, initiator, serverDeleted.name));
+//                    ToastUtils.showShort(applicationContext.getString(R.string.circle_delete_server, initiator, serverDeleted.name));
                 }
             }
+            LiveEventBus.get(Constants.SERVER_DESTROYED_NOTIFY).post(serverId);
         }
 
         @Override
         public void onServerUpdated(EMCircleServerEvent event) {
+            EMLog.e(TAG, "onServerUpdated");
             String serverId = event.getId();
             CircleServer circleServer = getServerDao().getServerById(serverId);
             if (circleServer != null) {
@@ -381,6 +414,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                 String serverDesc = event.getDesc();
                 String serverExt = event.getExt();
                 String serverIcon = event.getIcon();
+                String background = event.getBackground();
                 if (serverName != null) {
                     circleServer.name = serverName;
                 }
@@ -393,6 +427,9 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                 if (serverIcon != null) {
                     circleServer.icon = serverIcon;
                 }
+                if (background != null) {
+                    circleServer.background = background;
+                }
                 getServerDao().updateCircleServer(circleServer);
             }
             LiveEventBus.get(Constants.SERVER_UPDATED_NOTIFY).post(event);
@@ -400,30 +437,50 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onMemberJoinedServer(String serverId, String member) {
-            CircleServer server = getServerDao().getServerById(serverId);
-            if (server != null) {
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_server, member, server.name));
+            EMLog.e(TAG, "onMemberJoinedServer");
+            if (TextUtils.equals(member, EMClient.getInstance().getCurrentUser())) {
+                //自己在其他设备上加入社区
+                LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
             }
             LiveEventBus.get(Constants.SERVER_MEMBER_JOINED_NOTIFY).post(new ServerMemberNotifyBean(serverId, member));
         }
 
         @Override
         public void onMemberLeftServer(String serverId, String member) {
-            CircleServer server = getServerDao().getServerById(serverId);
-            if (server != null) {
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_leave_server, member, server.name));
+            EMLog.e(TAG, "onMemberLeftServer");
+            if (TextUtils.equals(member, EMClient.getInstance().getCurrentUser())) {
+                //自己的多设备退出server
+                //删除server
+                getServerDao().deleteByServerId(serverId);
             }
             LiveEventBus.get(Constants.SERVER_MEMBER_LEFT_NOTIFY).post(new ServerMemberNotifyBean(serverId, member));
         }
 
         @Override
         public void onMemberRemovedFromServer(String serverId, List<String> members) {
+            EMLog.e(TAG, "onMemberRemovedFromServer");
+//            //检查自己是否在对应社区的语聊房里，是就退出
+            String channelId = CircleRTCManager.getInstance().getChannelId();
+            if (!TextUtils.isEmpty(channelId)&&getChannelDao()!=null) {
+                CircleChannel circleChannel = getChannelDao().getChannelByChannelID(channelId);
+                if (circleChannel != null) {
+                    if (!TextUtils.isEmpty(serverId)&&TextUtils.equals(circleChannel.serverId, serverId) && members != null) {
+                        for (int i = 0; i < members.size(); i++) {
+                            if (TextUtils.equals(members.get(i), AppUserInfoManager.getInstance().getCurrentUserName())) {
+                                //被踢的人是自己就退出RTC频道
+                                CircleRTCManager.getInstance().leaveChannel();
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
             LiveEventBus.get(Constants.SERVER_MEMBER_BE_REMOVED_NOTIFY).post(new ServerMembersNotifyBean(serverId, members));
         }
 
         @Override
         public void onReceiveInvitation(EMCircleServerEvent event, String inviter) {
-            Log.e("TAG", "onReceive ServerInvitation serverId=" + event.getId() + "server name=" + event.getName());
+            EMLog.e(TAG, "onReceive ServerInvitation serverId=" + event.getId() + "server name=" + event.getName());
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -431,15 +488,17 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                         Log.e(TAG, "onReceive server Invitation ,but event is null");
                         return;
                     }
-                    Activity currentActivity = ((BaseApplication) BaseApplication.getContext()).getLifecycleCallbacks().current();
-                    CustomInfo info = new CustomInfo();
-                    info.setServerId(event.getId());
-                    info.setServerDesc(event.getDesc());
-                    info.setServerIcon(event.getIcon());
-                    info.setServerName(event.getName());
-                    info.setInviter(event.getFrom());
-                    CircleUtils.showServerInviteDialog(currentActivity, info);
-
+                    if (!TextUtils.equals(inviter, EMClient.getInstance().getCurrentUser())) {
+                        //邀请人不是自己，表明不是多设备事件
+                        Activity currentActivity = ((BaseApplication) BaseApplication.getContext()).getLifecycleCallbacks().current();
+                        CustomInfo info = new CustomInfo();
+                        info.setServerId(event.getId());
+                        info.setServerDesc(event.getDesc());
+                        info.setServerIcon(event.getIcon());
+                        info.setServerName(event.getName());
+                        info.setInviter(event.getFrom());
+                        CircleUtils.showServerInviteDialog(currentActivity, info);
+                    }
                     LiveEventBus.get(Constants.SERVER_RECEIVE_INVITATION_NOTIFY).post(new ServerInvitationNotifyBean(event, inviter));
                 }
             };
@@ -448,16 +507,19 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onInvitationBeAccepted(String serverId, String invitee) {
+            EMLog.e(TAG, "onInvitationBeAccepted");
             LiveEventBus.get(Constants.SERVER_INVITAION_BE_ACCEPTED_NOTIFY).post(new ServerMemberNotifyBean(serverId, invitee));
         }
 
         @Override
         public void onInvitationBeDeclined(String serverId, String invitee) {
+            EMLog.e(TAG, "onInvitationBeDeclined");
             LiveEventBus.get(Constants.SERVER_INVITAION_BE_DECLINED_NOTIFY).post(new ServerMemberNotifyBean(serverId, invitee));
         }
 
         @Override
         public void onRoleAssigned(String serverId, String member, EMCircleUserRole role) {
+            EMLog.e(TAG, "onRoleAssigned");
             if (TextUtils.equals(member, AppUserInfoManager.getInstance().getCurrentUserName())) {
                 AppUserInfoManager.getInstance().saveSelfServerRole(serverId, role.getRoleId());
             }
@@ -465,57 +527,90 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
     }
 
-    private class ChatChannelListener implements EMCircleChannelListener {
+    private class ChatCategoryListener implements EMCircleCategoryListener {
 
         @Override
-        public void onChannelCreated(String serverId, String channelId, String creator) {
-            EMClient.getInstance().chatCircleManager().fetchChannelDetail(serverId, channelId, new EMValueCallBack<EMCircleChannel>() {
-                @Override
-                public void onSuccess(EMCircleChannel value) {
-                    getChannelDao().insert(new CircleChannel(value));
-                }
-
-                @Override
-                public void onError(int error, String errorMsg) {
-
-                }
-            });
-            LiveEventBus.get(Constants.CHANNEL_CREATED_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, creator));
+        public void onCategoryCreated(EMCircleCategory category, String creater) {
+            EMLog.e(TAG, "onCategoryCreated");
+            CircleCategory circleCategory = new CircleCategory(category);
+            DatabaseManager.getInstance().getCagegoryDao().insert(circleCategory);
         }
 
         @Override
-        public void onChannelDestroyed(String serverId, String channelId, String initiator) {
+        public void onCategoryDestroyed(String serverId, String categoryId, String initiator) {
+            EMLog.e(TAG, "onCategoryDestroyed");
+            //从数据库总删除
+            DatabaseManager.getInstance().getCagegoryDao().deleteByCagegoryId(categoryId);
+            //发出广播通知分组删除
+            CategoryEvent categoryEvent = new CategoryEvent();
+            categoryEvent.serverId = serverId;
+            categoryEvent.categoryId = categoryId;
+            LiveEventBus.get(Constants.CATEGORY_DELETE, CategoryEvent.class).post(categoryEvent);
+        }
+
+        @Override
+        public void onCategoryUpdated(EMCircleCategory category, String initiator) {
+            EMLog.e(TAG, "onCategoryUpdated");
+            CircleCategory circleCategory = new CircleCategory(category);
+            DatabaseManager.getInstance().getCagegoryDao().updateCategory(circleCategory);
+        }
+
+        @Override
+        public void onChannelTransfered(String serverId, String sourceCategoryId, String newCategoryId, String channelId, String initiator) {
+            EMLog.e(TAG, "onChannelTransfered");
+            CircleChannelDao channelDao = DatabaseManager.getInstance().getChannelDao();
+            CircleChannel channel = channelDao.getChannelByChannelID(channelId);
+            if (channel != null) {
+                channel.categoryId = newCategoryId;
+                channelDao.updateChannel(channel);
+            }
+        }
+    }
+
+    private class ChatChannelListener implements EMCircleChannelListener {
+
+        @Override
+        public void onChannelCreated(EMCircleChannel channel, String creator) {
+            EMLog.e(TAG, "onChannelCreated");
+            getChannelDao().insert(new CircleChannel(channel));
+        }
+
+        @Override
+        public void onChannelDestroyed(String serverId, String categoryId, String channelId, String initiator) {
+            EMLog.e(TAG, "onChannelDestroyed");
+            if(TextUtils.equals(CircleRTCManager.getInstance().getChannelId(),channelId)) {
+                CircleRTCManager.getInstance().leaveChannel();
+            }
             getChannelDao().deleteByChannelId(channelId);
             LiveEventBus.get(Constants.CHANNEL_DESTORYED_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, initiator));
         }
 
         @Override
-        public void onChannelUpdated(String serverId, String channelId, String channelName, String channelDesc, String initiator) {
-            CircleChannel circleChannel = getChannelDao().getChannelByChannelID(channelId);
-            if (circleChannel != null) {
-                circleChannel.name = channelName;
-                circleChannel.desc = channelDesc;
-                getChannelDao().updateChannel(circleChannel);
-            }
-            LiveEventBus.get(Constants.CHANNEL_UPDATED_NOTIFY).post(new ChannelUpdateNotifyBean(serverId, channelId, initiator, channelName, channelDesc));
+        public void onChannelUpdated(EMCircleChannel channel, String initiator) {
+            EMLog.e(TAG, "onChannelUpdated");
+            getChannelDao().updateChannel(new CircleChannel(channel));
         }
 
         @Override
-        public void onMemberJoinedChannel(String serverId, String channelId, String member) {
+        public void onMemberJoinedChannel(String serverId, String categoryId, String channelId, EMCircleUser circleUser) {
+            EMLog.e(TAG, "onMemberJoinedChannel");
             CircleChannel channel = getChannelDao().getChannelByChannelID(channelId);
             if (channel != null) {
                 List<CircleUser> channelUsers = channel.channelUsers;
                 if (channelUsers != null) {
-                    channelUsers.add(new CircleUser(member));
+                    CircleUser user = new CircleUser();
+                    user.setRoleID(circleUser.getRole().getRoleId());
+                    user.setUsername(circleUser.getUserId());
+                    channelUsers.add(user);
                     getChannelDao().updateChannel(channel);
                 }
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_join_channel, member, channel.name));
             }
-            LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, member));
+            LiveEventBus.get(Constants.MEMBER_JOINED_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, circleUser.getUserId()));
         }
 
         @Override
-        public void onMemberLeftChannel(String serverId, String channelId, String member) {
+        public void onMemberLeftChannel(String serverId, String categoryId, String channelId, String member) {
+            EMLog.e(TAG, "onMemberLeftChannel");
             CircleChannel channel = getChannelDao().getChannelByChannelID(channelId);
             if (channel != null) {
                 List<CircleUser> channelUsers = channel.channelUsers;
@@ -529,18 +624,23 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                     }
                     getChannelDao().updateChannel(channel);
                 }
-                ToastUtils.showShort(applicationContext.getString(R.string.circle_leave_channel, member, channel.name));
             }
             LiveEventBus.get(Constants.MEMBER_LEFT_CHANNEL_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, member));
         }
 
         @Override
-        public void onMemberRemovedFromChannel(String serverId, String channelId, String member, String initiator) {
-            LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY).post(new ChannelMemberRemovedNotifyBean(serverId, channelId, member, initiator));
+        public void onMemberRemovedFromChannel(String serverId, String categoryId, String channelId, String member, String initiator) {
+            EMLog.e(TAG, "onMemberRemovedFromChannel");
+            if (TextUtils.equals(member, AppUserInfoManager.getInstance().getCurrentUserName()) && !TextUtils.isEmpty(channelId) && TextUtils.equals(channelId, CircleRTCManager.getInstance().getChannelId())) {
+                //被踢的人是自己就退出RTC频道
+                CircleRTCManager.getInstance().leaveChannel();
+            }
+            LiveEventBus.get(Constants.MEMBER_REMOVED_FROM_CHANNEL_NOTIFY).post(new ChannelMemberRemovedNotifyBean(serverId, channelId, initiator, member));
         }
 
         @Override
         public void onReceiveInvitation(EMCircleChannelInviteInfo inviteInfo, String inviter) {
+            EMLog.e(TAG, "onReceiveInvitation");
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -558,6 +658,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
                     info.setChannelId(inviteInfo.getChannelId());
                     info.setChannelDesc(inviteInfo.getChannelDesc());
                     info.setChannelName(inviteInfo.getChannelName());
+                    info.setCategoryId(inviteInfo.getCategoryId());
 
                     CircleUtils.showChannelInviteDialog(currentActivity, info);
                     LiveEventBus.get(Constants.RECEIVE_INVITATION_NOTIFY).post(new ChannelInvitationNotifyBean(inviteInfo, inviter));
@@ -567,17 +668,20 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
 
         @Override
-        public void onInvitationBeAccepted(String serverId, String channelId, String invitee) {
+        public void onInvitationBeAccepted(String serverId, String categoryId, String channelId, String invitee) {
+            EMLog.e(TAG, "onInvitationBeAccepted");
             LiveEventBus.get(Constants.INVITAION_BE_ACCEPTED_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, invitee));
         }
 
         @Override
-        public void onInvitationBeDeclined(String serverId, String channelId, String invitee) {
+        public void onInvitationBeDeclined(String serverId, String categoryId, String channelId, String invitee) {
+            EMLog.e(TAG, "onInvitationBeDeclined");
             LiveEventBus.get(Constants.INVITAION_BE_DECLINED_NOTIFY).post(new ChannelEventNotifyBean(serverId, channelId, invitee));
         }
 
         @Override
-        public void onMemberMuteChanged(String serverId, String channelId, boolean isMuted, List<String> muteMembers) {
+        public void onMemberMuteChanged(String serverId, String categoryId, String channelId, boolean isMuted, List<String> muteMembers) {
+            EMLog.e(TAG, "onMemberMuteChanged");
             LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY).post(new ChannelMuteNotifyBean(serverId, channelId, isMuted, muteMembers));
         }
     }
@@ -586,21 +690,21 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
         @Override
         public void onChatThreadCreated(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 LiveEventBus.get(Constants.THREAD_CHANGE).post(event.getChatThread());
             }
         }
 
         @Override
         public void onChatThreadUpdated(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 LiveEventBus.get(Constants.THREAD_CHANGE).post(event.getChatThread());
             }
         }
 
         @Override
         public void onChatThreadDestroyed(EMChatThreadEvent event) {
-            if(event!=null) {
+            if (event != null) {
                 EMChatThread chatThread = event.getChatThread();
                 ThreadData threadData = new ThreadData(chatThread.getChatThreadName(), chatThread.getChatThreadId(), chatThread.getParentId());
                 LiveEventBus.get(Constants.THREAD_DESTROY).post(threadData);
@@ -981,54 +1085,6 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
 
         @Override
-        public void onCircleServerEvent(int event, String serverId, List<String> usernames) {
-            switch (event) {
-                case SERVER_CREATE:
-                    //当前用户在其他设备上创建社区。
-                    LiveEventBus.get(Constants.CREATE_CHANNEL_MULTIPLY_NOTIFY).post(null);
-                    break;
-                case SERVER_DELETE:
-                    // 当前用户在其他设备上删除社区。
-                    DatabaseManager.getInstance().getServerDao().deleteByServerId(serverId);
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
-                    break;
-                case SERVER_UPDATE:
-                    // 当前用户在其他设备上更新社区。
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
-                    break;
-                case SERVER_JOIN:
-                    // 当前用户在其他设备上加入社区。
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
-                    break;
-                case SERVER_LEAVE:
-                    // 当前用户在其他设备上退出社区。
-                    DatabaseManager.getInstance().getServerDao().deleteByServerId(serverId);
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
-                    break;
-                case SERVER_INVITE_ACCEPT:
-                    // 当前用户在其他设备上接受加入社区的邀请。
-                    LiveEventBus.get(Constants.SERVER_CHANGED).post(null);
-                    break;
-                case SERVER_INVITE_DECLINE:
-                    // 当前用户在其他设备上拒绝加入社区的邀请。
-                    break;
-
-                case CIRCLE_SERVER_SET_ROLE:
-                    // 当前用户在其他设备上为用户设置社区角色。
-                    break;
-
-                case CIRCLE_SERVER_REMOVE_USER:
-                    // 当前设备在其他设备上从社区中移除成员。
-                    break;
-
-                case CIRCLE_SERVER_INVITE_USER:
-                    // 当前设备在其他设备上邀请其他用户加入社区。
-                    break;
-            }
-
-        }
-
-        @Override
         public void onCircleChannelEvent(int event, String channelId, List<String> usernames) {
             switch (event) {
 
@@ -1073,9 +1129,11 @@ public class GlobalEventMonitor extends EaseChatPresenter {
 
                 case CIRCLE_CHANNEL_MEMBER_ADD_MUTE:
                     // 当前用户在其他设备上禁言频道成员。
+                    LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY).post(new ChannelMuteNotifyBean(channelId, true, usernames));
                     break;
                 case CIRCLE_CHANNEL_MEMBER_REMOVE_MUTE:
                     // 当前用户在其他设备上解除对频道成员的禁言。
+                    LiveEventBus.get(Constants.MEMBER_MUTE_CHANGED_NOTIFY).post(new ChannelMuteNotifyBean(channelId, false, usernames));
                     break;
             }
         }

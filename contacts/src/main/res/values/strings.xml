@@ -20,7 +20,7 @@
     <string name="circle_role_moderator">管理员</string>
     <string name="circle_server_setting">社区设置</string>
     <string name="circlr_delete_server">解散社区</string>
-    <string name="circlr_exit_server">离开社区</string>
+    <string name="circlr_exit_server">退出社区</string>
     <string name="delete_server_success">解散社区成功</string>
     <string name="delete_server_failure">解散社区失败</string>
     <string name="leave_server_success">离开社区成功</string>
@@ -28,7 +28,9 @@
     <string name="circle_create_channel">创建频道</string>
     <string name="circle_set_server">编辑社区</string>
     <string name="delete_channel_success">删除频道成功</string>
+    <string name="delete_voice_channel_success">删除语聊房成功</string>
     <string name="delete_channel_failure">删除频道失败</string>
+    <string name="delete_voice_channel_failure">删除语聊房失败</string>
     <string name="leave_channel_success">离开频道成功</string>
     <string name="leave_channel_failure">离开频道失败</string>
     <string name="circle_channel_setting">频道设置</string>
@@ -38,8 +40,8 @@
     <string name="circle_set_channel">编辑频道</string>
     <string name="dialog_add_tag">添加标签</string>
     <string name="dialog_add_tag_here">在此输入标签</string>
-    <string name="home_channel_name">频道名</string>
-    <string name="home_channel_desc">频道描述</string>
+    <string name="home_channel_name">频道名称</string>
+    <string name="home_channel_desc">频道简介</string>
     <string name="circle_thread">子区</string>
 
     <string name="circle_delete_friend">删除好友</string>
@@ -79,5 +81,29 @@
     <string name="circle_inviting">邀请中</string>
     <string name="circle_invite">邀请</string>
     <string name="circle_no_threadlist">没有子区\n长按频道内消息创建子区</string>
+    <string name="circle_invite_to_join_voice_channel">加入语聊房聊起来吧</string>
     <string name="circle_self_click">不能和自己建立会话</string>
+    <string name="circle_mark_read">标记为已读</string>
+    <string name="circle_create_category">创建频道分组</string>
+    <string name="circle_server_members">查看社区成员</string>
+    <string name="circle_notification_setting">通知设定</string>
+    <string name="circle_all_messages">所有消息</string>
+    <string name="circle_no_notification">无通知</string>
+    <string name="circle_channel_type">频道类型</string>
+    <string name="circle_create_channel_private_switch_hint">仅通过邀请的用户可以加入私密频道</string>
+    <string name="circle_cagegory_name">分组名称</string>
+    <string name="input_category_name">输入分组名称</string>
+    <string name="circle_edit_server_cover_hint">头像建议比例1:1，2M以下\n社区封面建议比例16:7，2M以下</string>
+    <string name="circle_overview">概览</string>
+    <string name="circle_server_setting_private_switch_hint">公开社区可以在广场中被搜到，私密社区不可以被搜到</string>
+    <string name="circle_whether_private_server">是否为公开社区</string>
+    <string name="circle_edit_channel_category">编辑频道分组</string>
+    <string name="circle_channel_setting_private_switch_hint">仅通过邀请的用户可以加入私密频道</string>
+    <string name="circle_default_category_name_alias">不属于任何分组</string>
+    <string name="circle_channel_setting_member_count_hint">限制可以连接此语频频道的用户数</string>
+    <string name="circle_tag_is_empty">标签为空</string>
+    <string name="circle_tag_exist">社区标签已存在</string>
+    <string name="circle_delete_server_message">确认解散社区 %1$s ？此操作不可撤回。</string>
+    <string name="circle_delete_channel_message">确认删除频道 %1$s ？此操作不可撤回。</string>
+
 </resources>

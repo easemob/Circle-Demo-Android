@@ -125,7 +125,7 @@ public class ThreadListActivity extends BaseInitActivity<ActivityThreadListBindi
                     .withString(PARENT_MSG_ID, threadData.getParentMsgId())
                     .withSerializable(PARENT_ID, threadData.getThreadPId())
                     .withString(Constants.THREAD_NAME, threadData.getThreadName())
-                    .withString(Constants.CHANNEL_NAME, channel.name)
+                    .withSerializable(Constants.CHANNEL, channel)
                     .navigation();
         }
     }

@@ -56,4 +56,9 @@ public class ChatThreadFragment extends EaseChatThreadFragment {
         super.recallFail(code, errorMsg);
         ToastUtils.showShort(errorMsg);
     }
+
+    @Override
+    public void addMsgAttrsBeforeSend(EMMessage message) {
+//        message.setAttribute(EM_IGNORE_NOTIFICATION,true);
+    }
 }

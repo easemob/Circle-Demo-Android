@@ -17,7 +17,6 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.TextUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCircleChannelAttribute;
-import com.hyphenate.chat.EMCircleChannelRank;
 import com.hyphenate.chat.EMCircleChannelStyle;
 import com.hyphenate.easeui.constants.EaseConstant;
 import com.hyphenate.easeui.widget.EaseTitleBar;
@@ -220,7 +219,7 @@ public class CreateChannelBottomFragment extends BaseInitFragment<FragmentChanne
         EMCircleChannelAttribute attribute = new EMCircleChannelAttribute();
         attribute.setName(name);
         attribute.setDesc(desc);
-        attribute.setRank(EMCircleChannelRank.RANK_2000);
+        attribute.setMaxUsers(Constants.CHANNEL_MAX_USERS_2000);
         mViewModel.createChannel(server.serverId, attribute, style);
     }
 

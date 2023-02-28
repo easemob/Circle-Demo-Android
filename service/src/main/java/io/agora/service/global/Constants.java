@@ -10,20 +10,26 @@ public class Constants {
     public static final String USERINFO_CHANGE = "userinfo_change";
     public static final String PRESENCES_CHANGED = "presences_changed";
     public static final String SERVER_CHANGED = "server_changed";
-    public static final String SERVER_ADDED = "server_added";
+    public static final String SERVER_DELETED = "server_deleted";
+    public static final String SERVER_CREATED = "server_added";
     public static final String SERVER_UPDATED = "server_updated";
     public static final String LEAVE_OR_DELETE_SERVER = "leave_or_delete_server";
     public static final String CHANNEL_CHANGED = "channel_changed";
     public static final String CHANNEL_LEAVE = "channel_leave";
+    public static final String CHANNEL_JOIN = "channel_join";
     public static final String CHANNEL_DELETE = "channel_delete";
     public static final String NOTIFY_CHANGE = "notify_change";
+    public static final String CATEGORY_DELETE = "category_delete";
+    public static final String CATEGORY_UPDATE = "category_update";
 
 
     public static final String SHOW_SERVER_INVITE_FRAGMENT = "show_server_invite_fragment";
     public static final String SHOW_SERVER_SETTING_FRAGMENT = "show_server_setting_fragment";
+    public static final String SHOW_SERVER_INTRODUCTION_FRAGMENT = "show_server_introduction_fragment";
     public static final String SHOW_CHANNEL_SETTING_FRAGMENT = "show_channel_setting_fragment";
     public static final String SHOW_CREATE_CHANNEL_FRAGMENT = "show_create_channel_fragment";
     public static final String SHOW_THREAD_SETTING_FRAGMENT = "show_thread_setting_fragment";
+    public static final String SHOW_VOICE_CHANNEL_DETAIL_BOTTOM_FRAGMENT = "show_voice_channel_detail_bottom_fragment";
     public static final long PRESENCE_SUBSCRIBE_EXPIRY = 7 * 24 * 60 * 60;
 
     public static final String SYSTEM_MESSAGE_FROM = "from";
@@ -73,10 +79,12 @@ public class Constants {
 
     public static final String SERVER_ID = "server_id";
     public static final String CHANNEL = "channel";
+    public static final String CATEGORY = "category";
     public static final String CHANNELS = "channels";
     public static final String SERVER = "server";
     public static final String SERVERS = "servers";
 
+    public static final String CATEGORY_ID = "category_id";
     public static final String CHANNEL_ID = "channel_id";
     public static final String MESSAGE_ID = "message_id";
 
@@ -89,6 +97,7 @@ public class Constants {
 
 
     public static final String THREAD_ID = "thread_id";
+    public static final String VOICE_CHANNEL_MEMBER_HEAD_ID = "voice_channel_member_head_id";
     public static final String CHANNEL_NAME = "channel_name";
     public static final String THREAD_NAME = "thread_name";
     public static final String THREAD_DATA = "thread_data";
@@ -121,6 +130,12 @@ public class Constants {
     public static final String SERVER_DESTROYED_NOTIFY = "server_destroyed_notify";
     public static final String SERVER_UPDATED_NOTIFY = "server_updated_notify";
 
+    public static final String CATEGORY_CREATED_NOTIFY = "category_created_notify";
+    public static final String CATEGORY_DESTORYED_NOTIFY = "category_destoryed_notify";
+    public static final String CATEGORY_UPDATED_NOTIFY = "category_updated_notify";
+    public static final String CATEGORY_CHANNEL_ADDED_NOTIFY = "category_channel_added_notify";
+    public static final String CATEGORY_CHANNEL_REMOVED_NOTIFY = "category_channel_removed_notify";
+
     public static final String CHANNEL_CREATED_NOTIFY = "channel_created_notify";
     public static final String CHANNEL_DESTORYED_NOTIFY = "channel_destoryed_notify";
     public static final String CHANNEL_UPDATED_NOTIFY = "channel_updated_notify";
@@ -150,4 +165,10 @@ public class Constants {
     public static final String SHOW_MODE = "show_mode";
     public static final String NAV_POSITION = "navigation_position";
     public static final String SHOW_RED_DOT ="show_red_dot" ;
+
+    public static final String DEFAULT_CATEGORY_NAME ="Default Channel Category" ;
+    public static final int CHANNEL_MAX_USERS_2000 = 2000;
+    public static final int CHANNEL_MAX_USERS_20 = 20;
+    public static final int CHANNEL_MAX_USERS_8 = 8;
+    public static final String SHOW_TARGET_SERVER = "show_target_server";
 }

@@ -194,7 +194,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
             }
         });
         tvEditThread.setOnClickListener(this);
-        mListAdapter.setOnItemClickListener(this);
+//        mListAdapter.setOnItemClickListener(this);
     }
 
     @Override
@@ -216,6 +216,7 @@ public class ThreadSettingBottomFragment extends ContactListFragment implements 
 
     @Override
     public void onContainerTitleBarInitialize(EaseTitleBar titlebar) {
+        titlebar.setVisibility(View.VISIBLE);
         titlebar.setTitle(getString(R.string.circle_thread_setting));
         titlebar.setLeftLayoutVisibility(View.VISIBLE);
         titlebar.getRightImage().setVisibility(View.VISIBLE);

@@ -1,6 +1,7 @@
 package io.agora.home.repo;
 
 
+import com.blankj.utilcode.util.CollectionUtils;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
 
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import io.agora.service.managers.AppUserInfoManager;
 import io.agora.service.managers.NotificationMsgManager;
 import io.agora.service.repo.ServiceReposity;
 
@@ -37,5 +39,19 @@ public class ConversationReposity extends ServiceReposity {
             }
         }
         return conversations;
+    }
+
+    public List<EMConversation> getConversationsByServerId(String serverId) {
+        List<EMConversation> datas=new ArrayList<>();
+        List<String> ids = AppUserInfoManager.getInstance().getChannelIds().get(serverId);
+        if (!CollectionUtils.isEmpty(ids)) {
+            for (String conversationId : ids) {
+                EMConversation conversation = EMClient.getInstance().chatManager().getConversation(conversationId, EMConversation.EMConversationType.GroupChat, false, false,true);
+                if(conversation!=null) {
+                    datas.add(conversation);
+                }
+            }
+        }
+        return datas;
     }
 }

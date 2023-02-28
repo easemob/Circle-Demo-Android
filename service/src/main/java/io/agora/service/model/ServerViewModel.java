@@ -12,11 +12,14 @@ import androidx.lifecycle.Transformations;
 
 import com.alibaba.android.arouter.utils.TextUtils;
 import com.hyphenate.EMError;
+import com.hyphenate.chat.EMCircleServerAttribute;
 import com.hyphenate.chat.EMCircleUserRole;
 
 import java.util.List;
+import java.util.Map;
 
 import io.agora.service.bean.CustomInfo;
+import io.agora.service.db.entity.CircleCategory;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.db.entity.CircleUser;
 import io.agora.service.net.Resource;
@@ -46,6 +49,9 @@ public class ServerViewModel extends ServiceViewModel {
     public SingleSourceLiveData<Resource<String>> inviteToServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<String>> removeUserFromServerLiveData = new SingleSourceLiveData<>();
     public SingleSourceLiveData<Resource<CustomInfo>> checkSelfIsInServerLiveData = new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<List<CircleCategory>>> getServerCategoriesLiveData=new SingleSourceLiveData<>();
+    public SingleSourceLiveData<Resource<Map<String,List<String>>>> getJoinedChannelIdsInServerLiveData=new SingleSourceLiveData<>();
+
 
     public ServerViewModel(@NonNull Application application) {
         super(application);
@@ -95,6 +101,31 @@ public class ServerViewModel extends ServiceViewModel {
                 }
             });
         }
+    }
+    public void updateServerBg(CircleServer circleServer, String bgPath) {
+        if (TextUtils.isEmpty(bgPath) || android.text.TextUtils.equals(circleServer.icon, bgPath)) {
+            updateServerLiveData.setSource(serverReposity.updateServerBg(circleServer.serverId, bgPath));
+        } else {
+            serverReposity.uploadFile(mContext, bgPath).observeForever(new Observer<Resource<String>>() {
+                @Override
+                public void onChanged(Resource<String> urlRescouce) {
+                    if (!TextUtils.isEmpty(urlRescouce.data)) {
+                        //上传图片成功
+                        updateServerLiveData.setSource(serverReposity.updateServerBg(circleServer.serverId, urlRescouce.data));
+                    } else {
+                        //由于livedata粘性的存在，这种方式会导致一进来就回调到这里，所以需要过滤下
+                        if (urlRescouce.errorCode == EMError.GENERAL_ERROR) {
+                            //上传图片失败
+                            Resource<CircleServer> value = Resource.error(urlRescouce.errorCode, urlRescouce.getMessage(mContext), null);
+                            updateServerLiveData.setValue(value);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    public void updateServer(String serverId, EMCircleServerAttribute attribute) {
+        updateServerLiveData.setSource(serverReposity.updateServer(serverId,attribute));
     }
 
     public void getJoinedServerList() {
@@ -172,5 +203,12 @@ public class ServerViewModel extends ServiceViewModel {
 
     public void checkSelfIsInServer(CustomInfo info) {
         checkSelfIsInServerLiveData.setSource(serverReposity.checkSelfIsInServer(info));
+    }
+
+    public void getServerCategories(String serverId){
+        getServerCategoriesLiveData.setSource(serverReposity.getServerCategories(serverId));
+    }
+    public void getJoinedChannelIdsInServer(String serverId){
+        getJoinedChannelIdsInServerLiveData.setSource(serverReposity.fetchJoinedChannelIdsInServer(serverId));
     }
 }

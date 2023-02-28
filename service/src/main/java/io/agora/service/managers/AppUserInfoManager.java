@@ -40,6 +40,7 @@ public class AppUserInfoManager {
     private Map<String, CircleServer> joinedServers = new ConcurrentHashMap<>();
     private Map<String, CircleUser> circleUsers = new HashMap<>();
     private MutableLiveData<Map<String, Integer>> selfServerRoleMapLiveData = new MutableLiveData<>();//key:serverId, value:roleId 存储自己在各社区的角色
+    private Map<String, List<String>> channelIds = new HashMap<>();
 
     public static AppUserInfoManager getInstance() {
         return ourInstance;
@@ -156,6 +157,9 @@ public class AppUserInfoManager {
     public void clear() {
         joinedServers.clear();
         selfServerRoleMapLiveData.postValue(null);
+        channelIds.clear();
+        circleUsers.clear();
+        mPresences.clear();
     }
 
     public Map<String, CircleUser> getCircleUsers() {
@@ -173,6 +177,10 @@ public class AppUserInfoManager {
         }
         serverRoleMap.put(serverId, roleId);
         selfServerRoleMapLiveData.postValue(serverRoleMap);
+    }
+
+    public Map<String, List<String>> getChannelIds() {
+        return channelIds;
     }
 
     private CircleUserDao getUserDao() {

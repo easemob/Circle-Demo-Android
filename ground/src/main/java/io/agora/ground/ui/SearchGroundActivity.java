@@ -7,8 +7,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,16 +24,17 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.blankj.utilcode.util.CollectionUtils;
+import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.bumptech.glide.Glide;
+import com.example.zhouwei.library.CustomPopWindow;
 import com.google.gson.Gson;
+import com.hyphenate.chat.EMCircleServerSearchType;
 import com.hyphenate.easeui.utils.ShowMode;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.agora.common.dialog.AlertDialog;
 import io.agora.ground.R;
 import io.agora.ground.adapter.GroundAdapter;
 import io.agora.ground.callbacks.OnItemClickListener;
@@ -39,18 +42,19 @@ import io.agora.ground.databinding.ActivitySearchGroundBinding;
 import io.agora.ground.model.GroundViewModel;
 import io.agora.service.base.BaseInitActivity;
 import io.agora.service.callbacks.OnResourceParseCallback;
-import io.agora.service.databinding.DialogJoinServerBinding;
 import io.agora.service.db.entity.CircleServer;
 import io.agora.service.global.Constants;
 import io.agora.service.managers.AppUserInfoManager;
 
-public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundBinding> implements TextWatcher, TextView.OnEditorActionListener, OnItemClickListener<CircleServer> {
+public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundBinding> implements TextWatcher, TextView.OnEditorActionListener, OnItemClickListener<CircleServer>, View.OnClickListener {
     private GroundViewModel mViewModel;
     private RecyclerView mRvResult;
     private GroundAdapter mAdapter;
     private EditText mEtSearch;
     private ImageView mIvClear;
     private ArrayList<CircleServer> servers;
+    private CustomPopWindow mCustomPopWindow;
+    private EMCircleServerSearchType searchType=EMCircleServerSearchType.EM_CIRCLE_SERVER_SEARCH_TYPE_NAME;
 
     public static void actionStart(Context context, ArrayList<CircleServer> servers) {
         Intent intent = new Intent(context, SearchGroundActivity.class);
@@ -97,7 +101,7 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
                 @Override
                 public void onError(int code, String message) {
                     super.onError(code, message);
-                    if(!TextUtils.isEmpty(message)) {
+                    if (!TextUtils.isEmpty(message)) {
                         ToastUtils.showShort(message);
                     }
                 }
@@ -105,6 +109,8 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
         });
         mEtSearch.addTextChangedListener(this);
         mEtSearch.setOnEditorActionListener(this);
+        mBinding.tvSearchType.setOnClickListener(this);
+        mBinding.ivArrowDown.setOnClickListener(this);
     }
 
     @Override
@@ -115,10 +121,12 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
         mAdapter.setOnItemClickListener(this);
         mRvResult.setAdapter(mAdapter);
         mAdapter.setData(servers);
+        mBinding.etSearch.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
-    private void getServerListByKey(String key) {
-        mViewModel.getServerListByKey(key).observe(this, response -> {
+    private void getServerListByKey(String key, EMCircleServerSearchType searchType) {
+        mViewModel.getServerListByKey(searchType,key).observe(this, response -> {
             parseResource(response, new OnResourceParseCallback<List<CircleServer>>() {
                 @Override
                 public void onSuccess(@Nullable List<CircleServer> data) {
@@ -146,6 +154,7 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
     }
 
     public void onCancel(View v) {
+        hideKeyboard();
         finish();
     }
 
@@ -188,7 +197,7 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
             ToastUtils.showShort(getString(R.string.keyword_not_empty));
             return;
         }
-        getServerListByKey(key);
+        getServerListByKey(key,searchType);
     }
 
     @Override
@@ -208,34 +217,80 @@ public class SearchGroundActivity extends BaseInitActivity<ActivitySearchGroundB
             finish();
         } else {
             //弹框
-            DialogJoinServerBinding joinServerBinding = DialogJoinServerBinding.inflate(getLayoutInflater());
-            AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setContentView(joinServerBinding.getRoot())
-                    .setLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    .show();
-            Glide.with(this).load(circleServer.icon).placeholder(io.agora.service.R.drawable.circle_default_avatar).into(joinServerBinding.ivServer);
-            joinServerBinding.tvServerName.setText(circleServer.name);
-            joinServerBinding.tvDesc.setText(circleServer.desc);
-            joinServerBinding.btnCancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //跳转到首页预览模式
-//                    Postcard postcard = ARouter.getInstance().build("/app/MainActivity");
-//                    //直接跳转到首页,显示目标server详情
-//                    postcard.withSerializable(Constants.SHOW_MODE, ShowMode.SERVER_PREVIEW);
-//                    postcard.withInt(Constants.NAV_POSITION, 0);
-//                    postcard.withParcelable(Constants.SERVER, circleServer);
-//                    postcard.navigation();
-                    dialog.dismiss();
-                }
-            });
-            joinServerBinding.btnJoinImmediately.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mViewModel.joinServer(circleServer.serverId);
-                    dialog.dismiss();
-                }
-            });
+            ServerIntroductionBottomFragment fragment = new ServerIntroductionBottomFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.SERVER, circleServer);
+            fragment.setArguments(bundle);
+            fragment.show(getSupportFragmentManager());
         }
     }
+
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.tv_search_type || v.getId() == R.id.iv_arrow_down) {
+            showPopWindow(mBinding.cslSearch);
+        }
+    }
+
+    private void showPopWindow(View locationView) {
+
+        View contentView = LayoutInflater.from(this).inflate(R.layout.search_server_pop, (ViewGroup) locationView.getParent(), false);
+        //处理popWindow 显示内容
+        handleLogic(contentView);
+
+        //显示PopupWindow
+        if (mCustomPopWindow == null) {
+            mCustomPopWindow = new CustomPopWindow.PopupWindowBuilder(this)
+                    .setView(contentView)
+                    .size(ConvertUtils.dp2px(118), ConvertUtils.dp2px(106))
+                    .setFocusable(true)
+                    .setOutsideTouchable(true)
+                    .create()
+                    .showAsDropDown(locationView, ConvertUtils.dp2px(0), 0);
+        } else {
+            mCustomPopWindow.showAsDropDown(locationView, ConvertUtils.dp2px(0), 0);
+        }
+    }
+
+    /**
+     * 处理弹出显示内容、点击事件等逻辑
+     *
+     * @param contentView
+     */
+    private void handleLogic(View contentView) {
+        TextView tvSearchName = contentView.findViewById(R.id.tv_search_name);
+        TextView tvSearchTag = contentView.findViewById(R.id.tv_search_tag);
+
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int id = v.getId();
+                if (id == R.id.tv_search_name) {
+                    mBinding.tvSearchType.setText(getString(io.agora.service.R.string.circle_server_name));
+                    searchType=EMCircleServerSearchType.EM_CIRCLE_SERVER_SEARCH_TYPE_NAME;
+                    tvSearchName.setEnabled(false);
+                    tvSearchTag.setEnabled(true);
+                } else if (id == R.id.tv_search_tag) {
+                    mBinding.tvSearchType.setText(getString(io.agora.service.R.string.circle_server_tag));
+                    searchType=EMCircleServerSearchType.EM_CIRCLE_SERVER_SEARCH_TYPE_TAG;
+                    tvSearchName.setEnabled(true);
+                    tvSearchTag.setEnabled(false);
+                }
+                if (mCustomPopWindow != null) {
+                    mCustomPopWindow.dissmiss();
+                }
+            }
+        };
+        if(searchType==EMCircleServerSearchType.EM_CIRCLE_SERVER_SEARCH_TYPE_NAME) {
+            tvSearchName.setEnabled(false);
+            tvSearchTag.setEnabled(true);
+        }else{
+            tvSearchName.setEnabled(true);
+            tvSearchTag.setEnabled(false);
+        }
+        tvSearchName.setOnClickListener(listener);
+        tvSearchTag.setOnClickListener(listener);
+    }
+
 }

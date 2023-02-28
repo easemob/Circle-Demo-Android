@@ -1,6 +1,7 @@
 package io.agora.mine.ui;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -194,6 +195,12 @@ public class UserInfoSettingActivity extends BaseInitActivity<ActivityUserInfoSe
                     @Override
                     public void onClick(View v) {
                         alertDialog.dismiss();
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        hideKeyboard();
                     }
                 })
                 .setOnClickListener(R.id.tv_confirm, new View.OnClickListener() {

@@ -5,6 +5,8 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
+import com.hyphenate.chat.EMCircleServerSearchType;
+
 import java.util.List;
 
 import io.agora.service.db.entity.CircleServer;
@@ -23,8 +25,8 @@ public class GroundViewModel extends ServerViewModel {
         super(application);
     }
 
-    public LiveData<Resource<List<CircleServer>>> getServerListByKey(String key){
-       return reposity.getServerListByKey(key);
+    public LiveData<Resource<List<CircleServer>>> getServerListByKey(EMCircleServerSearchType searchType, String key){
+       return reposity.getServerListByKey(searchType,key);
     }
 
     public void getServerJoinedList(){
