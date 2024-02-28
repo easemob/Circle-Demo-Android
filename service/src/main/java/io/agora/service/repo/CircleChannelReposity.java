@@ -130,7 +130,7 @@ public class CircleChannelReposity extends ServiceReposity {
     }
 
     private void doGetPrivateChannelList(String serverID, int limit, String cursor, ArrayList<CircleChannel> channels, ResultCallBack<LiveData<List<CircleChannel>>> callBack) {
-        getCircleManager().fetchVisiblePrivateChannelsInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleChannel>>() {
+        getCircleManager().fetchPrivateChannelsInServer(serverID, limit, cursor, new EMValueCallBack<EMCursorResult<EMCircleChannel>>() {
             @Override
             public void onSuccess(EMCursorResult<EMCircleChannel> value) {
                 List<CircleChannel> circleChannels = converToCirlceChannelList(value.getData());
