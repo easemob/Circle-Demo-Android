@@ -556,7 +556,7 @@ public class GlobalEventMonitor extends EaseChatPresenter {
         }
 
         @Override
-        public void onChannelTransfered(String serverId, String sourceCategoryId, String newCategoryId, String channelId, String initiator) {
+        public void onChannelTransferred(String serverId, String sourceCategoryId, String newCategoryId, String channelId, String initiator) {
             EMLog.e(TAG, "onChannelTransfered");
             CircleChannelDao channelDao = DatabaseManager.getInstance().getChannelDao();
             CircleChannel channel = channelDao.getChannelByChannelID(channelId);
