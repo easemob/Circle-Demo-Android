@@ -1,22 +1,22 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     dependencies {
-        def nav_version = "2.4.2"
+        def nav_version = "2.5.0"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
         classpath "com.alibaba:arouter-register:1.0.2"
     }
 }
 
 plugins {
-    id 'com.android.application' version '4.2.0' apply false
-    id 'com.android.library' version '4.2.0' apply false
+    id 'com.android.application' version '8.1.0' apply false
+    id 'com.android.library' version '8.1.0' apply false
 }
 apply plugin: 'com.alibaba.arouter'
 
 ext {
-    compile_sdk_version = 31
+    compile_sdk_version = 33
     min_sdk_verion = 21
-    target_sdk_version = 31
+    target_sdk_version = 33
 
     lib_version_code = 2
     lib_version_name = "2.0.0"

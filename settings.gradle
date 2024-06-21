@@ -39,8 +39,8 @@ include ':circle-im-kit'
 //temp for compile
 //内部使用，demo直接依赖aar，不需要依赖下面的module, release时需要把下面的include相关的两行注释掉
 //include ':hyphenatechatsdk'
-//project(':hyphenatechatsdk').projectDir = new File('../publish/circle-2-base-on-3.9.9/circle-debug/emclient-android/hyphenatechatsdk')
+//project(':hyphenatechatsdk').projectDir = new File('../publish/circle-base-on-4.7.0/circle-release/emclient-android/hyphenatechatsdk')
 //include ':ease-linux'
-//project(':ease-linux').projectDir = new File('../publish/circle-2-base-on-3.9.9/circle-debug/emclient-linux')
+//project(':ease-linux').projectDir = new File('../publish/circle-base-on-4.7.0/circle-release/emclient-linux')
 
 

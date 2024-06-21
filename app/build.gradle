@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply from: '../dependencies.gradle'
 
 android {
-
+    namespace 'io.agora.circle'
     compileSdk compile_sdk_version
 
     defaultConfig {
@@ -16,6 +16,11 @@ android {
 //            }
 //        }
         applicationId "io.agora.circle"
+        externalNativeBuild {
+            ndkBuild {
+                arguments '-j8'
+            }
+        }
     }
 
     //打开注释后，可以直接在studio里查看和编辑emclient-linux里的代码
@@ -24,7 +29,8 @@ android {
 //            path file('jni/Android.mk')
 //        }
 //    }
-    ndkPath '/Users/xuchengpu/Library/Android/sdk/ndk/19.2.5345600'  // Point to your own NDK
+
+    ndkPath '/Users/xuchengpu/Library/Android/sdk/ndk/android-ndk-r19c'  // Point to your own NDK
     ndkVersion '19.2.5345600'
 }
 

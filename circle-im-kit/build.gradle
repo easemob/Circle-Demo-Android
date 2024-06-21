@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 //group = "com.hyphenate"//groupId
 android {
+    namespace 'com.hyphenate.easeui'
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
 
@@ -47,7 +48,7 @@ dependencies {
     compileOnly files('libs/BaiduLBS_Android.jar')
     implementation files('libs/pinyin4j-2.5.0.jar')
 //	api project(':hyphenatechatsdk')
-    api 'io.hyphenate:hyphenate-chat:3.9.9.2.1'
+    api 'io.hyphenate:hyphenate-chat:4.7.0.1'
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     api 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'

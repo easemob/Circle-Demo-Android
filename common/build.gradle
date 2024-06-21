@@ -4,7 +4,7 @@ apply from: '../dependencies.gradle'
 // CrashHandler、日志上报、推送、联网请求基类、封装的基础自定义UI控件、工具类、webview等
 
 android {
-
+    namespace 'io.agora.common'
 }
 
 dependencies {

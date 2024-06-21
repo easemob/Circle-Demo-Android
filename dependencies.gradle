@@ -137,4 +137,5 @@ dependencies {
 
     //agora
     implementation 'io.agora.rtc:full-rtc-basic:4.1.0'
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 }

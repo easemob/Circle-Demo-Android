@@ -3,11 +3,14 @@ apply from: '../dependencies.gradle'
 //此模块存放一些公共业务相关的 比如数据库、用户信息管理类等
 
 android {
+    namespace 'io.agora.service'
     // Read local.properties
     Properties properties = new Properties()
     InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream() ;
     properties.load( inputStream )
-
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig{
 
         buildConfigField ("String", "CIRCLE_AGORA_APPID", properties.getProperty("circle_agora_appid", "\"******\""))

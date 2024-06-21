@@ -6,7 +6,7 @@ if (singleModule.toBoolean()) {
 apply from: '../dependencies.gradle'
 
 android {
-
+    namespace 'io.agora.home'
     defaultConfig {
         if (singleModule.toBoolean()) {
             applicationId "io.agora.home"

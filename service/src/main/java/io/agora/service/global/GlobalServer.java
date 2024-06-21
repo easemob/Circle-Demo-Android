@@ -98,8 +98,6 @@ public class GlobalServer {
         // Set whether to automatically accept group invitations
         options.setAutoAcceptGroupInvitation(OptionsManager.getInstance().isAutoAcceptGroupInvitation());
         options.setUsingHttpsOnly(true);
-        // Use fpa by default
-        options.setFpaEnable(true);
 
         /**
          * NOTE:You need to set up your own account to use the three-way push function, see the integration documentation
@@ -121,6 +119,11 @@ public class GlobalServer {
 
         if (EaseIM.getInstance().isMainProcess(context)) {
             EMPushHelper.getInstance().setPushListener(new PushListener() {
+                @Override
+                public void onBindTokenSuccess(EMPushType pushType, String pushToken) {
+                    EMLog.d("PushClient", "Push client bind token success: " + pushType + " - " + pushToken);
+                }
+
                 @Override
                 public void onError(EMPushType pushType, long errorCode) {
                     EMLog.e("PushClient", "Push client occur a error: " + pushType + " - " + errorCode);
