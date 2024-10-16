@@ -12,6 +12,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -24,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.blankj.utilcode.util.CacheDiskUtils;
+import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.hyphenate.chat.EMCustomMessageBody;
 import com.hyphenate.chat.EMMessage;
@@ -356,12 +358,22 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
 
     @Override
     public void onChatExtendMenuItemClick(View view, int itemId) {
+        String[] permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            permissions= new String[]{ Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.READ_MEDIA_VIDEO};
+        }else{
+            permissions= new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        }
         if (itemId == com.hyphenate.easeui.R.id.extend_item_take_picture) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                permissions= new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.READ_MEDIA_VIDEO};
+            }else{
+                permissions= new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+            }
             rxPermissions
-                    .request(Manifest.permission.CAMERA,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .request(permissions)
                     .subscribe(granted -> {
+                        LogUtils.d("onChatExtendMenuItemClick--granted:"+granted);
                         if (granted) {
                             // All requested permissions are granted
                             selectPicFromCamera();
@@ -369,8 +381,7 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
                     });
         } else if (itemId == com.hyphenate.easeui.R.id.extend_item_picture) {
             rxPermissions
-                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .request(permissions)
                     .subscribe(granted -> {
                         if (granted) {
                             // All requested permissions are granted
@@ -381,16 +392,14 @@ public class ChatFragment extends EaseChatFragment implements OnRecallMessageRes
             startMapLocation(REQUEST_CODE_MAP);
         } else if (itemId == com.hyphenate.easeui.R.id.extend_item_video) {
             rxPermissions
-                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .request(permissions)
                     .subscribe(granted -> {
                         if (granted) {
                             selectVideoFromLocal();
                         }
                     });
         } else if (itemId == com.hyphenate.easeui.R.id.extend_item_file) {
-            rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+            rxPermissions.request(permissions)
                     .subscribe(granted -> {
                         if (granted) {
                             selectFileFromLocal();

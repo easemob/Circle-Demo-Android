@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -216,6 +217,12 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
 
     @Override
     public void onClick(View v) {
+        String[] permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            permissions= new String[]{ Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.READ_MEDIA_VIDEO};
+        }else{
+            permissions= new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        }
         if (v.getId() == R.id.csl_server_setting) {
             ServerSettingActivity.actionStart(this, server);
         } else if (v.getId() == R.id.csl_server_overview) {
@@ -226,8 +233,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
             //去相册选择
             //申请权限
             rxPermissions
-                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .request(permissions)
                     .subscribe(granted -> {
                         if (granted) {
                             // All requested permissions are granted
@@ -241,8 +247,7 @@ public class EditServerActivity extends BaseInitActivity<ActivityEditServerBindi
             //去相册选择
             //申请权限
             rxPermissions
-                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .request(permissions)
                     .subscribe(granted -> {
                         if (granted) {
                             // All requested permissions are granted

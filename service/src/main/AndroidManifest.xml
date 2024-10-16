@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="io.agora.service">
     <!-- IM SDK required start -->
     <!-- 允许程序振动，用于本地通知设置振动 -->
@@ -13,14 +14,16 @@
     <!-- 获取运营商信息，用于获取网络状态 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- 写入扩展存储权限，用于附件等的存储 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <!-- 从扩展存储读取权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"
+        tools:ignore="ScopedStorage" />
     <!-- 访问GPS定位，用于定位消息，如果不用定位相关可以移除 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- api 21后被标记为deprecated，可以移除 -->
-    <uses-permission android:name="android.permission.GET_TASKS" />
     <!-- 允许程序在手机屏幕关闭后后台进程仍然运行 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- 允许程序开机自动运行，SDK保活时使用，如果使用厂商推送，可以移除 -->
@@ -40,7 +43,19 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- 对于 Android 12.0 及以上设备，还需要添加如下权限： -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"  />
+    <!-- 对于 Android 12.0 及以上设备，还需要添加以下权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <!-- agora SDK required end -->
+
+    <!-- Android 13 用于替换 READ_EXTERNAL_STORAGE 权限 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <!-- Android 14 用于申请部分权限 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+    <!-- android 13 通知运行时权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:usesCleartextTraffic="true">
         <!-- 设置环信  AppKey -->
